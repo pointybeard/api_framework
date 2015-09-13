@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<extension id="api_framework" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
+	<name>API Framework</name>
+	<description>Base for a Json API in Symphony</description>
+	<types>
+		<type>System</type>
+	</types>
+	<authors>
+		<author>
+			<name github="pointybeard" symphony="alistair">Alistair Kearney</name>
+			<website>http://alistairkearney.com</website>
+		</author>
+	</authors>
+	<releases>
+		<release version="1.0" date="2015-09-06" min="2.6">
+			- Initial release
+		</release>
+	</releases>
+</extension>

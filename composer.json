@@ -1,0 +1,33 @@
+{
+    "name": "pointybeard/symphony-api-framework",
+    "version": "1.0.0",
+    "description": "",
+    "homepage": "http://alistairkearney.com",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Alistair Kearney",
+            "email": "hi@alistairkearney.com"
+        }
+    ],
+    "support": {
+      "issues": "https://github.com/pointybeard/symphony-api-framework/issues",
+      "wiki": "https://github.com/pointybeard/symphony-api-framework/wiki"
+    },
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=5.6.6",
+        "monolog/monolog": "^1.16@dev",
+        "symfony/http-foundation": "^3.0@dev"
+    },
+    "autoload": {
+        "psr-4": {
+            "Symphony\\ApiFramework\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Symphony\\ApiFramework\\Tests\\": "tests"
+        }
+    }
+}
