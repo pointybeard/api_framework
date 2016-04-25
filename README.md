@@ -93,7 +93,7 @@ Here is an example of a completed controller:
         {
             $someEntryId = (int)Frontend::instance()
                 ->Page()
-                ->Params()['preference-id'];
+                ->Params()['some-id'];
 
             $data = $request->request->all();
             $output = [];
