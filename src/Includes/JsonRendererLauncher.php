@@ -22,7 +22,13 @@ function renderer_json($mode){
     if(in_array('JSON', Frontend::Page()->pageData()['type'])) {
         // Load the output into a SimpleXML Container and convert to JSON
         $xml = new SimpleXMLElement($output, LIBXML_NOCDATA);
-        $output = json_encode(xml, JSON_PRETTY_PRINT);
+
+        // Convert the XML to a plain array. This step is necessary as we cannot
+        // use JSON_PRETTY_PRINT directly on a SimpleXMLElement object
+        $outputArray = json_decode(json_encode($xml));
+
+        // Now put the array through a json_encode
+        $output = json_encode($outputArray, JSON_PRETTY_PRINT);
     }
 
     echo $output;
