@@ -8,13 +8,14 @@ class eventController extends SectionEvent
     public static function about()
     {
         return [
-            'name' => 'Symphony API Framework: Event Controller',
-            'author' => array(
+            'name' => 'API Framework: Controller',
+            'author' => [
                 'name' => 'Alistair Kearney',
-                'website' => 'http://cp.kickd',
-                'email' => 'alistair@ruleandmake.com'),
-            'version' => 'Symphony 2.6.3',
-            'release-date' => '2015-08-28T02:10:22+00:00',
+                'website' => 'http://alistairkearney.com',
+                'email' => 'hi@alistairkearney.com'
+            ],
+            'version' => 'Symphony 2.6.7',
+            'release-date' => '2016-04-25T02:10:22+00:00',
             'trigger-condition' => 'POST|PUT|PATCH|DELETE'
         ];
     }

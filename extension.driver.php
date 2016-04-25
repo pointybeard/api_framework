@@ -1,8 +1,8 @@
 <?php
 
-include __DIR__.'/vendor/autoload.php';
+include __DIR__ . '/vendor/autoload.php';
 
-Class extension_api_framework extends Extension {
+Class extension_symphony_api extends Extension {
     public function getSubscribedDelegates(){
         return[
             [
@@ -30,7 +30,7 @@ Class extension_api_framework extends Extension {
 
     public function setBoilerplateXSL($context)
     {
-		// @todo: This should only be available if logged in
+        // @todo: This should only be available if logged in
         if(!isset($_GET['boilerplate-xsl']) && (!in_array('JSON', Frontend::Page()->pageData()['type'])
             || !in_array('boilerplate-xsl', Frontend::Page()->pageData()['type']))) {
             return;
