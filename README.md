@@ -24,6 +24,97 @@ This extension has two parts: The JSON renderer, and the Controller event.
 
 Any page with a type `JSON` will trigger the new JSON renderer. This automatically converts your XML output into a JSON document. This includes output from any events.
 
+#### Working with XML
+
+The JSON renderer expects to get well formed XML data, which it then translates into JSON data. Although JSON is just as well structured as XML, XML does not translate directly to JSON. Here are a few examples of XML and how it translates into JSON:
+
+##### Arrays
+
+Arrays are formed when the same element is used and contains simple values (numbers or strings). Each element does not need to be directly after one another either, but it is best practise to group them in some way.
+
+XML:
+
+    <data>
+    	...
+		<array>1</array>
+		<array>2</array>
+    </data>
+
+JSON:
+
+	{
+		...
+    	"array": [
+			"1",
+   	     	"2"
+    	]
+	}
+
+
+##### Objects
+
+Typically Symphony will be outputting objects (Entries, Sections etc). E.g.
+
+```
+<data>
+  <entries>
+    <entry>
+      <id>2</id>
+      <title>Another Entry</title>
+      <handle>another-entry</handle>
+      <body>Blah Blah</body>
+      <publish-date>
+        <date>2016-04-25</date>
+        <time>19:03</time>
+      </publish-date>
+    </entry>
+    <entry>
+      <id>1</id>
+      <title>An Entry</title>
+      <handle>an-entry</handle>
+      <body>This is a dummy entry</body>
+      <publish-date>
+        <date>2016-04-25</date>
+        <time>16:53</time>
+      </publish-date>
+    </entry>
+  </entries>
+</data>
+```
+
+Would result in the following JSON
+
+```
+{
+    "entries": {
+        "entry": [
+            {
+                "id": "2",
+                "title": "Another Entry",
+                "handle": "another-entry",
+                "body": "Blah Blah",
+                "publish-date": {
+                    "date": "2016-04-25",
+                    "time": "19:03"
+                }
+            },
+            {
+                "id": "1",
+                "title": "An Entry",
+                "handle": "an-entry",
+                "body": "This is a dummy entry",
+                "publish-date": {
+                    "date": "2016-04-25",
+                    "time": "16:53"
+                }
+            }
+        ]
+    }
+}
+```
+
+**Note that when there is a single, in the case, `<entry>` element, the a JSON array is not produced. This is a known limitation (see [https://github.com/pointybeard/api_framework/issues/2](https://github.com/pointybeard/api_framework/issues/2))**
+
 ### Controller Event
 
 Use the `API Framework: Controller` event to listen for PUT, POST, PATCH and DELETE requests. To create your own controller, make a folder called `controllers` in your `/workspace` directory.
