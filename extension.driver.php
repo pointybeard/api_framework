@@ -2,7 +2,7 @@
 
 include __DIR__ . '/vendor/autoload.php';
 
-Class extension_symphony_api extends Extension {
+Class extension_api_framework extends Extension {
     public function getSubscribedDelegates(){
         return[
             [
