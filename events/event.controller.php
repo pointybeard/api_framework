@@ -2,6 +2,7 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symphony\ApiFramework\Lib;
 
 class eventController extends SectionEvent
 {
@@ -37,18 +38,34 @@ class eventController extends SectionEvent
             $request->request->replace(is_array($data) ? $data : []);
         }
 
-        //@TODO: Use the current path to resolve controllers deeper than 1 level
-        //Frontend::instance()->Page()->Params()['current-path']
-
         $controllerPath = WORKSPACE . '/controllers';
-        $controllerName = 'Controller' . ucfirst(Frontend::instance()->Page()->pageData()['handle']);
+
+        // #5 - Use the full page path to generate the controller class name
+        $controllerName = 'Controller';
+        $currentPagePath = trim(Frontend::instance()->Page()->Params()["current-path"], '/');
+        foreach(preg_split("@\/@", $currentPagePath) as $part) {
+          $controllerName .= ucfirst($part);
+        }
+
+        // #6 - Check if the controller exists before trying to include it.
+        // Throw an exception if it cannot be located.
+        $controllerFullPath = sprintf("%s/controllers/%s.php", WORKSPACE, $controllerName);
+        if(!file_exists($controllerFullPath) || !is_readable($controllerFullPath)) {
+          throw new Lib\Exceptions\ControllerNotFoundException("Controller '{$controllerName}' does not exist.");
+        }
 
         include_once WORKSPACE . "/controllers/$controllerName.php";
         $controller = new $controllerName();
+
+        // Make sure the controller extends the AbstractConroller class
+        if(!($controller instanceof Lib\AbstractController)) {
+          throw new Lib\Exceptions\ControllerNotValidException("'{$controllerName}' is not a valid controller. Check implementation.");
+        }
+
         $method = strtolower($request->getMethod());
 
         if(!method_exists($controller, $method)){
-            throw new \Exception("405 method not found (".$request->getMethod().")");
+            throw new Lib\Exceptions\ControllerNotValidException("405 method not found (".$request->getMethod().")");
         }
 
         $controller->execute();
@@ -60,7 +77,6 @@ class eventController extends SectionEvent
         $response = $controller->$method($request, $response);
         $response->send();
         exit;
-
     }
 
     public static function documentation()

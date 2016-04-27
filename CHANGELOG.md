@@ -8,6 +8,10 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added APIFrameworkJSONRendererAppendTransformations delegate
 - Added phpunit to composer require-dev
 - Added unit tests for Transformation code
+- Controller names are based on full page path (#5)
+
+#### Fixed
+- Checking that controller actually exists before trying to include it (#6)
 
 #### Removed
 - Symphony PDO is not longer a Composer requirement as it is not used

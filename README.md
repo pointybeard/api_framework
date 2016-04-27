@@ -131,7 +131,9 @@ Lastly, call the render method (which is inherited) to generate the output. E.g.
 
     return $this->render($response, ['data' => 'some output']);
 
-To actually use a controller, name it the same as a top level page. E.g. if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`
+A controllers class and file name are the same. It is based on the full path to your page.
+
+For example, if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`. If that same page was then a child of a page called "parent", than both the class and file names would be "ControllerParentEntry" instead.
 
 Here is an example of a completed controller:
 
