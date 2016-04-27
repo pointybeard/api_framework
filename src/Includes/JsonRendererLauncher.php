@@ -29,6 +29,22 @@ function renderer_json($mode){
           // use JSON_PRETTY_PRINT directly on a SimpleXMLElement object
           $outputArray = json_decode(json_encode($xml));
 
+          // Get the transforer object ready. Other extensions will
+          // add their transormations to this.
+          $transformer = new Lib\Transformer();
+
+          /**
+           * Allow other extensions to add their own transformers
+           */
+          Symphony::ExtensionManager()->notifyMembers(
+            'APIFrameworkJSONRendererAppendTransformations',
+            '/frontend/',
+            ['transformer' => &$transformer]
+          );
+
+          // Apply transformations
+          $outputArray = $transformer->run($outputArray);
+
           // Now put the array through a json_encode
           $output = json_encode($outputArray, JSON_PRETTY_PRINT);
 

@@ -8,12 +8,11 @@ This is an extension for Symphony CMS. Add it to your `/extensions` folder in yo
 
 ### Requirements
 
-This extension requires the **[Symfony HTTP Foundation](https://github.com/symfony/http-foundation)** (`symfony/http-foundation`) and **[Symphony PDO](https://github.com/pointybeard/symphony-pdo)** (`pointybeard/symphony-pdo`) to be installed via Composer. Either require both of these in your main composer.json file, or run `composer install` on the `extension/api_framework` directory.
+This extension requires the **[Symfony HTTP Foundation](https://github.com/symfony/http-foundation)** (`symfony/http-foundation`) to be installed via Composer. Either require both of these in your main composer.json file, or run `composer install` on the `extension/api_framework` directory.
 
     "require": {
       "php": ">=5.6.6",
-      "symfony/http-foundation": "^3.0@dev",
-      "pointybeard/symphony-pdo": "~0.1"
+      "symfony/http-foundation": "^3.0@dev"
     }
 
 ## Usage
@@ -112,8 +111,6 @@ Would result in the following JSON
     }
 }
 ```
-
-**Note that when there is a single, in the case, `<entry>` element, the a JSON array is not produced. This is a known limitation (see [https://github.com/pointybeard/api_framework/issues/2](https://github.com/pointybeard/api_framework/issues/2))**
 
 ### Controller Event
 
@@ -240,3 +237,141 @@ Here is an example of a completed controller:
             return $this->render($response, $output);
         }
     }
+
+### Transformers
+
+Prior to converting the XML into JSON, transformers are run over it. Transformers mutate the result based on a test and action.
+
+`@jsonForceArray`
+
+This transformation will look for the attribute `jsonForceArray` on any XML elements. If it is set to "true", this transformation is applied. It relates to **[#issue-2](https://github.com/pointybeard/api_framework/issues/2)**. When there are multiple elements of the same name, for example 'entry', the JSON encode process will treat these as an array. E.g.
+
+```
+<data>
+  <entries>
+    <entry>
+      <id>2</id>
+      <title>Another Entry</title>
+    </entry>
+    <entry>
+      <id>1</id>
+      <title>An Entry</title>
+    </entry>
+  </entries>
+</data>
+```
+
+becomes
+
+
+```
+{
+    "entries": {
+        "entry": [
+            {
+                "id": "2",
+                "title": "Another Entry",
+            },
+            {
+                "id": "1",
+                "title": "An Entry",
+            }
+        ]
+    }
+}
+```
+
+However, if there is only a single 'entry' element, it is treated as an object. This is because internally it is just an associtive array, not an indexed array of 'entry' objects. E.g.
+
+```
+<data>
+  <entries>
+    <entry>
+      <id>2</id>
+      <title>Another Entry</title>
+    </entry>
+  </entries>
+</data>
+```
+
+results in
+
+```
+{
+    "entries": {
+        "entry": {
+            "id": "1",
+            "title": "An Entry",
+        }
+    }
+}
+```
+
+Notice that 'entry' is a JSON object. The problem with this is inconsistent data. It changes depending on how many entries are present. The solution is to set `jsonForceArray="true"` on the 'entry' element to trigger the transformation:
+
+```
+<data>
+  <entries>
+    <entry jsonForceArray="true">
+      <id>2</id>
+      <title>Another Entry</title>
+    </entry>
+  </entries>
+</data>
+```
+
+Which results in JSON
+
+```
+{
+    "entries": {
+        "entry": [
+            {
+                "id": "2",
+                "title": "Another Entry",
+            }
+        ]
+    }
+}
+```
+
+### Creating new Transformers
+
+This extention provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of `Lib\Transformer`. Use the `append()` method to add your own transformations. E.g.
+
+```
+<?php
+
+use Symphony\ApiFramework\Lib;
+
+Class extension_example extends Extension
+{
+  public function getSubscribedDelegates(){
+    return[[
+      'page' => '/frontend/',
+      'delegate' => 'APIFrameworkJSONRendererAppendTransformations',
+      'callback' => 'appendTransformations'
+      ]];
+  }
+
+  public function appendTransformations($context) {
+
+    $context['transformer']->append(
+      new Lib\Transformation(
+
+        // This is the test. If it returns true, the action will be run
+        function(array $input, array $attributes=[]){
+          // do some tests in here and return either true or false
+          return true;
+        },
+
+        // This is the action. If the test passes, this code will be run
+        function(array $input, array $attributes=[]){
+          // Operate on $input and return the result.
+          return $input;
+        }
+      )
+    );
+  }
+}
+```

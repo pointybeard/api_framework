@@ -1,8 +1,11 @@
 <?php
 
-include __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/vendor/autoload.php';
 
-Class extension_api_framework extends Extension {
+use Symphony\ApiFramework\Lib;
+
+Class extension_api_framework extends Extension
+{
     public function getSubscribedDelegates(){
         return[
             [
@@ -15,8 +18,47 @@ Class extension_api_framework extends Extension {
                 'delegate' => 'FrontendOutputPreGenerate',
                 'callback' => 'setBoilerplateXSL'
             ],
-
+            [
+                'page' => '/frontend/',
+                'delegate' => 'APIFrameworkJSONRendererAppendTransformations',
+                'callback' => 'appendTransformations'
+            ],
         ];
+    }
+
+    public function appendTransformations($context) {
+
+      // Add the @jsonForceArray transformation
+      $context['transformer']->append(
+        new Lib\Transformation(
+          function(array $input, array $attributes=[]){
+              // First make sure there is an attributes array
+              if(empty($attributes)) {
+                  return false;
+              }
+              // Only looking at the jsonForceArray property
+              elseif(!isset($attributes['jsonForceArray']) || $attributes['jsonForceArray'] !== "true") {
+                  return false;
+              }
+              // This is already an indexed array.
+              elseif(!Lib\array_is_assoc($input)) {
+                  return false;
+              }
+              // jsonForceArray is set, and it's true
+              return true;
+          },
+          function(array $input, array $attributes=[]){
+              $result = [];
+              // Encapsulate everything in an array
+              foreach($input as $key => $value) {
+                  $result[$key] = $value;
+                  unset($input[$key]);
+              }
+              $input[] = $result;
+              return $input;
+          }
+        )
+      );
     }
 
     public function setJSONLauncher($context)
@@ -25,6 +67,7 @@ Class extension_api_framework extends Extension {
             return;
         }
         define('SYMPHONY_LAUNCHER', 'renderer_json');
+
         include __DIR__ . '/src/Includes/JsonRendererLauncher.php';
     }
 
