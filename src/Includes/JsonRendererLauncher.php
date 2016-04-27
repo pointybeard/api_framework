@@ -27,7 +27,7 @@ function renderer_json($mode){
 
           // Convert the XML to a plain array. This step is necessary as we cannot
           // use JSON_PRETTY_PRINT directly on a SimpleXMLElement object
-          $outputArray = json_decode(json_encode($xml));
+          $outputArray = json_decode(json_encode($xml), true);
 
           // Get the transforer object ready. Other extensions will
           // add their transormations to this.
