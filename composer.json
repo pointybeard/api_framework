@@ -17,7 +17,8 @@
     },
     "autoload": {
         "psr-4": {
-            "Symphony\\ApiFramework\\": "src"
+            "Symphony\\ApiFramework\\": "src",
+            "Symphony\\ApiFramework\\Controllers\\": "../../workspace/controllers"
         }
     },
     "require": {

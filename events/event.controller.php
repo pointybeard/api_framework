@@ -38,28 +38,30 @@ class eventController extends SectionEvent
             $request->request->replace(is_array($data) ? $data : []);
         }
 
-        $controllerPath = WORKSPACE . '/controllers';
-
         // #5 - Use the full page path to generate the controller class name
-        $controllerName = 'Controller';
+        // #7 - Use a PSR-4 folder structure and build the namespace accordingly
         $currentPagePath = trim(Frontend::instance()->Page()->Params()["current-path"], '/');
-        foreach(preg_split("@\/@", $currentPagePath) as $part) {
-          $controllerName .= ucfirst($part);
-        }
+        $parts = array_map("ucfirst", preg_split("@\/@", $currentPagePath));
+        $controllerName = "Controller" . array_pop($parts);
+        $controllerPath = implode($parts, "\\") . "\\";
+
+        $controllerPath = sprintf(
+            "Symphony\ApiFramework\Controllers\\%s%s",
+            ltrim($controllerPath, '\\'),
+            $controllerName
+        );
 
         // #6 - Check if the controller exists before trying to include it.
         // Throw an exception if it cannot be located.
-        $controllerFullPath = sprintf("%s/controllers/%s.php", WORKSPACE, $controllerName);
-        if(!file_exists($controllerFullPath) || !is_readable($controllerFullPath)) {
-          throw new Lib\Exceptions\ControllerNotFoundException("Controller '{$controllerName}' does not exist.");
+        if(!class_exists($controllerPath)) {
+          throw new Lib\Exceptions\ControllerNotFoundException("Controller '{$controllerPath}' does not exist.");
         }
 
-        include_once WORKSPACE . "/controllers/$controllerName.php";
-        $controller = new $controllerName();
+        $controller = new $controllerPath();
 
-        // Make sure the controller extends the AbstractConroller class
+        // Make sure the controller extends the AbstractController class
         if(!($controller instanceof Lib\AbstractController)) {
-          throw new Lib\Exceptions\ControllerNotValidException("'{$controllerName}' is not a valid controller. Check implementation.");
+          throw new Lib\Exceptions\ControllerNotValidException("'{$controllerPath}' is not a valid controller. Check implementation conforms to Lib\AbstractController.");
         }
 
         $method = strtolower($request->getMethod());
