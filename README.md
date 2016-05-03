@@ -131,13 +131,15 @@ Lastly, call the render method (which is inherited) to generate the output. E.g.
 
     return $this->render($response, ['data' => 'some output']);
 
-A controllers class and file name are the same. It is based on the full path to your page.
+A controllers class and file name are the same. Each controller must sit in a folder path that matches your page path.
 
-For example, if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`. If that same page was then a child of a page called "parent", than both the class and file names would be "ControllerParentEntry" instead.
+For example, if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`. It should be placed in `/workspace/controllers`. If that same page was then a child of a page called "parent", you must create a new folder called `parent` inside `/workspace/controllers`. Place `ControllerEntry` in this new folder. Be sure to adjust its namespace accordingly. **Note: Be sure to rebuild your composer autoloader (`composer dumpautoload`) whenever you move or create a new Controller.**
 
 Here is an example of a completed controller:
 
     <?php
+
+    namespace Symphony\ApiFramework\Controllers;
 
     use Symfony\Component\HttpFoundation\Request;
     use Symfony\Component\HttpFoundation\Response;
