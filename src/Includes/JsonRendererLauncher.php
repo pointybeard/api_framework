@@ -1,13 +1,21 @@
 <?php
 
 use Symphony\ApiFramework\Lib;
+use \Symphony;
 
 function renderer_json($mode){
     if (strtolower($mode) == 'administration') {
-        throw new Lib\Exceptions\InvalidModeException('JSON Renderer launcher is only availalbe on the frontend');
+        throw new Lib\Exceptions\InvalidModeException('JSON Renderer launcher is only available on the frontend');
     }
 
     $renderer = Frontend::instance();
+
+    // Check if we should enable exception debug information
+    $exceptionDebugEnabled = Symphony::isLoggedIn();
+
+    // Use the JSON exception and error handlers instead of the Symphony one.
+    Lib\ExceptionHandler::initialise($exceptionDebugEnabled);
+    Lib\ErrorHandler::initialise($exceptionDebugEnabled);
 
     // #1808
     if (isset($_SERVER['HTTP_MOD_REWRITE']))
