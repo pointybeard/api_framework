@@ -72,7 +72,12 @@ class ExceptionHandler extends GenericExceptionHandler
     public static function render($e)
     {
         // Set some headers
-        http_response_code(500);
+        if($e instanceof AbstractApiException) {
+            http_response_code($e->getHttpStatusCode());
+        } else {
+            http_response_code(500);
+        }
+
         header("Content-Type: application/json");
 
         // Build the JSON
