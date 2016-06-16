@@ -16,7 +16,7 @@ class eventController extends SectionEvent
                 'email' => 'hi@alistairkearney.com'
             ],
             'version' => 'Symphony 2.6.7',
-            'release-date' => '2016-04-25T02:10:22+00:00',
+            'release-date' => '2016-06-16',
             'trigger-condition' => 'POST|PUT|PATCH|DELETE'
         ];
     }
@@ -54,7 +54,7 @@ class eventController extends SectionEvent
         // #6 - Check if the controller exists before trying to include it.
         // Throw an exception if it cannot be located.
         if(!class_exists($controllerPath)) {
-          throw new Lib\Exceptions\ControllerNotFoundException("Controller '{$controllerPath}' does not exist.");
+          throw new Lib\Exceptions\ControllerNotFoundException($controllerPath);
         }
 
         $controller = new $controllerPath();
@@ -67,7 +67,7 @@ class eventController extends SectionEvent
         $method = strtolower($request->getMethod());
 
         if(!method_exists($controller, $method)){
-            throw new Lib\Exceptions\ControllerNotValidException("405 method not found (".$request->getMethod().")");
+            throw new Lib\Exceptions\MethodNotAllowedException($request->getMethod());
         }
 
         $controller->execute();
