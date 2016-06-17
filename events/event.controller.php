@@ -16,7 +16,7 @@ class eventController extends SectionEvent
                 'email' => 'hi@alistairkearney.com'
             ],
             'version' => 'Symphony 2.6.7',
-            'release-date' => '2016-06-16',
+            'release-date' => '2016-06-17',
             'trigger-condition' => 'POST|PUT|PATCH|DELETE'
         ];
     }

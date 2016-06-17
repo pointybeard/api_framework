@@ -1,5 +1,10 @@
 # RESTful API Framework for Symphony CMS
 
+- Version: v0.2.1
+- Date: June 17 2016
+- [Release notes](https://github.com/pointybeard/api_framework/blob/master/CHANGELOG.md)
+- [GitHub repository](https://github.com/pointybeard/api_framework)
+
 JSON renderer and event driven controller interface for Symphony CMS designed to quickly build a RESTful APIs.
 
 ## Installation
@@ -379,3 +384,16 @@ Class extension_example extends Extension
   }
 }
 ```
+
+## Support
+
+If you believe you have found a bug, please report it using the [GitHub issue tracker](https://github.com/pointybeard/api_framework/issues),
+or better yet, fork the library and submit a pull request.
+
+## Contributing
+
+We encourage you to contribute to this project. Please check out the [Contributing documentation](https://github.com/pointybeard/api_framework/blob/master/CONTRIBUTING.md) for guidelines about how to get involved.
+
+## License
+
+"RESTful API Framework for Symphony CMS" is released under the [MIT License](http://www.opensource.org/licenses/MIT).

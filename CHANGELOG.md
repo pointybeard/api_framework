@@ -3,6 +3,8 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.2.1] - 2016-06-17
 #### Added
 - Added `JSON_UNESCAPED_SLASHES` to avoid unnecessary escaping of slashes in output. (#8)
 - Added new abstract extension `AbstractApiException` which is used by `ControllerNotFoundException` and `MethodNotAllowedException`. Allows setting of HTTP response code to avoid every exception thrown appearing as a '500 Internal Server Error'
@@ -48,6 +50,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial release
 - Added Symphony PDO as requirement
 
-[Unreleased]: https://github.com/pointybeard/api_framework/compare/v0.2.0...integration
+[Unreleased]: https://github.com/pointybeard/api_framework/compare/v0.2.1...integration
+[0.2.1]: https://github.com/pointybeard/api_framework/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/pointybeard/api_framework/compare/v0.1.0...v0.1.1

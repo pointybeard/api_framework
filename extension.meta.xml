@@ -1,31 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension id="api_framework" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
-	<name>API Framework</name>
-	<description>JSON renderer and API framework for Symphony CMS</description>
-	<repo type="github">https://github.com/pointybeard/api_framework</repo>
-	<types>
-		<type>System</type>
-	</types>
-	<authors>
-		<author>
-			<name github="pointybeard" symphony="alistair">Alistair Kearney</name>
-			<website>http://alistairkearney.com</website>
-		</author>
-	</authors>
-	<releases>
-		<release version="0.1.2" date="2016-04-27" min="2.6.7">
-			- Transformer and Transformation classes.
-			- Added APIFrameworkJSONRendererAppendTransformations delegate
-			- Added unit tests for Transformation code
-			- Symphony PDO is not longer a Composer requirement as it is not used
-		</release>
-		<release version="0.1.1" date="2016-04-25" min="2.6.7">
-			- Added CONTRIBUTING.md and CHANGELOG.md
-			- Improvements to the example controller code in README.md
-			- Extension driver had include class name which meant could not install
-		</release>
-		<release version="0.1.0" date="2015-09-13" min="2.6">
-			- Initial release
-		</release>
-	</releases>
+    <name>API Framework</name>
+    <description>JSON renderer and API framework for Symphony CMS</description>
+    <repo type="github">https://github.com/pointybeard/api_framework</repo>
+    <types>
+        <type>System</type>
+    </types>
+    <authors>
+        <author>
+            <name github="pointybeard" symphony="alistair">Alistair Kearney</name>
+            <website>http://alistairkearney.com</website>
+        </author>
+    </authors>
+    <releases>
+        <release version="0.2.1" date="2016-06-17" min="2.6.7">
+            - Added `JSON_UNESCAPED_SLASHES` to avoid unnecessary escaping of slashes in output. (#8)
+            - Added new abstract extension `AbstractApiException` which is used by `ControllerNotFoundException` and `MethodNotAllowedException`.
+            - Updated core controller event based on changes to `ControllerNotFoundException` and `MethodNotAllowedException`
+            - Updated `ControllerNotFoundException` and `MethodNotAllowedException` to extend the new `AbstractApiException` class
+            - Updated `ExceptionHandler` to check for overloaded http response code. Calls the method `getHttpStatusCode()` if it is available
+            - Removed the use clause for Symphony as it is redundant and causes a PHP warning
+            - Using API Framework exception and error handlers instead of Symphony built in. (#9)
+        </release>
+        <release version="0.2.0" date="2016-05-03" min="2.6.7">
+            - Transformer and Transformation classes.
+            - Added APIFrameworkJSONRendererAppendTransformations delegate
+            - Added phpunit to composer require-dev
+            - Added unit tests for Transformation code
+            - Controller names are based on full page path (#5)
+            - Using PSR-4 folder structure for controllers. Controllers must have a namespace. (#7)
+            - Checking that controller actually exists before trying to include it (#6)
+            - Symphony PDO is not longer a Composer requirement as it is not used
+        </release>
+        <release version="0.1.1" date="2016-04-25" min="2.6.7">
+            - Added CONTRIBUTING.md and CHANGELOG.md
+            - Improvements to the example controller code in README.md
+            - Extension driver had include class name which meant could not install
+        </release>
+        <release version="0.1.0" date="2015-09-13" min="2.6">
+            - Initial release
+        </release>
+    </releases>
 </extension>
