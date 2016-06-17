@@ -3,7 +3,18 @@ All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
-None
+#### Added
+- Added `JSON_UNESCAPED_SLASHES` to avoid unnecessary escaping of slashes in output. (#8)
+- Added new abstract extension `AbstractApiException` which is used by `ControllerNotFoundException` and `MethodNotAllowedException`. Allows setting of HTTP response code to avoid every exception thrown appearing as a '500 Internal Server Error'
+
+#### Changed
+- Updated core controller event based on changes to `ControllerNotFoundException` and `MethodNotAllowedException`
+- Updated `ControllerNotFoundException` and `MethodNotAllowedException` to extend the new `AbstractApiException` class
+- Updated `ExceptionHandler` to check for overloaded http response code. Calls the method `getHttpStatusCode()` if it is available
+
+#### Fixes
+- Removed the use clause for Symphony as it is redundant and causes a PHP warning
+- Using API Framework exception and error handlers instead of Symphony built in. (#9)
 
 ## [0.2.0] - 2016-05-03
 #### Added
@@ -38,5 +49,5 @@ None
 - Added Symphony PDO as requirement
 
 [Unreleased]: https://github.com/pointybeard/api_framework/compare/v0.2.0...integration
-[0.1.2]: https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0
+[0.2.0]: https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/pointybeard/api_framework/compare/v0.1.0...v0.1.1
