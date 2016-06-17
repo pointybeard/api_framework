@@ -1,7 +1,6 @@
 <?php
 
 use Symphony\ApiFramework\Lib;
-use \Symphony;
 
 function renderer_json($mode){
     if (strtolower($mode) == 'administration') {
