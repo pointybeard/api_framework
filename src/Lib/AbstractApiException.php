@@ -2,7 +2,7 @@
 
 namespace Symphony\ApiFramework\Lib;
 
-class AbstractApiException extends \Exception
+abstract class AbstractApiException extends \Exception
 {
     private $status;
 
