@@ -71,21 +71,27 @@ class ExceptionHandler extends GenericExceptionHandler
 
     public static function render($e)
     {
-        // Set some headers
-        if($e instanceof AbstractApiException) {
-            http_response_code($e->getHttpStatusCode());
-        } else {
-            http_response_code(500);
-        }
 
         header("Content-Type: application/json");
 
         // Build the JSON
        $output = [
-            "status" => http_response_code(),
+            "status" => 500,
             "error" => $e->getCode(),
             "message" => $e->getMessage()
         ];
+
+        // Check for a custom status code
+        if($e instanceof AbstractApiException) {
+            $output['status'] = $e->getHttpStatusCode();
+        }
+
+        // Let the exception modify the output if it wants to.
+        if(in_array("Symphony\ApiFramework\Lib\Interfaces\ModifesExceptionOutputInterface", class_implements($e))) {
+            $output = $e->modifyOutput($output);
+        }
+
+        http_response_code($output['status']);
 
         if(self::$debug){
             if(is_object(\Symphony::Database())){
