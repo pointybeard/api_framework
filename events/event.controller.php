@@ -40,9 +40,28 @@ class eventController extends SectionEvent
 
         // #5 - Use the full page path to generate the controller class name
         // #7 - Use a PSR-4 folder structure and build the namespace accordingly
-        $currentPagePath = trim(Frontend::instance()->Page()->Params()["current-path"], '/');
+        // #14 - Each page has a parent-path (somtimes this is / when at root). In
+        // order to find the correct controller path, we need to combine
+        // current-page with parent-path
+
+        // Grab out the "current-page". Our controller will always be named
+        // using this
+        $controllerName = "Controller" . ucfirst(trim(
+            Frontend::instance()
+                ->Page()
+                ->Params()["current-page"]
+        ));
+
+        // Next, do some processing over the "parent-path" (if there is one) to
+        // determine the folder path.
+        $currentPagePath = trim(
+            Frontend::instance()
+                ->Page()
+                ->Params()["parent-path"]
+            ,
+            '/'
+        );
         $parts = array_map("ucfirst", preg_split("@\/@", $currentPagePath));
-        $controllerName = "Controller" . array_pop($parts);
         $controllerPath = implode($parts, "\\") . "\\";
 
         $controllerPath = sprintf(
