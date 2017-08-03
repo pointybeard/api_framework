@@ -87,7 +87,7 @@ class ExceptionHandler extends GenericExceptionHandler
         }
 
         // Let the exception modify the output if it wants to.
-        if(in_array("Symphony\ApiFramework\Lib\Interfaces\ModifesExceptionOutputInterface", class_implements($e))) {
+        if(in_array("Symphony\ApiFramework\Lib\Interfaces\ModifiesExceptionOutputInterface", class_implements($e))) {
             $output = $e->modifyOutput($output);
         }
 

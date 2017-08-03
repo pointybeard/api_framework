@@ -2,7 +2,7 @@
 
 namespace Symphony\ApiFramework\Lib\Interfaces;
 
-interface ModifesExceptionOutputInterface
+interface ModifiesExceptionOutputInterface
 {
 	public function modifyOutput(array $output);
 }
