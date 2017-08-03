@@ -89,7 +89,7 @@ class eventController extends SectionEvent
             throw new Lib\Exceptions\MethodNotAllowedException($request->getMethod());
         }
 
-        $controller->execute();
+        $controller->execute($request);
 
         // Prepare the response.
         $response = new JsonResponse();
