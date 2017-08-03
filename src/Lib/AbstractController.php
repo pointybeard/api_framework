@@ -11,7 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class AbstractController implements Interfaces\ControllerInterface
 {
-	abstract public function execute();
+	abstract public function execute(Request $request);
 
     public function render(Response $response, array $data)
     {
