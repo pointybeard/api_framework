@@ -32,7 +32,7 @@ Any page with a type `JSON` will trigger the new JSON renderer. This automatical
 
 #### Working with XML
 
-The JSON renderer expects to get well formed XML data, which it then translates into JSON data. Although JSON is just as well structured as XML, XML does not translate directly to JSON. Here are a few examples of XML and how it translates into JSON:
+The JSON renderer expects to get well formed XML data, which it then translates into JSON data. Although JSON is just as well structured as XML, XML does not translate directly to JSON. Here are a few examples of XML and how they translate into JSON.
 
 ##### Arrays
 
@@ -116,6 +116,10 @@ Would result in the following JSON
     }
 }
 ```
+
+### Attributes
+
+Since JSON does not have a concept of attributes in the same way XML does, all attributes are discarded to ensure a consistent result. Consequently, the field name `@attributes` is reserved and cannot be used.
 
 ### Controller Event
 
@@ -298,7 +302,7 @@ becomes
 }
 ```
 
-However, if there is only a single 'entry' element, it is treated as an object. This is because internally it is just an associtive array, not an indexed array of 'entry' objects. E.g.
+However, if there is only a single 'entry' element, it is treated as an object. This is because internally it is just an associative array, not an indexed array of 'entry' objects. E.g.
 
 ```xml
 <data>
@@ -324,7 +328,7 @@ results in
 }
 ```
 
-Notice that 'entry' is a JSON object. The problem with this is inconsistent data. It changes depending on how many entries are present. The solution is to set `jsonForceArray="true"` on the 'entry' element to trigger the transformation:
+Notice that 'entry' is a JSON object. The problem with this is inconsistent data and is a symptom of converting from XML to JSON using PHP's SimpleXML class. The solution is to set `jsonForceArray="true"` on the 'entry' element to trigger the transformation:
 
 ```xml
 <data>
@@ -352,9 +356,11 @@ Which results in JSON
 }
 ```
 
+*Note that you should not set `jsonForceArray="true"` if there is more than one entry otherwise the JSON result will contain unnecessary nesting. Use logic in the XSLT to omit or toggle this attribute when there is more than a single entry.*
+
 ### Creating new Transformers
 
-This extention provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of `Lib\Transformer`. Use the `append()` method to add your own transformations. E.g.
+This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of `Lib\Transformer`. Use the `append()` method to add your own transformations. E.g.
 
 ```php
 <?php
