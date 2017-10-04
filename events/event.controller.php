@@ -1,6 +1,6 @@
 <?php
 
-use Symfony\Component\HttpFoundation\Request;
+//use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symphony\ApiFramework\Lib;
 
@@ -23,7 +23,7 @@ class eventController extends SectionEvent
 
     public function load()
     {
-        $request = Request::createFromGlobals();
+        $request = Lib\JsonRequest::createFromGlobals();
 
         // This ensures the composer autoloader for the framework is included
         Symphony::ExtensionManager()->create('api_framework');
