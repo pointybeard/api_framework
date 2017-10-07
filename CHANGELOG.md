@@ -4,6 +4,21 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+#### Added
+* Added extended FrontendPage class, `JsonFrontendPage` to handle json requests specifically.
+* Added `JsonRequest` and `RequestJsonInvalidException`. They are used to grab the incoming json data. Also updated controller event to use `JsonRequest`.
+
+#### Fixes
+* Fixed the recursive method `recursiveApplyTransformationToArray()`. It had a logic bug that meant the result from lower levels was not propagated up the chain. Additionally, the `@attributes` array was not being dealt with consistently. The last transformer to run will trigger a cleanup which removes the `@attributes` array. (#15, #16, and #17)
+
+#### Changed
+* Updated controller event to pass Request object when calling execute method of a Controller object.
+* Updated README for fixes #15 #16 and #17.
+* Updated the json renderer to use `JsonFrontend` instead of the core Frontend class.
+* Changed abstract method `execute()` to include a Request object, allowing controllers to manipulate the Request.
+* Changed the way a controller path is discovered by using `current-page` and `parent-path` instead of `current-path`. (#14)
+* Removed `boilerplate-xsl` feature. This is no longer required as `?debug` now works correctly. (#12)
+
 ## [0.2.1] - 2016-06-17
 #### Added
 - Added `JSON_UNESCAPED_SLASHES` to avoid unnecessary escaping of slashes in output. (#8)

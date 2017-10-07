@@ -1,7 +1,7 @@
 # RESTful API Framework for Symphony CMS
 
-- Version: v0.2.1
-- Date: June 17 2016
+- Version: v0.2.2
+- Date: October 8th 2017
 - [Release notes](https://github.com/pointybeard/api_framework/blob/master/CHANGELOG.md)
 - [GitHub repository](https://github.com/pointybeard/api_framework)
 
@@ -148,7 +148,7 @@ return $this->render($response, ['data' => 'some output']);
 
 A controllers class and file name are the same. Each controller must sit in a folder path that matches your page path.
 
-For example, if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`. It should be placed in `/workspace/controllers`. If that same page was then a child of a page called "parent", you must create a new folder called `parent` inside `/workspace/controllers`. Place `ControllerEntry` in this new folder. Be sure to adjust its namespace accordingly. **Note: Be sure to rebuild your composer autoloader (`composer dumpautoload`) whenever you move or create a new Controller.**
+For example, if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`. It should be placed in `/workspace/controllers`. If that same page was then a child of a page called "parent", you must create a new folder called `parent` inside `/workspace/controllers`. Place `ControllerEntry` in this new folder. Be sure to adjust its namespace accordingly. **Note: Also remember to rebuild the API Framework composer autoloader (`composer dumpautoload`) whenever you move or create a new Controller.**
 
 Here is an example of a completed controller:
 
@@ -159,6 +159,7 @@ namespace Symphony\ApiFramework\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symphony\ApiFramework\Lib;
 use Symphony\ApiFramework\Lib\AbstractController;
 use Symphony\ApiFramework\Lib\Traits;
 
@@ -199,7 +200,7 @@ final class ControllerExample extends AbstractController{
 
     public function put(Request $request, Response $response)
     {
-        $someEntryId = (int)Frontend::instance()
+        $someEntryId = (int)Lib\JsonFrontend::instance()
             ->Page()
             ->Params()['some-id'];
 
