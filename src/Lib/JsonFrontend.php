@@ -4,30 +4,45 @@ namespace Symphony\ApiFramework\Lib;
 use \Symphony;
 
 /**
- * This extends the core Frontend class of Symphony to give us a vector to
- * overload various functionality. Unfortunately it relies on Frontend::$_page
- * being protected instead of private which is not available in the main
- * Symphony CMS 2.7.x release. Once it is, this code will be available in
- * stable releases for the API Framework.
+ * This extends the core Symphony class to give us a vector to
+ * overload various functionality. There is a certain amount of code
+ * duplication, taken from Frontend, since $_page is a private variable
+ * and thus we cannot extend the Frontend class and inherit it's core features.
  */
-class JsonFrontend extends \Frontend
+class JsonFrontend extends Symphony
 {
+    /**
+     * An instance of the ApiFramework\Lib\JsonFrontendPage class
+     * @var JsonFrontendPage
+     */
+    protected static $_page;
+
+    /**
+     * Code duplication from core Frontend class.
+     */
+    protected function __construct()
+    {
+        parent::__construct();
+        $this->_env = [];
+    }
+
+    /**
+     * Code duplication from core Frontend class, however it returns an
+     * instance of JsonFrontendPage rather than FrontendPage.
+     */
     public function display($page)
     {
-        // Note to self: had to modify Frontend to make $_page protected instead
-        // of private. Will consider making a patch for the offical Symphony
-        // repo at some stage, but for now remember to update the core code
         self::$_page = new JsonFrontendPage;
-
-        // Unfortunately we have to use some code duplication here since there
-        // isnt't a way to inject a custom FrontendPage class and still call
-        // the parent display() method.
         Symphony::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
         $output = self::$_page->generate($page);
 
         return $output;
     }
 
+    /**
+     * Code duplication from core Frontend class, however it returns an
+     * instance of self rather than hard coding the class name.
+     */
     public static function instance()
     {
         if (!(self::$_instance instanceof self)) {
@@ -35,5 +50,25 @@ class JsonFrontend extends \Frontend
         }
 
         return self::$_instance;
+    }
+
+    /**
+     * Code duplication from core Frontend class.
+     */
+    public static function Page()
+    {
+        return self::$_page;
+    }
+
+    /**
+     * Code duplication from core Frontend class.
+     */
+    public static function isLoggedIn()
+    {
+        if (isset($_REQUEST['auth-token']) && $_REQUEST['auth-token'] && strlen($_REQUEST['auth-token']) == 8) {
+            return self::loginFromToken($_REQUEST['auth-token']);
+        }
+
+        return Symphony::isLoggedIn();
     }
 }
