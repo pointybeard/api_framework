@@ -16,11 +16,6 @@ class extension_api_framework extends Extension
             ],
             [
                 'page' => '/frontend/',
-                'delegate' => 'FrontendOutputPreGenerate',
-                'callback' => 'setBoilerplateXSL'
-            ],
-            [
-                'page' => '/frontend/',
                 'delegate' => 'APIFrameworkJSONRendererAppendTransformations',
                 'callback' => 'appendTransformations'
             ],
