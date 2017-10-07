@@ -1,6 +1,5 @@
 <?php
 
-//use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symphony\ApiFramework\Lib;
 
@@ -47,7 +46,7 @@ class eventController extends SectionEvent
         // Grab out the "current-page". Our controller will always be named
         // using this
         $controllerName = "Controller" . ucfirst(trim(
-            Frontend::instance()
+            Lib\JsonFrontend::instance()
                 ->Page()
                 ->Params()["current-page"]
         ));
@@ -55,7 +54,7 @@ class eventController extends SectionEvent
         // Next, do some processing over the "parent-path" (if there is one) to
         // determine the folder path.
         $currentPagePath = trim(
-            Frontend::instance()
+            Lib\JsonFrontend::instance()
                 ->Page()
                 ->Params()["parent-path"]
             ,

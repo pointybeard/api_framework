@@ -7,7 +7,7 @@ function renderer_json($mode){
         throw new Lib\Exceptions\InvalidModeException('JSON Renderer launcher is only available on the frontend');
     }
 
-    $renderer = Frontend::instance();
+    $renderer = Lib\JsonFrontend::instance();
 
     // Check if we should enable exception debug information
     $exceptionDebugEnabled = Symphony::isLoggedIn();
@@ -26,7 +26,7 @@ function renderer_json($mode){
 
     cleanup_session_cookies();
 
-    if(in_array('JSON', Frontend::Page()->pageData()['type'])) {
+    if(in_array('JSON', Lib\JsonFrontend::Page()->pageData()['type'])) {
 
         // Load the output into a SimpleXML Container and convert to JSON
         try{
