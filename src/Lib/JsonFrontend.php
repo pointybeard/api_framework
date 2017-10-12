@@ -23,6 +23,12 @@ class JsonFrontend extends Symphony
     protected function __construct()
     {
         parent::__construct();
+
+        // When the parent construtor is called, the GenericExceptionHandler is
+        // turned off, which is fine normally unless you want exceptions to
+        // bubble up in a JSON api. Lets turn it back on.
+        \GenericExceptionHandler::$enabled = true;
+
         $this->_env = [];
     }
 

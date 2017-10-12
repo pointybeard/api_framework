@@ -20,10 +20,6 @@ class ExceptionHandler extends GenericExceptionHandler
     public static function handler($e)
     {
         try {
-            if (self::$enabled !== true) {
-                return;
-            }
-
             $class = __CLASS__;
             $exception_type = get_class($e);
 
