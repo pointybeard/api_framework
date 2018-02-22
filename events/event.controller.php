@@ -1,5 +1,6 @@
 <?php
 
+use Symfony\Component\HttpFoundation;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symphony\ApiFramework\Lib;
 
@@ -22,7 +23,19 @@ class eventController extends SectionEvent
 
     public function load()
     {
-        $request = Lib\JsonRequest::createFromGlobals();
+
+        try{
+            $request = Lib\JsonRequest::createFromGlobals();
+
+        // We want to allow non-JSON requests in certain situations.
+        } catch(Lib\Exceptions\RequestJsonInvalidException $ex) {
+
+            $request = HttpFoundation\Request::createFromGlobals();
+
+            // The input is discarded, but we need to emulate the json ParameterBag
+            // object.
+            $request->json = new HttpFoundation\ParameterBag;
+        }
 
         // This ensures the composer autoloader for the framework is included
         Symphony::ExtensionManager()->create('api_framework');
