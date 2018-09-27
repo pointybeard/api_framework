@@ -12,54 +12,46 @@ use Symphony\ApiFramework\Lib;
 trait hasEndpointSchemaTrait
 {
     /**
-     * Given a request object, this will return any JSON schema for the endpoint
-     * @param  Request $request A Symfony HTTP request object
+     * This will return any JSON schemas for the endpoint
      * @return array           An array containing request and response schemas
      *                           path if they exist.
      */
-    public function getSchema(Request $request) {
+    public function schemas($method) {
 
         // Remove the common namepsace
         $path = str_replace("Symphony\\ApiFramework\\Controllers\\", "", __CLASS__);
 
-        // Split by slashes
-        $schema = explode("\\", $path);
+        // Change back slashes to the system directory separator
+        $schema = str_replace("\\", DIRECTORY_SEPARATOR, $path);
 
-        // Ditch the 'controller' part in the last item
-        $schema[count($schema) - 1] = preg_replace("@^Controller@i", "", end($schema));
+        // Join the HTTP method and workspace folder to the schema path
+        $schema = sprintf(
+            "%s%sschemas%s%s.%s",
+            realpath(WORKSPACE), DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR,
+            $schema,
+            strtolower($method)
+        );
 
-        // Concatinate with underscores
-        $schema = implode("_", $schema);
-
-        // Join the HTTP method to the concatinated schema name
-        $schema = strtolower(sprintf("%s.%s", $schema, $request->getMethod()));
-
-        // All schemas live in WORKSPACE
-        $schemaDirectory = realpath(WORKSPACE) . DIRECTORY_SEPARATOR . "schema" . DIRECTORY_SEPARATOR;
-
-        // Format is path.method.(request|response).json
+        // Format is [controller-name].[http-method].[request|response].json
         // Generate potential paths for both a request and response
-        $requestSchemaPath =  $schemaDirectory . $schema . ".request.json";
-        $responseSchemaPath = $schemaDirectory . $schema . ".response.json";
+        $requestSchemaPath =  $schema . ".request.json";
+        $responseSchemaPath = $schema . ".response.json";
 
-        $result = [
+        $result = (object)[
             "request" => null,
             "response" => null
         ];
 
-        // Check to see if the request schema exists. If so, add the path into
-        // the return array.
-        if(file_exists($requestSchemaPath) || is_readable($requestSchemaPath)) {
-            $result['request'] = $requestSchemaPath;
+        // Check to see if the schemas exists.
+        if(is_readable($requestSchemaPath)) {
+            $result->request = $requestSchemaPath;
         }
 
-        // Check to see if the request schema exists. If so, add the path into
-        // the return array.
-        if(file_exists($responseSchemaPath) || is_readable($responseSchemaPath)) {
-            $result['response'] = $responseSchemaPath;
+        if(is_readable($responseSchemaPath)) {
+            $result->response = $responseSchemaPath;
         }
 
-        return $result;
+        return (object)$result;
     }
 
     /**
