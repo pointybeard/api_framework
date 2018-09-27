@@ -85,14 +85,16 @@ class eventController extends SectionEvent
         // #6 - Check if the controller exists before trying to include it.
         // Throw an exception if it cannot be located.
         if(!class_exists($controllerPath)) {
-          throw new Lib\Exceptions\ControllerNotFoundException($controllerPath);
+            throw new Lib\Exceptions\ControllerNotFoundException($controllerPath);
         }
 
         $controller = new $controllerPath();
 
         // Make sure the controller extends the AbstractController class
         if(!($controller instanceof Lib\AbstractController)) {
-          throw new Lib\Exceptions\ControllerNotValidException("'{$controllerPath}' is not a valid controller. Check implementation conforms to Lib\AbstractController.");
+            throw new Lib\Exceptions\ControllerNotValidException(sprintf(
+                "'%s' is not a valid controller. Check implementation conforms to Lib\AbstractController.", $controllerPath)
+            );
         }
 
         $method = strtolower($request->getMethod());
@@ -101,13 +103,34 @@ class eventController extends SectionEvent
             throw new Lib\Exceptions\MethodNotAllowedException($request->getMethod());
         }
 
+        $canValidate = ($controller instanceof Lib\Interfaces\JsonSchemaValidationInterface);
+
+        // Run any controller pre-flight code
         $controller->execute($request);
 
         // Prepare the response.
         $response = new JsonResponse();
         $response->headers->set('Content-Type', 'application/json');
 
+        // Find any request or response schemas to apply
+        if($canValidate == true) {
+            $schemas = $controller->schemas($request->getMethod());
+
+            // Validate the request. We dont care about the returned data
+            $controller->validate(
+                $request->request->all(),
+                $schemas->request
+            );
+        }
+
+        // Run the controller's method that corresponds to the request method
         $response = $controller->$method($request, $response);
+
+        // Validate the response. We dont care about the returned data
+        if($canValidate == true) {
+            $controller->validate($response->getContent(), $schemas->response);
+        }
+
         $response->send();
         exit;
     }
