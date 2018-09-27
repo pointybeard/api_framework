@@ -13,6 +13,28 @@
         </author>
     </authors>
     <releases>
+        <release version="0.9.0" date="2018-09-27" min="2.6.7">
+            #### Added
+            * Added extended FrontendPage class, `JsonFrontendPage` to handle json requests specifically.
+            * Added `JsonRequest` and `RequestJsonInvalidException`. They are used to grab the incoming json data. Also updated controller event to use `JsonRequest`.
+            * Added logic that allows pages without JSON content to still reach the controller (Fixes #20)
+            * JSON Schema validation
+
+            #### Fixes
+            * Fixed the recursive method `recursiveApplyTransformationToArray()`. It had a logic bug that meant the result from lower levels was not propagated up the chain. Additionally, the `@attributes` array was not being dealt with consistently. The last transformer to run will trigger a cleanup which removes the `@attributes` array. (#15, #16, and #17)
+            * Fixed Exception namespace in `__construct()` function signature (Fixes #19).
+            * Added `JSON_UNESCAPED_SLASHES` flag when generating output from ExceptionHandler (Fixes #22)
+
+            #### Changed
+            * Updated controller event to pass Request object when calling execute method of a Controller object.
+            * Updated README for fixes #15 #16 and #17.
+            * Updated the json renderer to use `JsonFrontend` instead of the core Frontend class.
+            * Changed abstract method `execute()` to include a Request object, allowing controllers to manipulate the Request.
+            * Changed the way a controller path is discovered by using `current-page` and `parent-path` instead of `current-path`. (#14)
+            * Removed `boilerplate-xsl` feature. This is no longer required as `?debug` now works correctly. (#12)
+            * Using `Lib\JsonFrontend` instead of `Frontend`. `JsonFrontend` no longer extends the `Frontend` class.
+            * Minor improvements to how error handling works. Subverting some behaviour of the `FrontendPage` class by skipping it's constructor. `JsonFrontend` will force enable the `GenericExceptionHandler`
+        </release>
         <release version="0.2.1" date="2016-06-17" min="2.6.7">
             - Added `JSON_UNESCAPED_SLASHES` to avoid unnecessary escaping of slashes in output. (#8)
             - Added new abstract extension `AbstractApiException` which is used by `ControllerNotFoundException` and `MethodNotAllowedException`.

@@ -1,7 +1,7 @@
 # RESTful API Framework for Symphony CMS
 
-- Version: v0.2.2
-- Date: October 8th 2017
+- Version: v0.9.0
+- Date: September 27th 2018
 - [Release notes](https://github.com/pointybeard/api_framework/blob/master/CHANGELOG.md)
 - [GitHub repository](https://github.com/pointybeard/api_framework)
 
@@ -13,12 +13,13 @@ This is an extension for Symphony CMS. Add it to your `/extensions` folder in yo
 
 ### Requirements
 
-This extension requires the **[Symfony HTTP Foundation](https://github.com/symfony/http-foundation)** (`symfony/http-foundation`) to be installed via Composer. Either require both of these in your main composer.json file, or run `composer install` on the `extension/api_framework` directory.
+This extension requires the **[Symfony HTTP Foundation](https://github.com/symfony/http-foundation)** (`symfony/http-foundation`) and **[JSON Schema for PHP](https://github.com/justinrainbow/json-schema)** (`justinrainbow/json-schema`) to be installed via Composer. Either require both of these in your main composer.json file, or run `composer install` on the `extension/api_framework` directory.
 
 ```json
 "require": {
   "php": ">=5.6.6",
-  "symfony/http-foundation": "^3.0@dev"
+  "symfony/http-foundation": "^3.0@dev",
+  "justinrainbow/json-schema": "^5.0@dev"
 }
 ```
 

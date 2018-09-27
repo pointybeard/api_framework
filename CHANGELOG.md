@@ -4,12 +4,17 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.9.0] - 2018-09-27
 #### Added
 * Added extended FrontendPage class, `JsonFrontendPage` to handle json requests specifically.
 * Added `JsonRequest` and `RequestJsonInvalidException`. They are used to grab the incoming json data. Also updated controller event to use `JsonRequest`.
+* Added logic that allows pages without JSON content to still reach the controller (Fixes #20)
+* JSON Schema validation
 
 #### Fixes
 * Fixed the recursive method `recursiveApplyTransformationToArray()`. It had a logic bug that meant the result from lower levels was not propagated up the chain. Additionally, the `@attributes` array was not being dealt with consistently. The last transformer to run will trigger a cleanup which removes the `@attributes` array. (#15, #16, and #17)
+* Fixed Exception namespace in `__construct()` function signature (Fixes #19).
+* Added `JSON_UNESCAPED_SLASHES` flag when generating output from ExceptionHandler (Fixes #22)
 
 #### Changed
 * Updated controller event to pass Request object when calling execute method of a Controller object.
@@ -18,6 +23,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 * Changed abstract method `execute()` to include a Request object, allowing controllers to manipulate the Request.
 * Changed the way a controller path is discovered by using `current-page` and `parent-path` instead of `current-path`. (#14)
 * Removed `boilerplate-xsl` feature. This is no longer required as `?debug` now works correctly. (#12)
+* Using `Lib\JsonFrontend` instead of `Frontend`. `JsonFrontend` no longer extends the `Frontend` class.
+* Minor improvements to how error handling works. Subverting some behaviour of the `FrontendPage` class by skipping it's constructor. `JsonFrontend` will force enable the `GenericExceptionHandler`
 
 ## [0.2.1] - 2016-06-17
 #### Added
@@ -66,6 +73,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Added Symphony PDO as requirement
 
 [Unreleased]: https://github.com/pointybeard/api_framework/compare/v0.2.1...integration
+[0.9.0]: https://github.com/pointybeard/api_framework/compare/v0.2.1...v0.9.0
 [0.2.1]: https://github.com/pointybeard/api_framework/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/pointybeard/api_framework/compare/v0.1.0...v0.1.1
