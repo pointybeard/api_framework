@@ -104,7 +104,7 @@ class ExceptionHandler extends GenericExceptionHandler
         }
 
         // output and die
-        echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        echo json_encode($output, JsonFrontend::DEFAULT_ENCODING_OPTIONS);
         exit(255);
     }
 }

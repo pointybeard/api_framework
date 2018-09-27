@@ -111,6 +111,9 @@ class eventController extends SectionEvent
         // Prepare the response.
         $response = new JsonResponse();
         $response->headers->set('Content-Type', 'application/json');
+        $response->setEncodingOptions(
+            Lib\JsonFrontend::instance()->getEncodingOptions()
+        );
 
         // Find any request or response schemas to apply
         if($canValidate == true) {

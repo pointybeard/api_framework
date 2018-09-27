@@ -53,7 +53,10 @@ function renderer_json($mode){
           $outputArray = $transformer->run($outputArray);
 
           // Now put the array through a json_encode
-          $output = json_encode($outputArray, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+          $output = json_encode(
+              $outputArray,
+              $renderer->getEncodingOptions()
+          );
 
         } catch(\Exception $e) {
             // This happened because the input was not valid XML. This could
