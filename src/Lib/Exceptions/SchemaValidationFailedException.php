@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 /**
  * @thrownby Symphony\ApiFramework\Lib\Traits\hasEndpointSchemaTrait
  */
-class SchemaValidationFailedException extends Lib\AbstractApiException implements Interfaces\ModifesExceptionOutputInterface
+class SchemaValidationFailedException extends Lib\AbstractApiException implements Interfaces\ModifiesExceptionOutputInterface
 {
 
     /**
@@ -38,7 +38,7 @@ class SchemaValidationFailedException extends Lib\AbstractApiException implement
         $this->dataProvided = $dataProvided;
 
         parent::__construct(
-            Response::HTTP_INTERNAL_SERVER_ERROR,
+            Response::HTTP_BAD_REQUEST,
             "Validation failed. Errors where encountered while validating data against the schema.",
             $code,
             $previous
