@@ -35,7 +35,7 @@ trait hasEndpointSchemaTrait
         $schema = strtolower(sprintf("%s.%s", $schema, $request->getMethod()));
 
         // All schemas live in WORKSPACE
-        $schemaDirectory = WORKSPACE . DIRECTORY_SEPARATOR . "schema" . DIRECTORY_SEPARATOR;
+        $schemaDirectory = realpath(WORKSPACE) . DIRECTORY_SEPARATOR . "schema" . DIRECTORY_SEPARATOR;
 
         // Format is path.method.(request|response).json
         // Generate potential paths for both a request and response
@@ -75,7 +75,7 @@ trait hasEndpointSchemaTrait
      *
      * @usedby eventController
      */
-    public function validate($data, $schemaPath = null) {
+    public function validate($data, $schema = null) {
 
         // We need to convert the entire data array into an object. Quick way
         // is to convert to json and back again.
@@ -91,19 +91,18 @@ trait hasEndpointSchemaTrait
         }
 
         // We only need to validate if a schema was supplied
-        if($schemaPath != null) {
-
-            // Set up the JsonSchema validation objects
-            $refResolver = new JsonSchema\RefResolver(new JsonSchema\Uri\UriRetriever(), new JsonSchema\Uri\UriResolver());
-            $schema = $refResolver->resolve("file://{$schemaPath}");
+        if($schema != null) {
 
             // Validate
-            $validator = new JsonSchema\Validator();
-            $validator->check($data, $schema);
+            $validator = new JsonSchema\Validator;
+            $validator->validate(
+                $data,
+                (object)['$ref' => 'file://' . realpath($schema)]
+            );
 
             // The result was not valid, but we need to dig a little deeper to
             // see what the problem might be.
-            if ($validator->isValid() === false) {
+            if ($validator->isValid() !== true) {
                 $errors = [];
 
                 foreach ($validator->getErrors() as $error) {
@@ -111,7 +110,7 @@ trait hasEndpointSchemaTrait
                 }
 
                 // Now throw up an exception along with the processed errors
-                throw new Lib\Exceptions\SchemaValidationFailedException($errors, $schemaPath, $data);
+                throw new Lib\Exceptions\SchemaValidationFailedException($errors, $schema, $data);
             }
         }
 
