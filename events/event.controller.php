@@ -103,11 +103,21 @@ class eventController extends SectionEvent
 
         $controller->execute($request);
 
+        // Find any request or response schemas to apply
+        $schema = $controller->getSchema($request);
+
+        // Validate the request. We dont care about the returned data
+        $controller->validate($request->request->all(), $schema['request']);
+
         // Prepare the response.
         $response = new JsonResponse();
         $response->headers->set('Content-Type', 'application/json');
 
         $response = $controller->$method($request, $response);
+
+        // Validate the response. We dont care about the returned data
+        $controller->validate($response->getContent(), $schema['response']);
+
         $response->send();
         exit;
     }
