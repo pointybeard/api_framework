@@ -39,7 +39,7 @@ class SchemaValidationFailedException extends Lib\AbstractApiException implement
 
         parent::__construct(
             Response::HTTP_BAD_REQUEST,
-            "Validation failed. Errors where encountered while validating data against the schema.",
+            "Validation failed. Errors where encountered while validating data against the supplied schema.",
             $code,
             $previous
         );
@@ -54,7 +54,9 @@ class SchemaValidationFailedException extends Lib\AbstractApiException implement
         // We want to see the schema validation errors in the output
         $output['error'] = $this->schemaErrors;
         $output['validation'] = [
-            'schema' => basename($this->schemaPath),
+            'schema' => str_replace(
+                realpath(WORKSPACE) . DIRECTORY_SEPARATOR, "", $this->schemaPath
+            ),
             'input' => $this->dataProvided
         ];
         return $output;
