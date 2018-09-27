@@ -260,6 +260,55 @@ final class ControllerExample extends AbstractController{
 }
 ```
 
+### Validating with JSON Schema
+
+Incoming request and output response JSON can be validated against a [JSON Schema](http://json-schema.org/) document. This allows you validate input before it gets to your controllers, removing the need for a lot of sanity checking code, and validate controller output to ensure it is conforming to your API specifications.
+
+**Note, JSON schema validation is not currently available for `GET` requests.**
+
+To use JSON Schema validation, implement the `JsonSchemaValidationInterface` Interface and use the `Traits\hasEndpointSchemaTrait` trait in your controller. E.g.
+
+```
+namespace Symphony\ApiFramework\Controllers;
+
+use Symphony\ApiFramework;
+
+...
+
+final class ControllerSchema extends Lib\AuthenticatedAbstractController Implements ApiFramework\Lib\Interfaces\JsonSchemaValidationInterface {
+
+    use ApiFramework\Lib\Traits\hasEndpointSchemaTrait;
+
+```
+
+The Interface `JsonSchemaValidationInterface` has two abstract methods: `schema()` and `validate()`. The Trait `hasEndpointSchemaTrait` implements these methods. It is also possible to implement both of these methods yourself.
+
+Once the necessary libraries have been included, the Event controller will look for schemas by calling `->schema()` prior to rendering. It looks for the directory `workspace/schemas` and follows the same hierarchy as controllers (sub-folders exist for each level of the API). E.g. A schema for the endpoint `/order/item/` would need to reside in `workspace/schemas/Order`.
+
+Schema files must be named using the format `[controller-name].[http-method].[request|response].json`. For example, if you have an endpoint controller called "Test", and you want to validate the output of a `PATCH` request, the name of the schema file would be `ControllerTest.patch.response.json`.
+
+If validation fails, an exception is thrown which renders a 400 Bad Request response. It will look something like this:
+
+```
+HTTP/1.1 400 Bad Request
+Date: Thu, 27 Sep 2018 03:28:06 GMT
+Content-Type: application/json
+
+{
+    "status": 400,
+    "error": [
+        "[fruit] The property fruit is required"
+    ],
+    "message": "Validation failed. Errors where encountered while validating data against the supplied schema.",
+    "validation": {
+        "schema": "schemas/Test/ControllerTest.post.request.json",
+        "input": {
+            "animal": "lion"
+        }
+    }
+}
+```
+
 ### Transformers
 
 Prior to converting the XML into JSON, transformers are run over it. Transformers mutate the result based on a test and action.
