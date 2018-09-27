@@ -11,6 +11,12 @@ use \Symphony;
  */
 class JsonFrontend extends Symphony
 {
+
+    // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
+    const DEFAULT_ENCODING_OPTIONS = 207;
+
+    protected $encodingOptions = self::DEFAULT_ENCODING_OPTIONS;
+
     /**
      * An instance of the ApiFramework\Lib\JsonFrontendPage class
      * @var JsonFrontendPage
@@ -76,5 +82,13 @@ class JsonFrontend extends Symphony
         }
 
         return Symphony::isLoggedIn();
+    }
+
+    public function getEncodingOptions() {
+        return $this->encodingOptions;
+    }
+
+    public function setEncodingOptions($options) {
+        $this->encodingOptions = $options;
     }
 }
