@@ -21,6 +21,7 @@ class ErrorHandler extends GenericErrorHandler
     {
         restore_error_handler();
         set_error_handler(array(__CLASS__, 'handler'), error_reporting());
+        //register_shutdown_function(array(__CLASS__, 'shutdown'));
     }
 
     /**
@@ -32,6 +33,23 @@ class ErrorHandler extends GenericErrorHandler
     public static function isEnabled()
     {
         return (bool) error_reporting() && self::$enabled;
+    }
+
+    public static function shutdown()
+    {
+        $last_error = error_get_last();
+
+        if (!is_null($last_error) && $last_error['type'] == E_ERROR) {
+            // Make sure we don't get any crud in the output
+            ob_clean();
+
+            $last_error['type'] = self::$errorTypeStrings[$last_error['type']];
+            print json_encode([
+                "error" => 'A severe, unrecoverable, error occurred.',
+                "details" => $last_error
+            ], JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            exit;
+        }
     }
 
     /**
