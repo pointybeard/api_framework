@@ -55,7 +55,9 @@ class SchemaValidationFailedException extends Lib\AbstractApiException implement
         $output['error'] = $this->schemaErrors;
         $output['validation'] = [
             'schema' => str_replace(
-                realpath(WORKSPACE) . DIRECTORY_SEPARATOR, "", $this->schemaPath
+                realpath(WORKSPACE) . DIRECTORY_SEPARATOR,
+                "",
+                $this->schemaPath
             ),
             'input' => $this->dataProvided
         ];

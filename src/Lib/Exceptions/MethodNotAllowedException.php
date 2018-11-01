@@ -9,11 +9,13 @@ class MethodNotAllowedException extends Lib\AbstractApiException
 {
     public $method;
 
-    public function getHttpMethod() {
+    public function getHttpMethod()
+    {
         return $this->method;
     }
 
-    public function __construct($method, $code = 0, Exception $previous = null) {
+    public function __construct($method, $code = 0, Exception $previous = null)
+    {
         // Save the method
         $this->method = $method;
 

@@ -26,7 +26,7 @@ class extension_api_framework extends Extension
     {
 
       // Add the @jsonForceArray transformation
-      $context['transformer']->append(
+        $context['transformer']->append(
         new Lib\Transformation(
           function (array $input, array $attributes=[]) {
               // First make sure there is an attributes array

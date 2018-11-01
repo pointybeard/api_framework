@@ -23,13 +23,11 @@ class eventController extends SectionEvent
 
     public function load()
     {
-
-        try{
+        try {
             $request = Lib\JsonRequest::createFromGlobals();
 
-        // We want to allow non-JSON requests in certain situations.
-        } catch(Lib\Exceptions\RequestJsonInvalidException $ex) {
-
+            // We want to allow non-JSON requests in certain situations.
+        } catch (Lib\Exceptions\RequestJsonInvalidException $ex) {
             $request = HttpFoundation\Request::createFromGlobals();
 
             // The input is discarded, but we need to emulate the json ParameterBag
@@ -41,7 +39,7 @@ class eventController extends SectionEvent
         Symphony::ExtensionManager()->create('api_framework');
 
         // Event controllor only responds to certain methods. GET is handled by the data sources
-        if($request->getMethod() == 'GET'){
+        if ($request->getMethod() == 'GET') {
             return;
         }
 
@@ -69,8 +67,7 @@ class eventController extends SectionEvent
         $currentPagePath = trim(
             Lib\JsonFrontend::instance()
                 ->Page()
-                ->Params()["parent-path"]
-            ,
+                ->Params()["parent-path"],
             '/'
         );
         $parts = array_map("ucfirst", preg_split("@\/@", $currentPagePath));
@@ -84,22 +81,25 @@ class eventController extends SectionEvent
 
         // #6 - Check if the controller exists before trying to include it.
         // Throw an exception if it cannot be located.
-        if(!class_exists($controllerPath)) {
+        if (!class_exists($controllerPath)) {
             throw new Lib\Exceptions\ControllerNotFoundException($controllerPath);
         }
 
         $controller = new $controllerPath();
 
         // Make sure the controller extends the AbstractController class
-        if(!($controller instanceof Lib\AbstractController)) {
-            throw new Lib\Exceptions\ControllerNotValidException(sprintf(
-                "'%s' is not a valid controller. Check implementation conforms to Lib\AbstractController.", $controllerPath)
+        if (!($controller instanceof Lib\AbstractController)) {
+            throw new Lib\Exceptions\ControllerNotValidException(
+                sprintf(
+                "'%s' is not a valid controller. Check implementation conforms to Lib\AbstractController.",
+                $controllerPath
+            )
             );
         }
 
         $method = strtolower($request->getMethod());
 
-        if(!method_exists($controller, $method)){
+        if (!method_exists($controller, $method)) {
             throw new Lib\Exceptions\MethodNotAllowedException($request->getMethod());
         }
 
@@ -116,7 +116,7 @@ class eventController extends SectionEvent
         );
 
         // Find any request or response schemas to apply
-        if($canValidate == true) {
+        if ($canValidate == true) {
             $schemas = $controller->schemas($request->getMethod());
 
             // Validate the request. We dont care about the returned data
@@ -130,7 +130,7 @@ class eventController extends SectionEvent
         $response = $controller->$method($request, $response);
 
         // Validate the response. We dont care about the returned data
-        if($canValidate == true) {
+        if ($canValidate == true) {
             $controller->validate($response->getContent(), $schemas->response);
         }
 

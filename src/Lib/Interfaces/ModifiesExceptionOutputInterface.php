@@ -4,5 +4,5 @@ namespace Symphony\ApiFramework\Lib\Interfaces;
 
 interface ModifiesExceptionOutputInterface
 {
-	public function modifyOutput(array $output);
+    public function modifyOutput(array $output);
 }

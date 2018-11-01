@@ -37,7 +37,8 @@ class ExceptionHandler extends GenericExceptionHandler
         }
     }
 
-    private static function getCodeTrace($trace){
+    private static function getCodeTrace($trace)
+    {
         $result = [];
         foreach ($trace as $t) {
             $result[] = sprintf(
@@ -52,7 +53,8 @@ class ExceptionHandler extends GenericExceptionHandler
         return $result;
     }
 
-    private static function getDatabaseTrace($queries){
+    private static function getDatabaseTrace($queries)
+    {
         $result = [];
         foreach ($queries as $query) {
             $result[] = sprintf(
@@ -67,30 +69,29 @@ class ExceptionHandler extends GenericExceptionHandler
 
     public static function render($e)
     {
-
         header("Content-Type: application/json");
 
         // Build the JSON
-       $output = [
+        $output = [
             "status" => 500,
             "error" => $e->getCode(),
             "message" => $e->getMessage()
         ];
 
         // Check for a custom status code
-        if($e instanceof AbstractApiException) {
+        if ($e instanceof AbstractApiException) {
             $output['status'] = $e->getHttpStatusCode();
         }
 
         // Let the exception modify the output if it wants to.
-        if(in_array("Symphony\ApiFramework\Lib\Interfaces\ModifiesExceptionOutputInterface", class_implements($e))) {
+        if (in_array("Symphony\ApiFramework\Lib\Interfaces\ModifiesExceptionOutputInterface", class_implements($e))) {
             $output = $e->modifyOutput($output);
         }
 
         http_response_code($output['status']);
 
-        if(self::$debug){
-            if(is_object(\Symphony::Database())){
+        if (self::$debug) {
+            if (is_object(\Symphony::Database())) {
                 $databaseDebug = \Symphony::Database()->debug();
             }
 

@@ -7,5 +7,5 @@ use Symfony\Component\HttpFoundation\Response;
 
 interface ControllerInterface
 {
-	//@todo define status and error codes
+    //@todo define status and error codes
 }

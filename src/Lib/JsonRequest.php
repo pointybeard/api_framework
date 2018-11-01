@@ -8,8 +8,8 @@ use Symfony\Component\HttpFoundation;
  * specific functionality for parsing JSON input and making it available in a
  * more standard way.
  */
-class JsonRequest extends HttpFoundation\Request {
-
+class JsonRequest extends HttpFoundation\Request
+{
     public static function createFromGlobals()
     {
         // Call the parent method to generate a standard request object and
@@ -24,12 +24,12 @@ class JsonRequest extends HttpFoundation\Request {
 
         // If we got something, decode it (making the assumption it's actually
         // json.)
-        if(!empty($requestBody)) {
+        if (!empty($requestBody)) {
             $input = json_decode($requestBody, true);
 
             // json_decode() will return false or NULL. NULL specifically
             // means the json was invalid.
-            if($input === false || is_null($input)) {
+            if ($input === false || is_null($input)) {
                 throw new Exceptions\RequestJsonInvalidException();
             }
         }

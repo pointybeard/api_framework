@@ -16,7 +16,8 @@ trait hasEndpointSchemaTrait
      * @return array           An array containing request and response schemas
      *                           path if they exist.
      */
-    public function schemas($method) {
+    public function schemas($method)
+    {
 
         // Remove the common namepsace
         $path = str_replace("Symphony\\ApiFramework\\Controllers\\", "", __CLASS__);
@@ -27,7 +28,9 @@ trait hasEndpointSchemaTrait
         // Join the HTTP method and workspace folder to the schema path
         $schema = sprintf(
             "%s%sschemas%s%s.%s",
-            realpath(WORKSPACE), DIRECTORY_SEPARATOR, DIRECTORY_SEPARATOR,
+            realpath(WORKSPACE),
+            DIRECTORY_SEPARATOR,
+            DIRECTORY_SEPARATOR,
             $schema,
             strtolower($method)
         );
@@ -43,11 +46,11 @@ trait hasEndpointSchemaTrait
         ];
 
         // Check to see if the schemas exists.
-        if(is_readable($requestSchemaPath)) {
+        if (is_readable($requestSchemaPath)) {
             $result->request = $requestSchemaPath;
         }
 
-        if(is_readable($responseSchemaPath)) {
+        if (is_readable($responseSchemaPath)) {
             $result->response = $responseSchemaPath;
         }
 
@@ -67,7 +70,8 @@ trait hasEndpointSchemaTrait
      *
      * @usedby eventController
      */
-    public function validate($data, $schema = null) {
+    public function validate($data, $schema = null)
+    {
 
         // We need to convert the entire data array into an object. Quick way
         // is to convert to json and back again.
@@ -78,12 +82,12 @@ trait hasEndpointSchemaTrait
         );
 
         // Handle a situation with $data is empty. We still need an object.
-        if(empty($data)) {
+        if (empty($data)) {
             $data = (object)$data;
         }
 
         // We only need to validate if a schema was supplied
-        if($schema != null) {
+        if ($schema != null) {
 
             // Validate
             $validator = new JsonSchema\Validator;
@@ -107,6 +111,5 @@ trait hasEndpointSchemaTrait
         }
 
         return $data;
-
     }
 }
