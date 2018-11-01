@@ -44,7 +44,18 @@ class JsonFrontend extends Symphony
      */
     public function display($page)
     {
-        self::$_page = new JsonFrontendPage;
+        $oPage = (new \FrontendPage)->resolvePage($page);
+
+        self::$_page = in_array('cacheable', $oPage['type'])
+            ? new CacheableJsonFrontendPage($oPage)
+            : new JsonFrontendPage($oPage)
+        ;
+
+        self::$_page->addHeaderToPage(
+            'X-API-Framework-Page-Renderer',
+            array_pop(explode('\\', get_class(self::$_page)))
+        );
+
         Symphony::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
         $output = self::$_page->generate($page);
 
@@ -84,11 +95,13 @@ class JsonFrontend extends Symphony
         return Symphony::isLoggedIn();
     }
 
-    public function getEncodingOptions() {
+    public function getEncodingOptions()
+    {
         return $this->encodingOptions;
     }
 
-    public function setEncodingOptions($options) {
+    public function setEncodingOptions($options)
+    {
         $this->encodingOptions = $options;
     }
 }
