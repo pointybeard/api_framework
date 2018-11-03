@@ -44,14 +44,14 @@ class JsonFrontend extends Symphony
      */
     public function display($page)
     {
-        $oPage = (new \FrontendPage)->resolvePage($page);
+        $resolvedPage = (new \FrontendPage)->resolvePage($page);
 
         // GET Requests on pages that are of type 'cacheable' can be cached.
-        $isCacheable = ($_SERVER['REQUEST_METHOD'] == 'GET' && in_array('cacheable', $oPage['type']));
+        $isCacheable = ($_SERVER['REQUEST_METHOD'] == 'GET' && in_array('cacheable', $resolvedPage['type']));
 
         self::$_page = $isCacheable
-            ? new CacheableJsonFrontendPage($oPage)
-            : new JsonFrontendPage($oPage)
+            ? new CacheableJsonFrontendPage()
+            : new JsonFrontendPage()
         ;
 
         self::$_page->addHeaderToPage(
