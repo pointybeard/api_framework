@@ -7,28 +7,13 @@ namespace Symphony\ApiFramework\Lib;
  */
 class JsonFrontendPage extends \FrontendPage
 {
-    private $resolvedPage = null;
-
-    // Little bit of optimisation here. Since JsonFrontend always
-    // pre-resolves the page (to check if it's cacheable or not), we can provide
-    // the pre-resolved data instead of asking FrontendPage to do it again.
-    public function resolvePage($page = null)
-    {
-        return is_null($this->resolvedPage)
-            ? parent::resolvePage($page)
-            : $this->resolvedPage
-        ;
-    }
-
     /**
      * Constructor function sets the `$is_logged_in` variable, calls
      * XSLTPage constructor (bypassing FrontendPage::__construct()) and
      * set $resolvedPage which is used by overloaded resolvePage() method.
      */
-    public function __construct(array $page=null)
+    public function __construct()
     {
-        $this->resolvedPage = $page;
-
         // We need to skip the FrontendPage constructor as it turns off
         // our exception handling by creating a new instance of Frontend.
         // Instead, lets skip over to the parent->parent constructor.
