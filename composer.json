@@ -25,7 +25,7 @@
         "php": ">=5.6.6",
         "symfony/http-foundation": "^3.0@dev",
         "justinrainbow/json-schema": "^5.0@dev",
-        "pointybeard/symphony-classmapper": "~1.0",
+        "pointybeard/symphony-classmapper": "dev-integration",
         "pointybeard/symphony-pdo": "~0.1"
     },
     "require-dev": {
