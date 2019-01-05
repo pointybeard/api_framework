@@ -2,7 +2,7 @@
     "name": "pointybeard/symphony-api-framework",
     "version": "1.0.0",
     "description": "JSON renderer and event driven controller interface for Symphony CMS designed to quickly build a RESTful APIs.",
-    "homepage": "http://alistairkearney.com",
+    "homepage": "http://alannahkearney.com",
     "license": "MIT",
     "minimum-stability": "dev",
     "authors": [
@@ -19,12 +19,15 @@
         "psr-4": {
             "Symphony\\ApiFramework\\": "src",
             "Symphony\\ApiFramework\\Controllers\\": "../../workspace/controllers"
-        }
+        },
+        "files": [
+            "extension.driver.php"
+        ]
     },
     "require": {
         "php": ">=5.6.6",
-        "symfony/http-foundation": "^3.0@dev",
-        "justinrainbow/json-schema": "^5.0@dev",
+        "symfony/http-foundation": "^3.0",
+        "justinrainbow/json-schema": "^5.2",
         "pointybeard/symphony-classmapper": "~1.0",
         "pointybeard/symphony-pdo": "~0.1"
     },
