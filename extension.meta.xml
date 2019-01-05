@@ -8,11 +8,14 @@
     </types>
     <authors>
         <author>
-            <name github="pointybeard" symphony="alistair">Alistair Kearney</name>
-            <website>http://alistairkearney.com</website>
+            <name github="pointybeard" symphony="alannah">Alannah Kearney</name>
+            <website>http://alannahkearney.com</website>
         </author>
     </authors>
     <releases>
+        <release version="1.0.0" date="2019-01-05" min="2.6.7">
+            
+        </release>
         <release version="0.9.0" date="2018-09-27" min="2.6.7">
             #### Added
             * Added extended FrontendPage class, `JsonFrontendPage` to handle json requests specifically.
