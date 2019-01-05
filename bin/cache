@@ -1,0 +1,79 @@
+<?php
+
+namespace Symphony\Shell\Command\Api_Framework;
+
+use Symphony\Shell\Lib\Traits;
+use Symphony\Shell\Lib\Shell as Shell;
+use Symphony\ApiFramework\Lib\Models\PageCache;
+
+use SymphonyPDO;
+use Extension_API_Framework;
+
+class Cache extends \Symphony\Shell\Lib\AuthenticatedCommand
+{
+    use Traits\hasRequiresAuthenticationTrait;
+
+    const ACTION_CLEAN = "clean";
+    const ACTION_PURGE = "purge";
+
+    public function usage()
+    {
+        echo "usage: cache [OPTION...]
+    Maintentance script for API Framework cache entries
+
+options:
+
+    --action | -a
+        The action to run on the cache entries. See 'Actions' below.
+
+actions:
+
+    clean
+        Removes expired cache entries
+
+    purge
+        Deletes all cache entries
+
+examples:
+    symphony -c api_framework/cache -a purge
+    symphony -c api_framework/cache --action=clean
+
+";
+    }
+
+    public function run()
+    {
+
+        if (Shell::instance()->args->find(['a', 'action']) === false) {
+            throw new \Exception('No action specified. Must use -a or --action.');
+
+        } elseif(!in_array(Shell::instance()->args->find(['a', 'action'])->value(), [self::ACTION_CLEAN, self::ACTION_PURGE])) {
+            throw new \Exception('Invalid action specified.');
+        }
+
+        switch(Shell::instance()->args->find(['a', 'action'])->value()) {
+            case self::ACTION_CLEAN:
+                $cacheEntries = PageCache::fetchExpired();
+                break;
+
+            case self::ACTION_PURGE:
+                $cacheEntries = PageCache::all();
+                break;
+
+        }
+
+        Shell::message(sprintf('%d cache entries located.', $cacheEntries->count()));
+
+        if ($cacheEntries->count() <= 0) {
+            Shell::message('Nothing to do. Exiting.', false);
+            return;
+        }
+
+        foreach($cacheEntries as $c) {
+            $c->delete();
+        }
+
+        Shell::message('Done.');
+    }
+
+}
