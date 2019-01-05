@@ -9,6 +9,16 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
     public function generate($page = null)
     {
 
+        // Check if "Disable Cache Cleanup" has been set. If not, go ahead and
+        // delete all expired cache entries. This can be disabled in the
+        // preferences.
+        if (\Extension_API_Framework::isCacheCleanupEnabled()) {
+            JsonFrontend::Page()->addHeaderToPage(
+                'X-API-Framework-Expired-Cache-Entries',
+                (int)Models\PageCache::deleteExpired()
+            );
+        }
+
         // Grab any query string values. We'll store this with the
         // cache to improve hit accuracy.
         $query = [];
@@ -50,7 +60,10 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
             ->contents($output)
             ->queryString($orderedQueryString)
             ->dateCreatedAt('now')
-            ->dateExpiresAt(date(DATE_RFC2822, strtotime("+1 hour")))
+            ->dateExpiresAt(\DateTimeObj::format(
+                \Extension_API_Framework::calculateNextCacheExpiryTime(),
+                DATE_RFC2822
+            ))
             ->page($page)
             ->save()
         ;
