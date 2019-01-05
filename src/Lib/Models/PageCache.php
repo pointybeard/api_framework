@@ -27,6 +27,13 @@ final class PageCache extends ClassMapper\AbstractClassMapper
         ];
     }
 
+    protected function getData()
+    {
+        $data = parent::getData();
+        $data['headers'] = self::removeAPIFrameworkHeadersFromJsonString($data['headers']);
+        return $data;
+    }
+
     public static function loadCurrentFromPageAndQueryString($page, $queryString)
     {
         self::findSectionFields();
@@ -67,6 +74,54 @@ final class PageCache extends ClassMapper\AbstractClassMapper
         return $result->current();
     }
 
+    public static function loadFromPage($page)
+    {
+        self::findSectionFields();
+        $db = SymphonyPDO\Loader::instance();
+        $query = $db->prepare(self::fetchSQL(self::findJoinTableFieldName('page') . ".value = :page") . " LIMIT 1");
+        $query->bindValue(':page', $page, \PDO::PARAM_STR);
+        $query->execute();
+
+        return (new SymphonyPDO\Lib\ResultIterator(__CLASS__, $query))->current();
+    }
+
+    public static function fetchExpired()
+    {
+        self::findSectionFields();
+        $db = SymphonyPDO\Loader::instance();
+        $query = $db->prepare(self::fetchSQL(self::findJoinTableFieldName('expires-at') . ".date < NOW() "));
+        $query->execute();
+
+        return (new SymphonyPDO\Lib\ResultIterator(__CLASS__, $query));
+    }
+
+    public static function deleteExpired()
+    {
+        $expired = self::fetchExpired();
+        foreach ($expired as $c) {
+            $c->delete();
+        }
+        return $expired->count();
+    }
+
+    public static function removeAPIFrameworkHeadersFromJsonString($headers)
+    {
+        return json_encode(
+            self::removeAPIFrameworkHeadersFromArray(json_decode($headers, true)),
+            JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES
+        );
+    }
+
+    public static function removeAPIFrameworkHeadersFromArray(array $headers)
+    {
+        foreach ($headers as $name => $value) {
+            if (preg_match("@^X-API-Framework-@i", $name)) {
+                unset($headers[$name]);
+            }
+        }
+        return $headers;
+    }
+
     public function render()
     {
         // Headers
@@ -78,7 +133,6 @@ final class PageCache extends ClassMapper\AbstractClassMapper
                 ? strtotime("+1 year")
                 : strtotime($this->dateExpiresAt)
         );
-        unset($headers['X-API-Framework-Render-Time']);
 
         foreach ($headers as $name => $value) {
             Lib\JsonFrontend::Page()->addHeaderToPage(
@@ -90,17 +144,6 @@ final class PageCache extends ClassMapper\AbstractClassMapper
         Lib\JsonFrontend::Page()->addRenderTimeToHeaders();
 
         return $this->contents;
-    }
-
-    public static function loadFromPage($page)
-    {
-        self::findSectionFields();
-        $db = SymphonyPDO\Loader::instance();
-        $query = $db->prepare(self::fetchSQL(self::findJoinTableFieldName('page') . ".value = :page") . " LIMIT 1");
-        $query->bindValue(':page', $page, \PDO::PARAM_STR);
-        $query->execute();
-
-        return (new SymphonyPDO\Lib\ResultIterator(__CLASS__, $query))->current();
     }
 
     public function expire()
