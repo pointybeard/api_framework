@@ -4,6 +4,26 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [1.0.0] - 2019-01-05
+#### Added
+- Added cacheable page type, caching option to preferences, and caching logic for GET requests
+- Added `CacheableJsonFrontEndPage` class
+- Added `convertEmptyElementsToString` transformer
+- Added `pointybeard/symphony-classmapper` and `pointybeard/symphony-pdo` libraries to `composer.json`
+- Added JSON encoding options to `JsonFrontend` class. This makes it easier to apply encoding changes across an entire API. Including two new methods: `getEncodingOptions()` and `setEncodingOptions()`
+- Added shutdown method to `ErrorHandler` so JSON error is rendered when there are unrecoverable errors (rather than error based on Symphony's HTML error template)
+- Added `loadCurrentFromPageAndQueryString()`, `hasExpired()`, `expire()`, `fetchExpired()`, `deleteExpired()`, `removeAPIFrameworkHeadersFromJsonString()`, and `removeAPIFrameworkHeadersFromArray()` methods to `PageCache` model
+- Added better error handling when setting `isCachable`
+
+#### Changed
+- Changed required versions of `symfony/http-foundation` and `justinrainbow/json-schema`
+- Removed code that stored `resolvedPage` data since causes issues with page params
+- No longer passing resolved page data to the contructor for `CacheableJsonFrontEndPage` and `JsonFrontEndPage`
+- Using `JsonFrontend` encoding options when generating responses
+
+#### Fixed
+- `JsonFrontend::display()` was failing if the page doesnt exist since `resolvedPage` is false
+
 ## [0.9.0] - 2018-09-27
 #### Added
 * Added extended FrontendPage class, `JsonFrontendPage` to handle json requests specifically.
@@ -72,7 +92,8 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 - Initial release
 - Added Symphony PDO as requirement
 
-[Unreleased]: https://github.com/pointybeard/api_framework/compare/v0.2.1...integration
+[Unreleased]: https://github.com/pointybeard/api_framework/compare/v1.0.0...integration
+[1.0.0]: https://github.com/pointybeard/api_framework/compare/v0.9.0...v1.0.0
 [0.9.0]: https://github.com/pointybeard/api_framework/compare/v0.2.1...v0.9.0
 [0.2.1]: https://github.com/pointybeard/api_framework/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0
