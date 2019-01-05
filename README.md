@@ -1,35 +1,59 @@
 # RESTful API Framework for Symphony CMS
 
-- Version: v0.9.0
-- Date: September 27th 2018
+- Version: v1.0.0
+- Date: January 5th 2019
 - [Release notes](https://github.com/pointybeard/api_framework/blob/master/CHANGELOG.md)
 - [GitHub repository](https://github.com/pointybeard/api_framework)
 
 JSON renderer and event driven controller interface for Symphony CMS designed to quickly build a RESTful APIs.
 
+- [Installation](#installation)
+	- [Dependencies](#dependencies)
+- [Usage](#usage)
+	- [JSON Renderer](#json-renderer)
+		- [Working with XML](#working-with-xml)
+			- [Arrays](#arrays)
+			- [Objects](#objects)
+		- [Dealing with Attributes](#dealing-with-attributes)
+		- [Headers](#headers)
+			- [X-API-Framework-Page-Renderer](#x-api-framework-page-renderer)
+			- [X-API-Framework-Render-Time](#x-api-framework-render-time)
+			- [X-API-Framework-Cache](#x-api-framework-cache)
+			- [X-API-Framework-Expired-Cache-Entries](#x-api-framework-expired-cache-entries)
+	- [Handling PUT, POST, PATCH and DELETE Requests](#handling-put-post-patch-and-delete-requests)
+	- [Validating with JSON Schema](#validating-with-json-schema)
+	- [Modifying rendered output with Transformers](#modifying-rendered-output-with-transformers)
+		- [@jsonForceArray](#jsonforcearray)
+		- [@convertEmptyElementsToString](#convertemptyelementstostring)
+	- [Writing Custom Transformers](#writing-custom-transformers)
+	- [Caching Page Output](#caching-page-output)
+		- [Removing Exired Cache Entries](#removing-exired-cache-entries)
+- [Support](#support)
+- [Contributing](#contributing)
+- [License](#license)
+
 ## Installation
 
 This is an extension for Symphony CMS. Add it to your `/extensions` folder in your Symphony CMS installation, then enable it though the interface.
 
-### Requirements
+### Dependencies
 
-This extension requires the **[Symfony HTTP Foundation](https://github.com/symfony/http-foundation)** (`symfony/http-foundation`) and **[JSON Schema for PHP](https://github.com/justinrainbow/json-schema)** (`justinrainbow/json-schema`) to be installed via Composer. Either require both of these in your main composer.json file, or run `composer install` on the `extension/api_framework` directory.
+This extension depends on the following Composer libraries:
 
-```json
-"require": {
-  "php": ">=5.6.6",
-  "symfony/http-foundation": "^3.0@dev",
-  "justinrainbow/json-schema": "^5.0@dev"
-}
-```
+- [Symfony HTTP Foundation](https://github.com/symfony/http-foundation)
+- [JSON Schema for PHP](https://github.com/justinrainbow/json-schema)
+- [Symphony Section Class Mapper](https://github.com/pointybeard/symphony-classmapper)
+- [SymphonyCMS PDO Connector](https://github.com/pointybeard/symphony-pdo)
+
+Run `composer install` on the `extension/api_framework` directory to install all of these.
 
 ## Usage
 
-This extension has two parts: The JSON renderer, and the Controller event.
+This extension has two parts: The [JSON Renderer](#json-renderer), and the [Controller event](#handling-put-post-patch-and-delete-requests).
 
 ### JSON Renderer
 
-Any page with a type `JSON` will trigger the new JSON renderer. This automatically converts your XML output into a JSON document. This includes output from any events.
+Any page with a type `JSON` will trigger the new JSON renderer. This automatically converts page XML output into a JSON document (this includes output from any events).
 
 #### Working with XML
 
@@ -43,8 +67,8 @@ XML:
 
 ```xml
 <data>
-	<array>1</array>
-	<array>2</array>
+    <array>1</array>
+    <array>2</array>
 </data>
 ```
 
@@ -52,7 +76,7 @@ JSON:
 
 ```json
 {
-	"array": [ "1", "2" ]
+    "array": [ "1", "2" ]
 }
 ```
 
@@ -118,11 +142,31 @@ Would result in the following JSON
 }
 ```
 
-### Attributes
+#### Dealing with Attributes
 
 Since JSON does not have a concept of attributes in the same way XML does, all attributes are discarded to ensure a consistent result. Consequently, the field name `@attributes` is reserved and cannot be used.
 
-### Controller Event
+#### Headers
+
+The JSON renderer adds two new headers to the page output:
+
+##### X-API-Framework-Page-Renderer
+
+This allows you to see which page renderer was invoked. Currently there are only two possiblities: `JsonFrontendPage`, and `CacheableJsonFrontendPage`
+
+##### X-API-Framework-Render-Time
+
+This header displays how long the page took to render, in milliseconds (ms).
+
+##### X-API-Framework-Cache
+
+Will be `hit` (if a valid cache entry was located and is being used for rendering) or `miss` (if there was no valid cache entry located), in which case a cache entry will be created.
+
+##### X-API-Framework-Expired-Cache-Entries
+
+If cache cleanup hasn't been disabled, this will show the number of expired cache entries that were deleted (see [Removing Exired Cache Entries](#removing-exired-cache-entries) for more details).
+
+### Handling PUT, POST, PATCH and DELETE Requests
 
 Use the `API Framework: Controller` event to listen for PUT, POST, PATCH and DELETE requests. To create your own controller, make a folder called `controllers` in your `/workspace` directory.
 
@@ -149,12 +193,11 @@ return $this->render($response, ['data' => 'some output']);
 
 A controllers class and file name are the same. Each controller must sit in a folder path that matches your page path.
 
-For example, if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`. It should be placed in `/workspace/controllers`. If that same page was then a child of a page called "parent", you must create a new folder called `parent` inside `/workspace/controllers`. Place `ControllerEntry` in this new folder. Be sure to adjust its namespace accordingly. **Note: Also remember to rebuild the API Framework composer autoloader (`composer dumpautoload`) whenever you move or create a new Controller.**
+For example, if you had a page called "entry", and you wanted to provide PUT, POST, PATCH and DELETE functionality, name your controller class "ControllerEntry" and the file `ControllerEntry.php`. It should be placed in `/workspace/controllers`. If that same page was then a child of a page called "parent", you must create a new folder called `parent` inside `/workspace/controllers`. Place `ControllerEntry` in this new folder. Be sure to adjust its namespace accordingly.
 
 Here is an example of a completed controller:
 
 ```php
-<?php
 
 namespace Symphony\ApiFramework\Controllers;
 
@@ -263,7 +306,7 @@ final class ControllerExample extends AbstractController{
 
 ### Validating with JSON Schema
 
-Incoming request and output response JSON can be validated against a [JSON Schema](http://json-schema.org/) document. This allows you validate input before it gets to your controllers, removing the need for a lot of sanity checking code, and validate controller output to ensure it is conforming to your API specifications.
+Incoming request and output response JSON can be validated against a [JSON Schema](http://json-schema.org/) document. This allows validation of input before it gets to your controllers, removing the need for a lot of sanity checking code, and validation of controller output to ensure it is conforming to your API specifications.
 
 **Note, JSON schema validation is not currently available for `GET` requests.**
 
@@ -310,11 +353,11 @@ Content-Type: application/json
 }
 ```
 
-### Transformers
+### Modifying rendered output with Transformers
 
-Prior to converting the XML into JSON, transformers are run over it. Transformers mutate the result based on a test and action.
+Prior to converting the XML into JSON, transformers are run. Transformers mutate the JSON result based on a test and action. The following built in transformers are available:
 
-`@jsonForceArray`
+#### @jsonForceArray
 
 This transformation will look for the attribute `jsonForceArray` on any XML elements. If it is set to "true", this transformation is applied. It relates to **[#issue-2](https://github.com/pointybeard/api_framework/issues/2)**. When there are multiple elements of the same name, for example 'entry', the JSON encode process will treat these as an array. E.g.
 
@@ -407,15 +450,75 @@ Which results in JSON
 }
 ```
 
-*Note that you should not set `jsonForceArray="true"` if there is more than one entry otherwise the JSON result will contain unnecessary nesting. Use logic in the XSLT to omit or toggle this attribute when there is more than a single entry.*
+*Note: `jsonForceArray="true"` should not be set if there is more than one entry otherwise the JSON result will contain unnecessary nesting. Use logic in the XSLT to omit or toggle this attribute when there is more than a single entry.*
 
-### Creating new Transformers
+#### @convertEmptyElementsToString
+
+This transformation will look for the `convertEmptyElementsToString` attribute on all XML elements. Should the value within that element be empty, i.e. `<someElement></someElement>`, then the output will be an empty string rather than an empty array.
+
+For example, XML such as this
+
+```XML
+<data>
+    <entry>
+        <name>My Entry</name>
+        <optionalField></optionalField>
+    </entry>
+    <entry>
+        <name>Another Entry</name>
+        <optionalField>Yes</optionalField>
+    </entry>
+</data>
+```
+
+gets converted to JSON like this
+
+```JSON
+{
+    "entry": [
+        {
+            "name": "My Entry",
+            "optionalField": [],
+        },
+        {
+            "name": "2",
+            "optionalField": "Yes",
+        }
+    ]
+}
+```
+
+Notice that `optionalField` in the first entry is an empty array (`[]`). If we set `convertEmptyElementsToString`, this will instead become an empty string (`""`). I.e.
+
+```XML
+<data>
+    <entry convertEmptyElementsToString="true">
+        <name>My Entry</name>
+        <optionalField></optionalField>
+    </entry>
+    ...
+</data>
+```
+
+instead becomes this
+
+```JSON
+{
+    "entry": [
+        {
+            "name": "My Entry",
+            "optionalField": "",
+        },
+        ...
+    ]
+}
+```
+
+### Writing Custom Transformers
 
 This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of `Lib\Transformer`. Use the `append()` method to add your own transformations. E.g.
 
 ```php
-<?php
-
 use Symphony\ApiFramework\Lib;
 
 Class extension_example extends Extension
@@ -449,6 +552,18 @@ Class extension_example extends Extension
   }
 }
 ```
+
+### Caching Page Output
+
+From version 1.0.0, it is possible to cache the output of GET requests. To do this, add a page type of `cacheable` to any page that requires caching. The length the cache remains valid can be set in `System > Preferences`.
+
+Cache entries can be viewed by going to `System > Page Cache` in the Symphony admin menu.
+
+#### Removing Exired Cache Entries
+
+By default, every time a cacheable page is rendered, the system looks for expired cache entries and removes them. This can add overhead to a busy site with many cached pages so it can be disabled in `System > Preferences`.
+
+It is possible to manually manage the page cache via `System > Page Cache` in the Symphony admin or via the terminal with the cache shell command. e.g. `symphony -c api_framework/cache -a clean` (requires the [Symphony Shell Extension](https://github.com/pointybeard/shell) to be installed).
 
 ## Support
 
