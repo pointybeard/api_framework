@@ -49,7 +49,8 @@ class JsonFrontend extends Symphony
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =
         (
-            $_SERVER['REQUEST_METHOD'] == 'GET'
+            \Extension_API_Framework::isCacheEnabled()
+            && $_SERVER['REQUEST_METHOD'] == 'GET'
             && is_array($resolvedPage)
             && in_array('cacheable', $resolvedPage['type'])
         );
