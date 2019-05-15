@@ -1,10 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Symphony\ApiFramework\Lib\Traits;
+namespace Symphony\ApiFramework\ApiFramework\Traits;
 
 use JsonSchema;
 use Symfony\Component\HttpFoundation\Request;
-use Symphony\ApiFramework\Lib;
+use Symphony\ApiFramework\ApiFramework;
 
 /**
  * This trait will help resolve schema for a particular endpoint.
@@ -13,10 +13,10 @@ trait hasEndpointSchemaTrait
 {
     /**
      * This will return any JSON schemas for the endpoint
-     * @return array           An array containing request and response schemas
+     * @return stdClass          An object containing request and response schemas
      *                           path if they exist.
      */
-    public function schemas($method)
+    public function schemas(string $method) : \stdClass
     {
 
         // Remove the common namepsace
@@ -66,11 +66,11 @@ trait hasEndpointSchemaTrait
      * @return object         An stdClass object representation of the inputted
      *                           data
      *
-     * @throws Lib\Exceptions\SchemaValidationFailedException
+     * @throwsApiFramework\Exceptions\SchemaValidationFailedException
      *
      * @usedby eventController
      */
-    public function validate($data, $schema = null)
+    public function validate($data, string $schema = null) : \stdClass
     {
 
         // We need to convert the entire data array into an object. Quick way
@@ -106,7 +106,7 @@ trait hasEndpointSchemaTrait
                 }
 
                 // Now throw up an exception along with the processed errors
-                throw new Lib\Exceptions\SchemaValidationFailedException($errors, $schema, $data);
+                throw new ApiFramework\Exceptions\SchemaValidationFailedException($errors, $schema, $data);
             }
         }
 

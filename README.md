@@ -1,49 +1,52 @@
 # RESTful API Framework for Symphony CMS
 
-- Version: v1.0.0
-- Date: January 5th 2019
-- [Release notes](https://github.com/pointybeard/api_framework/blob/master/CHANGELOG.md)
-- [GitHub repository](https://github.com/pointybeard/api_framework)
+-   Version: v1.1.0
+-   Date: May 11th 2019
+-   [Release notes](https://github.com/pointybeard/api_framework/blob/master/CHANGELOG.md)
+-   [GitHub repository](https://github.com/pointybeard/api_framework)
 
-JSON renderer and event driven controller interface for Symphony CMS designed to quickly build a RESTful APIs.
+JSON renderer and event driven controller interface for Symphony CMS which is designed to help rapidly prototype and build RESTful APIs.
 
-- [Installation](#installation)
-	- [Dependencies](#dependencies)
-- [Usage](#usage)
-	- [JSON Renderer](#json-renderer)
-		- [Working with XML](#working-with-xml)
-			- [Arrays](#arrays)
-			- [Objects](#objects)
-		- [Dealing with Attributes](#dealing-with-attributes)
-		- [Headers](#headers)
-			- [X-API-Framework-Page-Renderer](#x-api-framework-page-renderer)
-			- [X-API-Framework-Render-Time](#x-api-framework-render-time)
-			- [X-API-Framework-Cache](#x-api-framework-cache)
-			- [X-API-Framework-Expired-Cache-Entries](#x-api-framework-expired-cache-entries)
-	- [Handling PUT, POST, PATCH and DELETE Requests](#handling-put-post-patch-and-delete-requests)
-	- [Validating with JSON Schema](#validating-with-json-schema)
-	- [Modifying rendered output with Transformers](#modifying-rendered-output-with-transformers)
-		- [@jsonForceArray](#jsonforcearray)
-		- [@convertEmptyElementsToString](#convertemptyelementstostring)
-	- [Writing Custom Transformers](#writing-custom-transformers)
-	- [Caching Page Output](#caching-page-output)
-		- [Removing Exired Cache Entries](#removing-exired-cache-entries)
-- [Support](#support)
-- [Contributing](#contributing)
-- [License](#license)
+-   [Installation](#installation)
+    -   [Dependencies](#dependencies)
+-   [Usage](#usage)
+    -   [JSON Renderer](#json-renderer)
+        -   [Working with XML](#working-with-xml)
+            -   [Arrays](#arrays)
+            -   [Objects](#objects)
+        -   [Dealing with Attributes](#dealing-with-attributes)
+        -   [Headers](#headers)
+            -   [X-API-Framework-Page-Renderer](#x-api-framework-page-renderer)
+            -   [X-API-Framework-Render-Time](#x-api-framework-render-time)
+            -   [X-API-Framework-Cache](#x-api-framework-cache)
+            -   [X-API-Framework-Expired-Cache-Entries](#x-api-framework-expired-cache-entries)
+    -   [Handling PUT, POST, PATCH and DELETE Requests](#handling-put-post-patch-and-delete-requests)
+    -   [Validating with JSON Schema](#validating-with-json-schema)
+    -   [Modifying rendered output with Transformers](#modifying-rendered-output-with-transformers)
+        -   [@jsonForceArray](#jsonforcearray)
+        -   [@convertEmptyElementsToString](#convertemptyelementstostring)
+    -   [Writing Custom Transformers](#writing-custom-transformers)
+    -   [Caching Page Output](#caching-page-output)
+        -   [Removing Exired Cache Entries](#removing-exired-cache-entries)
+-   [Support](#support)
+-   [Contributing](#contributing)
+-   [License](#license)
 
 ## Installation
 
 This is an extension for Symphony CMS. Add it to your `/extensions` folder in your Symphony CMS installation, then enable it though the interface.
 
-### Dependencies
+### Requirements
 
-This extension depends on the following Composer libraries:
+This extension requires PHP 7.3 or greater. For use with earlier version of PHP, please use v1.0.0 of this extension instead (`git clone -b1.0.0 https://github.com/pointybeard/api_framework.git`).
 
-- [Symfony HTTP Foundation](https://github.com/symfony/http-foundation)
-- [JSON Schema for PHP](https://github.com/justinrainbow/json-schema)
-- [Symphony Section Class Mapper](https://github.com/pointybeard/symphony-classmapper)
-- [SymphonyCMS PDO Connector](https://github.com/pointybeard/symphony-pdo)
+This extension also depends on the following Composer libraries:
+
+-   [Symfony HTTP Foundation](https://github.com/symfony/http-foundation)
+-   [JSON Schema for PHP](https://github.com/justinrainbow/json-schema)
+-   [Symphony Section Class Mapper](https://github.com/pointybeard/symphony-classmapper)
+-   [SymphonyCMS PDO Connector](https://github.com/pointybeard/symphony-pdo)
+-   [PHP Helpers: Array Functions](https://github.com/pointybeard/helpers-functions-arrays)
 
 Run `composer install` on the `extension/api_framework` directory to install all of these.
 
@@ -203,9 +206,9 @@ namespace Symphony\ApiFramework\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symphony\ApiFramework\Lib;
-use Symphony\ApiFramework\Lib\AbstractController;
-use Symphony\ApiFramework\Lib\Traits;
+use Symphony\ApiFramework\ApiFramework;
+use Symphony\ApiFramework\ApiFrameworkAbstractController;
+use Symphony\ApiFramework\ApiFramework\Traits;
 
 final class ControllerExample extends AbstractController{
 
@@ -244,7 +247,7 @@ final class ControllerExample extends AbstractController{
 
     public function put(Request $request, Response $response)
     {
-        $someEntryId = (int)Lib\JsonFrontend::instance()
+        $someEntryId = (intApiFramework\JsonFrontend::instance()
             ->Page()
             ->Params()['some-id'];
 
@@ -319,9 +322,9 @@ use Symphony\ApiFramework;
 
 ...
 
-final class ControllerSchema extends Lib\AuthenticatedAbstractController Implements ApiFramework\Lib\Interfaces\JsonSchemaValidationInterface {
+final class ControllerSchema extends ApiFramework\AuthenticatedAbstractController Implements ApiFramework\ApiFramework\Interfaces\JsonSchemaValidationInterface {
 
-    use ApiFramework\Lib\Traits\hasEndpointSchemaTrait;
+    use ApiFramework\ApiFramework\Traits\hasEndpointSchemaTrait;
 
 ```
 
@@ -516,10 +519,10 @@ instead becomes this
 
 ### Writing Custom Transformers
 
-This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of `Lib\Transformer`. Use the `append()` method to add your own transformations. E.g.
+This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of ApiFramework\Transformer`. Use the `append()` method to add your own transformations. E.g.
 
 ```php
-use Symphony\ApiFramework\Lib;
+use Symphony\ApiFramework\ApiFramework;
 
 Class extension_example extends Extension
 {
@@ -534,7 +537,7 @@ Class extension_example extends Extension
   public function appendTransformations($context) {
 
     $context['transformer']->append(
-      new Lib\Transformation(
+      new ApiFramework\Transformation(
 
         // This is the test. If it returns true, the action will be run
         function(array $input, array $attributes=[]){
@@ -563,7 +566,7 @@ Cache entries can be viewed by going to `System > Page Cache` in the Symphony ad
 
 By default, every time a cacheable page is rendered, the system looks for expired cache entries and removes them. This can add overhead to a busy site with many cached pages so it can be disabled in `System > Preferences`.
 
-It is possible to manually manage the page cache via `System > Page Cache` in the Symphony admin or via the terminal with the cache shell command. e.g. `symphony -c api_framework/cache -a clean` (requires the [Symphony Shell Extension](https://github.com/pointybeard/shell) to be installed).
+It is possible to manually manage the page cache via `System > Page Cache` in the Symphony admin or via the terminal with the cache shell command. e.g. `symphony api_framework cache clean` (requires the [Symphony Console Extension](https://github.com/pointybeard/console) to be installed).
 
 ## Support
 

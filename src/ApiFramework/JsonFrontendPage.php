@@ -1,5 +1,5 @@
-<?php
-namespace Symphony\ApiFramework\Lib;
+<?php declare(strict_types=1);
+namespace Symphony\ApiFramework\ApiFramework;
 
 /**
  * This extends the core FrontendPage class of Symphony to give us a vector to
@@ -23,12 +23,12 @@ class JsonFrontendPage extends \FrontendPage
     }
 
     // Accessor method for rendering the page headers.
-    public function renderHeaders()
+    public function renderHeaders() : void
     {
         \Page::__renderHeaders();
     }
 
-    public function addRenderTimeToHeaders()
+    public function addRenderTimeToHeaders() : void
     {
         \Profiler::instance()->sample('API JSON Rendering complete.');
 
@@ -43,7 +43,7 @@ class JsonFrontendPage extends \FrontendPage
         );
     }
 
-    public function generate($page=null)
+    public function generate($page=null) : string
     {
         $output = parent::generate($page);
         cleanup_session_cookies();
@@ -65,9 +65,9 @@ class JsonFrontendPage extends \FrontendPage
                  * Allow other extensions to add their own transformers
                  */
                 \Symphony::ExtensionManager()->notifyMembers(
-                'APIFrameworkJSONRendererAppendTransformations',
-                '/frontend/',
-                ['transformer' => &$transformer]
+                    'APIFrameworkJSONRendererAppendTransformations',
+                    '/frontend/',
+                    ['transformer' => &$transformer]
               );
 
                 // Apply transformations
@@ -75,8 +75,8 @@ class JsonFrontendPage extends \FrontendPage
 
                 // Now put the array through a json_encode
                 $output = json_encode(
-                  $outputArray,
-                  JsonFrontend::instance()->getEncodingOptions()
+                    $outputArray,
+                    JsonFrontend::instance()->getEncodingOptions()
               );
 
                 $this->addRenderTimeToHeaders();

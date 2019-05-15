@@ -1,12 +1,12 @@
-<?php
-namespace Symphony\ApiFramework\Lib;
+<?php declare(strict_types=1);
+namespace Symphony\ApiFramework\ApiFramework;
 
 /**
  * This extends the JsonFrontendPage class, adding caching features
  */
 class CacheableJsonFrontendPage extends JsonFrontendPage
 {
-    public function generate($page = null)
+    public function generate($page = null) : string
     {
 
         // Check if "Disable Cache Cleanup" has been set. If not, go ahead and

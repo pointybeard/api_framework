@@ -1,23 +1,7 @@
-<?php
-namespace Symphony\ApiFramework\Lib;
+<?php declare(strict_types=1);
+namespace Symphony\ApiFramework\ApiFramework;
 
-function array_is_assoc(array $input)
-{
-    return array_keys($input) !== range(0, count($input) - 1);
-}
-
-function array_remove_empty($haystack)
-{
-    foreach ($haystack as $key => $value) {
-        if (is_array($value)) {
-            $haystack[$key] = array_remove_empty($haystack[$key]);
-        }
-        if (empty($haystack[$key])) {
-            unset($haystack[$key]);
-        }
-    }
-    return $haystack;
-}
+use pointybeard\Helpers\Functions\Arrays;
 
 /**
  * Transformer
@@ -27,18 +11,18 @@ class Transformer
 {
     private $transformations = [];
 
-    public function append(Transformation $transformation)
+    public function append(Transformation $transformation) : self
     {
         $this->transformations[] = $transformation;
         return $this;
     }
 
-    public function transformations()
+    public function transformations() : array
     {
         return $this->transformations;
     }
 
-    public function run(array $input)
+    public function run(array $input) : array
     {
         $totalTransformantionCount = count($this->transformations);
         $preserveAttributes = true;
@@ -57,7 +41,7 @@ class Transformer
         return $input;
     }
 
-    private function recursiveApplyTransformationToArray(array $input, Transformation $transformation, $preserveAttributes = true)
+    private function recursiveApplyTransformationToArray(array $input, Transformation $transformation, bool $preserveAttributes = true) : array
     {
         $result = [];
 
@@ -73,12 +57,12 @@ class Transformer
         }
 
         // Are we dealing with an associative array, or a sequential indexed array
-        $isAssoc = array_is_assoc($input);
+        $isAssoc = Arrays\array_is_assoc($input);
 
         // Iterate over each element in the array and decide if we need to move deeper
         foreach ($input as $key => $value) {
             $next = (
-            is_array($value)
+                is_array($value)
             // It's an array, so go deeper.
             ? $this->recursiveApplyTransformationToArray($value, $transformation, $preserveAttributes)
             // Non-array, just append it back in and return

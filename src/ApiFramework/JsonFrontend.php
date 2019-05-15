@@ -1,5 +1,5 @@
-<?php
-namespace Symphony\ApiFramework\Lib;
+<?php declare(strict_types=1);
+namespace Symphony\ApiFramework\ApiFramework;
 
 use \Symphony;
 
@@ -18,7 +18,7 @@ class JsonFrontend extends Symphony
     protected $encodingOptions = self::DEFAULT_ENCODING_OPTIONS;
 
     /**
-     * An instance of the ApiFramework\Lib\JsonFrontendPage class
+     * An instance of the ApiFramework\ApiFrameworkJsonFrontendPage class
      * @var JsonFrontendPage
      */
     protected static $_page;
@@ -42,7 +42,7 @@ class JsonFrontend extends Symphony
      * Code duplication from core Frontend class, however it returns an
      * instance of JsonFrontendPage rather than FrontendPage.
      */
-    public function display($page)
+    public function display(string $page) : string
     {
         $resolvedPage = (new \FrontendPage)->resolvePage($page);
 
@@ -75,7 +75,7 @@ class JsonFrontend extends Symphony
      * Code duplication from core Frontend class, however it returns an
      * instance of self rather than hard coding the class name.
      */
-    public static function instance()
+    public static function instance() : self
     {
         if (!(self::$_instance instanceof self)) {
             self::$_instance = new self;
@@ -95,7 +95,7 @@ class JsonFrontend extends Symphony
     /**
      * Code duplication from core Frontend class.
      */
-    public static function isLoggedIn()
+    public static function isLoggedIn() : bool
     {
         if (isset($_REQUEST['auth-token']) && $_REQUEST['auth-token'] && strlen($_REQUEST['auth-token']) == 8) {
             return self::loginFromToken($_REQUEST['auth-token']);
@@ -104,12 +104,12 @@ class JsonFrontend extends Symphony
         return Symphony::isLoggedIn();
     }
 
-    public function getEncodingOptions()
+    public function getEncodingOptions() : int
     {
         return $this->encodingOptions;
     }
 
-    public function setEncodingOptions($options)
+    public function setEncodingOptions(int $options) : void
     {
         $this->encodingOptions = $options;
     }

@@ -1,43 +1,39 @@
-<?php
-namespace Symphony\ApiFramework\Lib;
+<?php declare(strict_types=1);
+namespace Symphony\ApiFramework\ApiFramework;
 
-use \Exception;
-use \GenericExceptionHandler;
-
-class ExceptionHandler extends GenericExceptionHandler
+class ExceptionHandler extends \GenericExceptionHandler
 {
     private static $debug;
 
-    public static function initialise($debug=false)
+    public static function initialise(bool $debug=false) : void
     {
         self::$enabled = true;
         self::$debug = $debug;
         restore_exception_handler();
         set_exception_handler(array(__CLASS__, 'handler'));
-        //register_shutdown_function(array(__CLASS__, 'shutdown'));
     }
 
-    public static function handler($e)
+    public static function handler(\Throwable $ex) : void
     {
         try {
             $class = __CLASS__;
-            $exception_type = get_class($e);
+            $exception_type = get_class($ex);
 
             $handler = __NAMESPACE__ . "\Exceptions\{$exception_type}Handler";
             if (class_exists($handler) && method_exists($handler, 'render')) {
                 $class = $handler;
             }
 
-            echo call_user_func(array($class, 'render'), $e);
+            echo call_user_func(array($class, 'render'), $ex);
             exit;
-        } catch (Exception $e) {
+        } catch (\Exception $ex) {
             echo 'Looks like the Exception handler crapped out';
-            print_r($e);
+            print_r($ex);
             exit;
         }
     }
 
-    private static function getCodeTrace($trace)
+    private static function getCodeTrace(array $trace) : array
     {
         $result = [];
         foreach ($trace as $t) {
@@ -53,7 +49,7 @@ class ExceptionHandler extends GenericExceptionHandler
         return $result;
     }
 
-    private static function getDatabaseTrace($queries)
+    private static function getDatabaseTrace(array $queries) : array
     {
         $result = [];
         foreach ($queries as $query) {
@@ -66,25 +62,25 @@ class ExceptionHandler extends GenericExceptionHandler
         return $result;
     }
 
-    public static function render($e)
+    public static function render(\Throwable $ex) : void
     {
         header("Content-Type: application/json");
 
         // Build the JSON
         $output = [
             "status" => 500,
-            "error" => $e->getCode(),
-            "message" => $e->getMessage()
+            "error" => $ex->getCode(),
+            "message" => $ex->getMessage()
         ];
 
         // Check for a custom status code
         if ($e instanceof AbstractApiException) {
-            $output['status'] = $e->getHttpStatusCode();
+            $output['status'] = $ex->getHttpStatusCode();
         }
 
         // Let the exception modify the output if it wants to.
-        if (in_array("Symphony\ApiFramework\Lib\Interfaces\ModifiesExceptionOutputInterface", class_implements($e))) {
-            $output = $e->modifyOutput($output);
+        if (in_array("Symphony\ApiFramework\ApiFramework\Interfaces\ModifiesExceptionOutputInterface", class_implements($ex))) {
+            $output = $ex->modifyOutput($output);
         }
 
         http_response_code($output['status']);
@@ -95,16 +91,16 @@ class ExceptionHandler extends GenericExceptionHandler
             }
 
             $output['debug'] = [
-                'file' => $e->getFile(),
-                'line' => $e->getLine(),
+                'file' => $ex->getFile(),
+                'line' => $ex->getLine(),
                 'severity' => (
-                    $e instanceof Lib\ErrorException
-                        ? \GenericErrorHandler::$errorTypeStrings[$e->getSeverity()]
+                    $e instanceof ApiFramework\ErrorException
+                        ? \GenericErrorHandler::$errorTypeStrings[$ex->getSeverity()]
                         : 'Fatal Error'
                 ),
                 'code_trace' => (
-                    count($e->getTrace()) > 0
-                        ? self::getCodeTrace($e->getTrace())
+                    count($ex->getTrace()) > 0
+                        ? self::getCodeTrace($ex->getTrace())
                         : null
                 ),
                 'database_trace' => self::getDatabaseTrace($databaseDebug),
@@ -114,10 +110,10 @@ class ExceptionHandler extends GenericExceptionHandler
             // since that is what is most likely failing.
             if (
                 $e instanceof \SymphonyErrorPage &&
-                $e->getTemplateName() == 'xslt' &&
-                isset($e->getAdditional()->proc)
+                $ex->getTemplateName() == 'xslt' &&
+                isset($ex->getAdditional()->proc)
             ) {
-                $err = $e->getAdditional()->proc->getError(false, true);
+                $err = $ex->getAdditional()->proc->getError(false, true);
                 if (isset($err['value']) && isset($err['value']['context'])) {
                     $xml = $err['value']['context'];
 

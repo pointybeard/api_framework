@@ -1,15 +1,15 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Symphony\ApiFramework\Lib\Exceptions;
+namespace Symphony\ApiFramework\ApiFramework\Exceptions;
 
-use Symphony\ApiFramework\Lib;
-use Symphony\ApiFramework\Lib\Interfaces;
+use Symphony\ApiFramework\ApiFramework;
+use Symphony\ApiFramework\ApiFramework\Interfaces;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @thrownby Symphony\ApiFramework\Lib\Traits\hasEndpointSchemaTrait
+ * @thrownby Symphony\ApiFramework\ApiFramework\Traits\hasEndpointSchemaTrait
  */
-class SchemaValidationFailedException extends Lib\AbstractApiException implements Interfaces\ModifiesExceptionOutputInterface
+class SchemaValidationFailedException extends ApiFramework\AbstractApiException implements Interfaces\ModifiesExceptionOutputInterface
 {
 
     /**
@@ -31,7 +31,7 @@ class SchemaValidationFailedException extends Lib\AbstractApiException implement
      */
     private $dataProvided = null;
 
-    public function __construct($schemaErrors, $schemaPath, $dataProvided, $code = 0, Exception $previous = null)
+    public function __construct(array $schemaErrors, string $schemaPath, $dataProvided, int $code = 0, Exception $previous = null)
     {
         $this->schemaErrors = $schemaErrors;
         $this->schemaPath = $schemaPath;
@@ -49,7 +49,7 @@ class SchemaValidationFailedException extends Lib\AbstractApiException implement
      * This exception needs to inject the schema errors into the final
      * API error output
      */
-    public function modifyOutput(array $output)
+    public function modifyOutput(array $output) : array
     {
         // We want to see the schema validation errors in the output
         $output['error'] = $this->schemaErrors;

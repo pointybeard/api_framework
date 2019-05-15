@@ -1,5 +1,5 @@
-<?php
-use Symphony\ApiFramework\Lib;
+<?php declare(strict_types=1);
+use Symphony\ApiFramework\ApiFramework;
 
 class TransformerTest extends \PHPUnit_Framework_TestCase
 {
@@ -9,8 +9,8 @@ class TransformerTest extends \PHPUnit_Framework_TestCase
      **/
     public function testValidTraformationObjectCreation()
     {
-        $t = new Lib\Transformer();
-        $this->assertTrue(($t instanceof Lib\Transformer));
+        $t = new ApiFramework\Transformer();
+        $this->assertTrue(($t instanceof ApiFramework\Transformer));
     }
 
     /**
@@ -26,8 +26,8 @@ class TransformerTest extends \PHPUnit_Framework_TestCase
             return $input;
         };
 
-        $t = new Lib\Transformation(
-          $test,
+        $t = new ApiFramework\Transformation(
+            $test,
             $action
         );
 
@@ -41,10 +41,10 @@ class TransformerTest extends \PHPUnit_Framework_TestCase
     /**
      * @depends testValidCreateTransformation
      */
-    public function testAppendTransformation(Lib\Transformation $t)
+    public function testAppendTransformation(ApiFramework\Transformation $t)
     {
-        $transformer = new Lib\Transformer();
-        $this->assertTrue($transformer->append($t) instanceof Lib\Transformer);
+        $transformer = new ApiFramework\Transformer();
+        $this->assertTrue($transformer->append($t) instanceof ApiFramework\Transformer);
         $this->assertEquals(count($transformer->transformations()), 1);
     }
 }

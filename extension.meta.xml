@@ -1,66 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension id="api_framework" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
     <name>API Framework</name>
-    <description>JSON renderer and API framework for Symphony CMS</description>
+    <description>JSON renderer and event driven controller interface for Symphony CMS which is designed to help rapidly prototype and build RESTful APIs.</description>
     <repo type="github">https://github.com/pointybeard/api_framework</repo>
     <types>
         <type>System</type>
     </types>
     <authors>
         <author>
-            <name github="pointybeard" symphony="alannah">Alannah Kearney</name>
+            <name github="pointybeard">Alannah Kearney</name>
             <website>http://alannahkearney.com</website>
         </author>
     </authors>
     <releases>
+        <release version="1.1.0" date="2019-05-11" min="2.7">
+            https://github.com/pointybeard/api_framework/compare/1.0.0...1.1.0
+        </release>
         <release version="1.0.0" date="2019-01-05" min="2.6.7">
-            
+            https://github.com/pointybeard/api_framework/compare/v0.9.0...1.0.0
         </release>
         <release version="0.9.0" date="2018-09-27" min="2.6.7">
-            #### Added
-            * Added extended FrontendPage class, `JsonFrontendPage` to handle json requests specifically.
-            * Added `JsonRequest` and `RequestJsonInvalidException`. They are used to grab the incoming json data. Also updated controller event to use `JsonRequest`.
-            * Added logic that allows pages without JSON content to still reach the controller (Fixes #20)
-            * JSON Schema validation
-
-            #### Fixes
-            * Fixed the recursive method `recursiveApplyTransformationToArray()`. It had a logic bug that meant the result from lower levels was not propagated up the chain. Additionally, the `@attributes` array was not being dealt with consistently. The last transformer to run will trigger a cleanup which removes the `@attributes` array. (#15, #16, and #17)
-            * Fixed Exception namespace in `__construct()` function signature (Fixes #19).
-            * Added `JSON_UNESCAPED_SLASHES` flag when generating output from ExceptionHandler (Fixes #22)
-
-            #### Changed
-            * Updated controller event to pass Request object when calling execute method of a Controller object.
-            * Updated README for fixes #15 #16 and #17.
-            * Updated the json renderer to use `JsonFrontend` instead of the core Frontend class.
-            * Changed abstract method `execute()` to include a Request object, allowing controllers to manipulate the Request.
-            * Changed the way a controller path is discovered by using `current-page` and `parent-path` instead of `current-path`. (#14)
-            * Removed `boilerplate-xsl` feature. This is no longer required as `?debug` now works correctly. (#12)
-            * Using `Lib\JsonFrontend` instead of `Frontend`. `JsonFrontend` no longer extends the `Frontend` class.
-            * Minor improvements to how error handling works. Subverting some behaviour of the `FrontendPage` class by skipping it's constructor. `JsonFrontend` will force enable the `GenericExceptionHandler`
+            https://github.com/pointybeard/api_framework/compare/v0.2.1...v0.9.0
         </release>
         <release version="0.2.1" date="2016-06-17" min="2.6.7">
-            - Added `JSON_UNESCAPED_SLASHES` to avoid unnecessary escaping of slashes in output. (#8)
-            - Added new abstract extension `AbstractApiException` which is used by `ControllerNotFoundException` and `MethodNotAllowedException`.
-            - Updated core controller event based on changes to `ControllerNotFoundException` and `MethodNotAllowedException`
-            - Updated `ControllerNotFoundException` and `MethodNotAllowedException` to extend the new `AbstractApiException` class
-            - Updated `ExceptionHandler` to check for overloaded http response code. Calls the method `getHttpStatusCode()` if it is available
-            - Removed the use clause for Symphony as it is redundant and causes a PHP warning
-            - Using API Framework exception and error handlers instead of Symphony built in. (#9)
+            https://github.com/pointybeard/api_framework/compare/v0.2.0...v0.2.1
         </release>
         <release version="0.2.0" date="2016-05-03" min="2.6.7">
-            - Transformer and Transformation classes.
-            - Added APIFrameworkJSONRendererAppendTransformations delegate
-            - Added phpunit to composer require-dev
-            - Added unit tests for Transformation code
-            - Controller names are based on full page path (#5)
-            - Using PSR-4 folder structure for controllers. Controllers must have a namespace. (#7)
-            - Checking that controller actually exists before trying to include it (#6)
-            - Symphony PDO is not longer a Composer requirement as it is not used
+            https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0
         </release>
         <release version="0.1.1" date="2016-04-25" min="2.6.7">
-            - Added CONTRIBUTING.md and CHANGELOG.md
-            - Improvements to the example controller code in README.md
-            - Extension driver had include class name which meant could not install
+            https://github.com/pointybeard/api_framework/compare/v0.1.0...v0.1.1
         </release>
         <release version="0.1.0" date="2015-09-13" min="2.6">
             - Initial release

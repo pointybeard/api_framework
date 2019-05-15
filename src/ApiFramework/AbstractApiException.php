@@ -1,17 +1,17 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Symphony\ApiFramework\Lib;
+namespace Symphony\ApiFramework\ApiFramework;
 
 abstract class AbstractApiException extends \Exception
 {
     private $status;
 
-    public function getHttpStatusCode()
+    public function getHttpStatusCode() : string
     {
         return $this->status;
     }
 
-    public function __construct($status, $message, $code = 0, \Exception $previous = null)
+    public function __construct(int $status, string $message, int $code = 0, \Exception $previous = null)
     {
         // Save the status code
         $this->status = $status;

@@ -1,8 +1,8 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Symphony\ApiFramework\Lib;
+namespace Symphony\ApiFramework\ApiFramework;
 
-use Symphony\ApiFramework\Lib\Interfaces;
+use Symphony\ApiFramework\ApiFramework\Interfaces;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -11,9 +11,7 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class AbstractController implements Interfaces\ControllerInterface
 {
-    abstract public function execute(Request $request);
-
-    public function render(Response $response, array $data)
+    public function render(Response $response, array $data) : Response
     {
         $response->setData($data);
         return $response;

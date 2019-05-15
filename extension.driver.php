@@ -1,8 +1,10 @@
-<?php
+<?php declare(strict_types=1);
 
 require_once __DIR__ . '/vendor/autoload.php';
 
-use Symphony\ApiFramework\Lib;
+use Symphony\ApiFramework\ApiFramework;
+use pointybeard\Helpers\Functions\Arrays;
+use pointybeard\Symphony\SectionBuilder;
 
 // This file is included automatically in the composer autoloader, however,
 // Symphony might try to include it again which would cause a fatal error.
@@ -18,35 +20,62 @@ if (!class_exists("\\Extension_API_Framework")) {
         const CACHE_ENABLED = 'yes';
         const CACHE_DISABLED = 'no';
 
-        public function getSubscribedDelegates()
+        public function install()
+        {
+            $this->createCacheSection();
+            return true;
+        }
+
+        public function update($previousVersion = false) : bool
+        {
+            $this->createCacheSection();
+            return true;
+        }
+
+        private function createCacheSection() : void
+        {
+            $pageCacheSection = SectionBuilder\Lib\Models\Section::loadFromHandle(
+                "page-cache"
+            );
+            if (!($pageCacheSection instanceof SectionBuilder\Lib\Models\Section)) {
+                SectionBuilder\Lib\Import::fromJsonFile(
+                    __DIR__ . '/src/Install/section-page_cache.json',
+                    SectionBuilder\Lib\Import::FLAG_SKIP_ORDERING
+                );
+            }
+
+            return;
+        }
+
+        public function getSubscribedDelegates() : array
         {
             return [
-            [
-                'page'      => '/all/',
-                'delegate'  => 'ModifySymphonyLauncher',
-                'callback'  => 'setJSONLauncher'
-            ],
-            [
-                'page'      => '/frontend/',
-                'delegate'  => 'APIFrameworkJSONRendererAppendTransformations',
-                'callback'  => 'appendTransformations'
-            ],
-            [
-                'page'      => '/system/preferences/',
-                'delegate'  => 'AddCustomPreferenceFieldsets',
-                'callback'  => 'appendPreferences'
-            ],
-            [
-                'page'      => '/system/preferences/',
-                'delegate'  => 'Save',
-                'callback'  => 'savePreferences'
-            ],
-            [
-                'page'      => '/blueprints/pages/',
-                'delegate'  => 'AppendPageContent',
-                'callback'  => 'appendCacheablePageType'
-            ],
-        ];
+                [
+                    'page'      => '/all/',
+                    'delegate'  => 'ModifySymphonyLauncher',
+                    'callback'  => 'setJSONLauncher'
+                ],
+                [
+                    'page'      => '/frontend/',
+                    'delegate'  => 'APIFrameworkJSONRendererAppendTransformations',
+                    'callback'  => 'appendTransformations'
+                ],
+                [
+                    'page'      => '/system/preferences/',
+                    'delegate'  => 'AddCustomPreferenceFieldsets',
+                    'callback'  => 'appendPreferences'
+                ],
+                [
+                    'page'      => '/system/preferences/',
+                    'delegate'  => 'Save',
+                    'callback'  => 'savePreferences'
+                ],
+                [
+                    'page'      => '/blueprints/pages/',
+                    'delegate'  => 'AppendPageContent',
+                    'callback'  => 'appendCacheablePageType'
+                ],
+            ];
         }
 
         /**
@@ -55,7 +84,7 @@ if (!class_exists("\\Extension_API_Framework")) {
          * @param array $context
          *  delegate context
          */
-        public function appendPreferences($context)
+        public function appendPreferences(array &$context) : void
         {
             // Create preference group
             $group = new XMLElement('fieldset');
@@ -79,10 +108,10 @@ if (!class_exists("\\Extension_API_Framework")) {
             // Cache lifetime
             $label = Widget::Label();
             $input = Widget::Input(
-            'settings[api_framework][cache_lifetime]',
-            self::getCacheLifetime(),
-            null,
-            ['size' => '6']
+                'settings[api_framework][cache_lifetime]',
+                self::getCacheLifetime(),
+                null,
+                ['size' => '6']
         );
             $selected = self::getCacheDuration();
             $options = [
@@ -139,7 +168,7 @@ if (!class_exists("\\Extension_API_Framework")) {
          * @param array $context
          *  delegate context
          */
-        public function savePreferences($context)
+        public function savePreferences(array &$context) : void
         {
             if (!is_array($context['settings'])) {
                 // Disable caching by default
@@ -169,10 +198,10 @@ if (!class_exists("\\Extension_API_Framework")) {
         /**
          * Check if cache is enabled
          */
-        public static function isCacheEnabled()
+        public static function isCacheEnabled() : bool
         {
             return
-            strtolower(Symphony::Configuration()->get('enable_caching', 'api_framework')) == self::CACHE_ENABLED
+            Symphony::Configuration()->get('enable_caching', 'api_framework') == self::CACHE_ENABLED
                 ? true
                 : false
         ;
@@ -181,10 +210,10 @@ if (!class_exists("\\Extension_API_Framework")) {
         /**
          * Check if cache cleanup is enabled
          */
-        public static function isCacheCleanupEnabled()
+        public static function isCacheCleanupEnabled() : bool
         {
             return
-            strtolower(Symphony::Configuration()->get('cache_disable_cleanup', 'api_framework')) != 'yes'
+            Symphony::Configuration()->get('cache_disable_cleanup', 'api_framework') != 'yes'
                 ? true
                 : false
         ;
@@ -193,7 +222,7 @@ if (!class_exists("\\Extension_API_Framework")) {
         /**
          * Convienence method for getting the cache_lifetime setting
          */
-        public static function getCacheLifetime()
+        public static function getCacheLifetime() : ?int
         {
             return (int)Symphony::Configuration()->get('cache_lifetime', 'api_framework');
         }
@@ -201,7 +230,7 @@ if (!class_exists("\\Extension_API_Framework")) {
         /**
          * Convienence method for getting the cache_duration setting
          */
-        public static function getCacheDuration()
+        public static function getCacheDuration() : ?string
         {
             return Symphony::Configuration()->get('cache_duration', 'api_framework');
         }
@@ -211,13 +240,13 @@ if (!class_exists("\\Extension_API_Framework")) {
          * expire.
          * @returns timestamp
          */
-        public static function calculateNextCacheExpiryTime()
+        public static function calculateNextCacheExpiryTime() : int
         {
             return strtotime(sprintf(
-            "+%s %s",
-            self::getCacheLifetime(),
-            self::getCacheDuration()
-        ));
+                "+%s %s",
+                self::getCacheLifetime(),
+                self::getCacheDuration()
+            ));
         }
 
         /**
@@ -225,7 +254,7 @@ if (!class_exists("\\Extension_API_Framework")) {
          * when calculating the cache expiry time.
          * @returns integer
          */
-        public static function cacheLifetimeReal()
+        public static function cacheLifetimeReal() : int
         {
             $value = self::getCacheLifetime();
 
@@ -254,7 +283,7 @@ if (!class_exists("\\Extension_API_Framework")) {
          * @param array $context
          *  delegate context
          */
-        public function appendCacheablePageType($context)
+        public function appendCacheablePageType(array &$context) : void
         {
             // Find page types
             $elements = $context['form']->getChildren();
@@ -278,10 +307,10 @@ if (!class_exists("\\Extension_API_Framework")) {
             }
         }
 
-        public function appendTransformations($context)
+        public function appendTransformations(array &$context) : void
         {
             // Add the @jsonForceArray transformation
-            $context['transformer']->append(new Lib\Transformation(
+            $context['transformer']->append(new ApiFramework\Transformation(
                 function (array $input, array $attributes=[]) {
                     // First make sure there is an attributes array
                     if (empty($attributes)) {
@@ -292,7 +321,7 @@ if (!class_exists("\\Extension_API_Framework")) {
                         return false;
                     }
                     // This is already an indexed array.
-                    elseif (!Lib\array_is_assoc($input)) {
+                    elseif (!Arrays\array_is_assoc($input)) {
                         return false;
                     }
                     // jsonForceArray is set, and it's true
@@ -314,7 +343,7 @@ if (!class_exists("\\Extension_API_Framework")) {
             // Render empty string values instead of empty arrays
             // i.e. <banana></banana>, normally converted to
             // array(0) {} and thus banana: [], becomes banana: ""
-            $context['transformer']->append(new Lib\Transformation(
+            $context['transformer']->append(new ApiFramework\Transformation(
                 function (array $input, array $attributes=[]) {
                     if (isset($attributes['convertEmptyElementsToString'])) {
                         return true;
@@ -332,14 +361,12 @@ if (!class_exists("\\Extension_API_Framework")) {
             ));
         }
 
-        public function setJSONLauncher($context)
+        public function setJSONLauncher(array &$context) : void
         {
             if ($_REQUEST['mode'] == 'administration') {
                 return;
             }
-            define('SYMPHONY_LAUNCHER', 'renderer_json');
-
-            include __DIR__ . '/src/Includes/JsonRendererLauncher.php';
+            define('SYMPHONY_LAUNCHER', 'Symphony\\ApiFramework\\ApiFramework\\renderer_json');
         }
     }
 }

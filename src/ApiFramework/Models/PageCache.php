@@ -1,8 +1,8 @@
-<?php
-namespace Symphony\ApiFramework\Lib\Models;
+<?php declare(strict_types=1);
+namespace Symphony\ApiFramework\ApiFramework\Models;
 
 use SymphonyPDO;
-use Symphony\ApiFramework\Lib;
+use Symphony\ApiFramework\ApiFramework;
 use Symphony\ClassMapper\Lib as ClassMapper;
 
 final class PageCache extends ClassMapper\AbstractClassMapper
@@ -135,13 +135,13 @@ final class PageCache extends ClassMapper\AbstractClassMapper
         );
 
         foreach ($headers as $name => $value) {
-            Lib\JsonFrontend::Page()->addHeaderToPage(
+            ApiFramework\JsonFrontend::Page()->addHeaderToPage(
                 $name,
                 $value
             );
         }
 
-        Lib\JsonFrontend::Page()->addRenderTimeToHeaders();
+        ApiFramework\JsonFrontend::Page()->addRenderTimeToHeaders();
 
         return $this->contents;
     }

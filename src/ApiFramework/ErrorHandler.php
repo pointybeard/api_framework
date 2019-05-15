@@ -1,5 +1,5 @@
-<?php
-namespace Symphony\ApiFramework\Lib;
+<?php declare(strict_types=1);
+namespace Symphony\ApiFramework\ApiFramework;
 
 use \GenericErrorHandler;
 use \ErrorException;
@@ -17,11 +17,10 @@ class ErrorHandler extends GenericErrorHandler
      * Initialise will set the error handler to be the `__CLASS__::handler`
      * function.
      */
-    public static function initialise()
+    public static function initialise() : void
     {
         restore_error_handler();
         set_error_handler(array(__CLASS__, 'handler'), error_reporting());
-        //register_shutdown_function(array(__CLASS__, 'shutdown'));
     }
 
     /**
@@ -30,12 +29,12 @@ class ErrorHandler extends GenericErrorHandler
      *
      * @return boolean
      */
-    public static function isEnabled()
+    public static function isEnabled() : bool
     {
         return (bool) error_reporting() && self::$enabled;
     }
 
-    public static function shutdown()
+    public static function shutdown() : void
     {
         $last_error = error_get_last();
 
@@ -70,7 +69,7 @@ class ErrorHandler extends GenericErrorHandler
      * @return string
      *  Usually a string of HTML that will displayed to a user
      */
-    public static function handler($code, $message, $file = null, $line = null)
+    public static function handler(int $code, string $message, string $file = null, int $line = null) : void
     {
         if (self::isEnabled()) {
             throw new ErrorException($message, 0, $code, $file, $line);

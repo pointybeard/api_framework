@@ -1,57 +1,59 @@
-<?php
+<?php declare(strict_types=1);
 
-namespace Symphony\Shell\Command\Api_Framework;
-
-use Symphony\Shell\Lib\Traits;
-use Symphony\Shell\Lib\Shell as Shell;
-use Symphony\ApiFramework\Lib\Models\PageCache;
+namespace Symphony\Console\Command\Api_Framework;
 
 use SymphonyPDO;
 use Extension_API_Framework;
 
-class Cache extends \Symphony\Shell\Lib\AuthenticatedCommand
+use Symphony\Console as Console;
+use Symphony\Console\AbstractInputType as Type;
+use Symphony\ApiFramework\ApiFramework\Models\PageCache;
+
+class Cache extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface
 {
-    use Traits\hasRequiresAuthenticationTrait;
+    use Console\Traits\hasCommandRequiresAuthenticateTrait;
 
     const ACTION_CLEAN = "clean";
     const ACTION_PURGE = "purge";
 
-    public function usage()
-    {
-        echo "usage: cache [OPTION...]
-    Maintentance script for API Framework cache entries
-
-options:
-
-    --action | -a
-        The action to run on the cache entries. See 'Actions' below.
-
-actions:
-
-    clean
-        Removes expired cache entries
-
-    purge
-        Deletes all cache entries
-
-examples:
-    symphony -c api_framework/cache -a purge
-    symphony -c api_framework/cache --action=clean
-
-";
+    public function __construct() {
+        parent::__construct(
+            "1.0.0",
+            "maintentance script for API Framework cache entries",
+            "symphony api_framework cache purge"
+        );
     }
 
-    public function run()
+    public function init() : bool
+    {
+        parent::init();
+        $this
+            ->addArgument(
+                'action',
+                Type::FLAG_REQUIRED,
+                "action to run on the cache entries. Can be either 'clean' (removes expired or duplicate entries) or 'purge' (delete all cache entries)",
+                function(Type $input, Console\AbstractInput $context) {
+                    if(!in_array(
+                        $context->getArgument('action'), [
+                            self::ACTION_CLEAN,
+                            self::ACTION_PURGE
+                        ]
+                    )) {
+                        throw new Console\Exceptions\ConsoleException(
+                            "action must be either purge or clean."
+                        );
+                    }
+                    return $context->getArgument('action');
+                }
+            )
+        ;
+        return true;
+    }
+
+    public function execute(Console\Interfaces\InputInterface $input) : bool
     {
 
-        if (Shell::instance()->args->find(['a', 'action']) === false) {
-            throw new \Exception('No action specified. Must use -a or --action.');
-
-        } elseif(!in_array(Shell::instance()->args->find(['a', 'action'])->value(), [self::ACTION_CLEAN, self::ACTION_PURGE])) {
-            throw new \Exception('Invalid action specified.');
-        }
-
-        switch(Shell::instance()->args->find(['a', 'action'])->value()) {
+        switch($input->getArgument('action')) {
             case self::ACTION_CLEAN:
                 $cacheEntries = PageCache::fetchExpired();
                 break;
@@ -59,21 +61,29 @@ examples:
             case self::ACTION_PURGE:
                 $cacheEntries = PageCache::all();
                 break;
-
         }
 
-        Shell::message(sprintf('%d cache entries located.', $cacheEntries->count()));
+        (new Console\Message)
+            ->message(sprintf('%d cache entries located.', $cacheEntries->count()))
+            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+            ->display()
+        ;
 
         if ($cacheEntries->count() <= 0) {
-            Shell::message('Nothing to do. Exiting.', false);
-            return;
+            (new Console\Message)
+                ->message('Nothing to do. Exiting.')
+                ->foreground(Console\Message::FG_COLOUR_YELLOW)
+                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                ->display()
+            ;
+            return true;
         }
 
         foreach($cacheEntries as $c) {
             $c->delete();
         }
 
-        Shell::message('Done.');
+        return true;
     }
 
 }

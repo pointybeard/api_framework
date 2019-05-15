@@ -1,0 +1,108 @@
+{
+    "sections": [
+        {
+            "modificationAuthorId": 1,
+            "authorId": 1,
+            "navigationGroup": "System",
+            "allowFiltering": true,
+            "hideFromBackendNavigation": false,
+            "sortOrder": 9,
+            "handle": "page-cache",
+            "name": "Page Cache",
+            "fields": [
+                {
+                    "required": true,
+                    "showColumn": true,
+                    "location": "sidebar",
+                    "sortOrder": 1,
+                    "elementName": "created-at",
+                    "label": "Created At",
+                    "type": "date",
+                    "custom": {
+                        "prePopulate": "",
+                        "calendar": false,
+                        "time": true
+                    }
+                },
+                {
+                    "required": true,
+                    "showColumn": false,
+                    "location": "main",
+                    "sortOrder": 3,
+                    "elementName": "contents",
+                    "label": "Contents",
+                    "type": "textarea",
+                    "custom": {
+                        "size": 25,
+                        "formatter": ""
+                    }
+                },
+                {
+                    "required": false,
+                    "showColumn": true,
+                    "location": "sidebar",
+                    "sortOrder": 6,
+                    "elementName": "expires-at",
+                    "label": "Expires At",
+                    "type": "date",
+                    "custom": {
+                        "prePopulate": "",
+                        "calendar": false,
+                        "time": true
+                    }
+                },
+                {
+                    "required": true,
+                    "showColumn": true,
+                    "location": "sidebar",
+                    "sortOrder": 0,
+                    "elementName": "page",
+                    "label": "Page",
+                    "type": "input",
+                    "custom": {
+                        "validator": ""
+                    }
+                },
+                {
+                    "required": false,
+                    "showColumn": true,
+                    "location": "sidebar",
+                    "sortOrder": 5,
+                    "elementName": "meta",
+                    "label": "Meta",
+                    "type": "taglist",
+                    "custom": {
+                        "prePopulateSource": "existing",
+                        "validator": ""
+                    }
+                },
+                {
+                    "required": true,
+                    "showColumn": false,
+                    "location": "main",
+                    "sortOrder": 2,
+                    "elementName": "headers",
+                    "label": "Headers",
+                    "type": "textarea",
+                    "custom": {
+                        "size": 15,
+                        "formatter": ""
+                    }
+                },
+                {
+                    "required": false,
+                    "showColumn": true,
+                    "location": "sidebar",
+                    "sortOrder": 4,
+                    "elementName": "query-string",
+                    "label": "Query String ",
+                    "type": "input",
+                    "custom": {
+                        "validator": ""
+                    }
+                }
+            ],
+            "associations": []
+        }
+    ]
+}
