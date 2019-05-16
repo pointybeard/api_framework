@@ -8,6 +8,7 @@ use Extension_API_Framework;
 use Symphony\Console as Console;
 use Symphony\Console\AbstractInputType as Type;
 use Symphony\ApiFramework\ApiFramework\Models\PageCache;
+use pointybeard\Helpers\Cli;
 
 class Cache extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface
 {
@@ -63,17 +64,15 @@ class Cache extends Console\AbstractCommand implements Console\Interfaces\Authen
                 break;
         }
 
-        (new Console\Message)
+        (new Cli\Message\Message)
             ->message(sprintf('%d cache entries located.', $cacheEntries->count()))
-            ->flags(Console\Message::FLAG_APPEND_NEWLINE)
             ->display()
         ;
 
         if ($cacheEntries->count() <= 0) {
-            (new Console\Message)
+            (new Cli\Message\Message)
                 ->message('Nothing to do. Exiting.')
-                ->foreground(Console\Message::FG_COLOUR_YELLOW)
-                ->flags(Console\Message::FLAG_APPEND_NEWLINE)
+                ->foreground(Cli\Colour\Colour::FG_YELLOW)
                 ->display()
             ;
             return true;
