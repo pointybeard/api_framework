@@ -32,6 +32,7 @@
         "pointybeard/symphony-section-builder": "~0.1",
         "pointybeard/symphony-classmapper": "dev-feature-2.0.0-php72",
         "pointybeard/symphony-pdo": "~0.1",
-        "pointybeard/helpers-functions-arrays": "~1.0"
+        "pointybeard/helpers-functions-arrays": "~1.0",
+        "pointybeard/helpers-cli-message": "~1.0"
     }
 }
