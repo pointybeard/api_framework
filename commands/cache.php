@@ -1,6 +1,6 @@
 <?php declare(strict_types=1);
 
-namespace Symphony\Console\Command\Api_Framework;
+namespace Symphony\Console\Commands\Api_Framework;
 
 use SymphonyPDO;
 use Extension_API_Framework;
