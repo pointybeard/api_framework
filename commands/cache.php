@@ -5,8 +5,11 @@ namespace Symphony\Console\Commands\Api_Framework;
 use SymphonyPDO;
 use Extension_API_Framework;
 
+use pointybeard\Helpers\Cli\Input;
+use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
+
 use Symphony\Console as Console;
-use Symphony\Console\AbstractInputType as Type;
+
 use Symphony\ApiFramework\ApiFramework\Models\PageCache;
 use pointybeard\Helpers\Cli;
 
@@ -33,7 +36,7 @@ class Cache extends Console\AbstractCommand implements Console\Interfaces\Authen
                 'action',
                 Type::FLAG_REQUIRED,
                 "action to run on the cache entries. Can be either 'clean' (removes expired or duplicate entries) or 'purge' (delete all cache entries)",
-                function(Type $input, Console\AbstractInput $context) {
+                function(Type $input, Input\AbstractInputHandler $context) {
                     if(!in_array(
                         $context->getArgument('action'), [
                             self::ACTION_CLEAN,
@@ -51,7 +54,7 @@ class Cache extends Console\AbstractCommand implements Console\Interfaces\Authen
         return true;
     }
 
-    public function execute(Console\Interfaces\InputInterface $input) : bool
+    public function execute(Input\Interfaces\InputHandlerInterface $input) : bool
     {
 
         switch($input->getArgument('action')) {
