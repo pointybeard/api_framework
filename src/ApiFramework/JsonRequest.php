@@ -1,5 +1,8 @@
-<?php declare(strict_types=1);
-namespace Symphony\ApiFramework\ApiFramework;
+<?php
+
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework;
 
 use Symfony\Component\HttpFoundation;
 
@@ -29,7 +32,7 @@ class JsonRequest extends HttpFoundation\Request
 
             // json_decode() will return false or NULL. NULL specifically
             // means the json was invalid.
-            if ($input === false || is_null($input)) {
+            if (false === $input || null === $input) {
                 throw new Exceptions\RequestJsonInvalidException();
             }
         }

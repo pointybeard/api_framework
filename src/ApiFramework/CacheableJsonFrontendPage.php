@@ -1,21 +1,23 @@
-<?php declare(strict_types=1);
-namespace Symphony\ApiFramework\ApiFramework;
+<?php
+
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework;
 
 /**
- * This extends the JsonFrontendPage class, adding caching features
+ * This extends the JsonFrontendPage class, adding caching features.
  */
 class CacheableJsonFrontendPage extends JsonFrontendPage
 {
-    public function generate($page = null) : string
+    public function generate(string $page = null): string
     {
-
         // Check if "Disable Cache Cleanup" has been set. If not, go ahead and
         // delete all expired cache entries. This can be disabled in the
         // preferences.
         if (\Extension_API_Framework::isCacheCleanupEnabled()) {
             JsonFrontend::Page()->addHeaderToPage(
                 'X-API-Framework-Expired-Cache-Entries',
-                (int)Models\PageCache::deleteExpired()
+                (int) Models\PageCache::deleteExpired()
             );
         }
 
@@ -29,7 +31,7 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
         // of it to make cache entry slightly less verbose.
         unset($query['symphony-page']);
 
-        $orderedQueryString = "";
+        $orderedQueryString = '';
         foreach ($query as $key => $value) {
             $orderedQueryString .= "&{$key}={$value}";
         }
@@ -43,6 +45,7 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
                 'X-API-Framework-Cache',
                 'hit'
             );
+
             return $cache->render();
         }
 
@@ -55,7 +58,7 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
         }
 
         // Update the cache
-        (new Models\PageCache)
+        (new Models\PageCache())
             ->headers(json_encode($headers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))
             ->contents($output)
             ->queryString($orderedQueryString)

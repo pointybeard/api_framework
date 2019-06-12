@@ -1,90 +1,101 @@
-<?php declare(strict_types=1);
+<?php
 
-require_once __DIR__ . '/vendor/autoload.php';
+declare(strict_types=1);
 
-use Symphony\ApiFramework\ApiFramework;
+require_once __DIR__.'/vendor/autoload.php';
+
+use Symphony\Extensions\ApiFramework;
 use pointybeard\Helpers\Functions\Arrays;
 use pointybeard\Symphony\SectionBuilder;
 
 // This file is included automatically in the composer autoloader, however,
 // Symphony might try to include it again which would cause a fatal error.
 // Check if the class already exists before declaring it again.
-if (!class_exists("\\Extension_API_Framework")) {
+if (!class_exists('\\Extension_API_Framework')) {
     class Extension_API_Framework extends Extension
     {
-        const CACHE_DURATION_MINUTE = "minute";
-        const CACHE_DURATION_DAY = "day";
-        const CACHE_DURATION_HOUR= "hour";
-        const CACHE_DURATION_WEEK = "week";
+        const CACHE_DURATION_MINUTE = 'minute';
+        const CACHE_DURATION_DAY = 'day';
+        const CACHE_DURATION_HOUR = 'hour';
+        const CACHE_DURATION_WEEK = 'week';
 
         const CACHE_ENABLED = 'yes';
         const CACHE_DISABLED = 'no';
 
+        public static function init()
+        {
+        }
+
         public function install()
         {
             $this->createCacheSection();
+
             return true;
         }
 
-        public function update($previousVersion = false) : bool
+        public function update($previousVersion = false): bool
         {
-            $this->createCacheSection();
-            return true;
+            return $this->install();
         }
 
-        private function createCacheSection() : void
+        public function enable(): bool
         {
-            $pageCacheSection = SectionBuilder\Lib\Models\Section::loadFromHandle(
-                "page-cache"
+            return $this->install();
+        }
+
+        private function createCacheSection(): void
+        {
+            $pageCacheSection = SectionBuilder\Models\Section::loadFromHandle(
+                'page-cache'
             );
-            if (!($pageCacheSection instanceof SectionBuilder\Lib\Models\Section)) {
-                SectionBuilder\Lib\Import::fromJsonFile(
-                    __DIR__ . '/src/Install/section-page_cache.json',
-                    SectionBuilder\Lib\Import::FLAG_SKIP_ORDERING
+            if (!($pageCacheSection instanceof SectionBuilder\Models\Section)) {
+                SectionBuilder\Import::fromJsonFile(
+                    __DIR__.'/src/Install/section-page_cache.json',
+                    SectionBuilder\Import::FLAG_SKIP_ORDERING
                 );
             }
 
             return;
         }
 
-        public function getSubscribedDelegates() : array
+        public function getSubscribedDelegates(): array
         {
             return [
                 [
-                    'page'      => '/all/',
-                    'delegate'  => 'ModifySymphonyLauncher',
-                    'callback'  => 'setJSONLauncher'
+                    'page' => '/all/',
+                    'delegate' => 'ModifySymphonyLauncher',
+                    'callback' => 'setJSONLauncher',
                 ],
                 [
-                    'page'      => '/frontend/',
-                    'delegate'  => 'APIFrameworkJSONRendererAppendTransformations',
-                    'callback'  => 'appendTransformations'
+                    'page' => '/frontend/',
+                    'delegate' => 'APIFrameworkJSONRendererAppendTransformations',
+                    'callback' => 'appendTransformations',
                 ],
                 [
-                    'page'      => '/system/preferences/',
-                    'delegate'  => 'AddCustomPreferenceFieldsets',
-                    'callback'  => 'appendPreferences'
+                    'page' => '/system/preferences/',
+                    'delegate' => 'AddCustomPreferenceFieldsets',
+                    'callback' => 'appendPreferences',
                 ],
                 [
-                    'page'      => '/system/preferences/',
-                    'delegate'  => 'Save',
-                    'callback'  => 'savePreferences'
+                    'page' => '/system/preferences/',
+                    'delegate' => 'Save',
+                    'callback' => 'savePreferences',
                 ],
                 [
-                    'page'      => '/blueprints/pages/',
-                    'delegate'  => 'AppendPageContent',
-                    'callback'  => 'appendCacheablePageType'
+                    'page' => '/blueprints/pages/',
+                    'delegate' => 'AppendPageContent',
+                    'callback' => 'appendCacheablePageType',
                 ],
             ];
         }
 
         /**
-         * Append API Framework page cache preferences
+         * Append API Framework page cache preferences.
          *
          * @param array $context
-         *  delegate context
+         *                       delegate context
          */
-        public function appendPreferences(array &$context) : void
+        public function appendPreferences(array &$context): void
         {
             // Create preference group
             $group = new XMLElement('fieldset');
@@ -99,7 +110,7 @@ if (!class_exists("\\Extension_API_Framework")) {
                 $input->setAttribute('checked', 'checked');
             }
 
-            $label->setValue($input->generate() . ' ' . __('Enable caching'));
+            $label->setValue($input->generate().' '.__('Enable caching'));
             $group->appendChild($label);
 
             // Append help
@@ -117,23 +128,23 @@ if (!class_exists("\\Extension_API_Framework")) {
             $options = [
             [
                 self::CACHE_DURATION_MINUTE,
-                ($selected == self::CACHE_DURATION_MINUTE),
-                'minute(s)'
+                (self::CACHE_DURATION_MINUTE == $selected),
+                'minute(s)',
             ],
             [
                 self::CACHE_DURATION_HOUR,
-                ($selected == self::CACHE_DURATION_HOUR),
-                'hour(s)'
+                (self::CACHE_DURATION_HOUR == $selected),
+                'hour(s)',
             ],
             [
                 self::CACHE_DURATION_DAY,
-                ($selected == self::CACHE_DURATION_DAY),
-                'day(s)'
+                (self::CACHE_DURATION_DAY == $selected),
+                'day(s)',
             ],
             [
                 self::CACHE_DURATION_WEEK,
-                ($selected == self::CACHE_DURATION_WEEK),
-                'week(s)'
+                (self::CACHE_DURATION_WEEK == $selected),
+                'week(s)',
             ],
         ];
             $select = Widget::Select('settings[api_framework][cache_duration]', $options, ['class' => 'inline', 'style' => 'display: inline; width: auto;']);
@@ -152,7 +163,7 @@ if (!class_exists("\\Extension_API_Framework")) {
                 $input->setAttribute('checked', 'checked');
             }
 
-            $label->setValue($input->generate() . ' ' . __('Disable Cleanup'));
+            $label->setValue($input->generate().' '.__('Disable Cleanup'));
             $group->appendChild($label);
 
             // Append help
@@ -163,12 +174,12 @@ if (!class_exists("\\Extension_API_Framework")) {
         }
 
         /**
-         * Save preferences
+         * Save preferences.
          *
          * @param array $context
-         *  delegate context
+         *                       delegate context
          */
-        public function savePreferences(array &$context) : void
+        public function savePreferences(array &$context): void
         {
             if (!is_array($context['settings'])) {
                 // Disable caching by default
@@ -177,8 +188,8 @@ if (!class_exists("\\Extension_API_Framework")) {
                     'enable_caching' => self::CACHE_DISABLED,
                     'cache_lifetime' => 1,
                     'cache_duration' => self::CACHE_DURATION_HOUR,
-                    'cache_disable_cleanup' => 'no'
-                ]
+                    'cache_disable_cleanup' => 'no',
+                ],
             ];
             } else {
                 if (!isset($context['settings']['api_framework']['enable_caching'])) {
@@ -191,46 +202,46 @@ if (!class_exists("\\Extension_API_Framework")) {
                     $context['settings']['api_framework']['cache_disable_cleanup'] = 'no';
                 }
 
-                $context['settings']['api_framework']['cache_lifetime'] = max(1, (int)$context['settings']['api_framework']['cache_lifetime']);
+                $context['settings']['api_framework']['cache_lifetime'] = max(1, (int) $context['settings']['api_framework']['cache_lifetime']);
             }
         }
 
         /**
-         * Check if cache is enabled
+         * Check if cache is enabled.
          */
-        public static function isCacheEnabled() : bool
+        public static function isCacheEnabled(): bool
         {
             return
-            Symphony::Configuration()->get('enable_caching', 'api_framework') == self::CACHE_ENABLED
+            self::CACHE_ENABLED == Symphony::Configuration()->get('enable_caching', 'api_framework')
                 ? true
                 : false
         ;
         }
 
         /**
-         * Check if cache cleanup is enabled
+         * Check if cache cleanup is enabled.
          */
-        public static function isCacheCleanupEnabled() : bool
+        public static function isCacheCleanupEnabled(): bool
         {
             return
-            Symphony::Configuration()->get('cache_disable_cleanup', 'api_framework') != 'yes'
+            'yes' != Symphony::Configuration()->get('cache_disable_cleanup', 'api_framework')
                 ? true
                 : false
         ;
         }
 
         /**
-         * Convienence method for getting the cache_lifetime setting
+         * Convienence method for getting the cache_lifetime setting.
          */
-        public static function getCacheLifetime() : ?int
+        public static function getCacheLifetime(): ?int
         {
-            return (int)Symphony::Configuration()->get('cache_lifetime', 'api_framework');
+            return (int) Symphony::Configuration()->get('cache_lifetime', 'api_framework');
         }
 
         /**
-         * Convienence method for getting the cache_duration setting
+         * Convienence method for getting the cache_duration setting.
          */
-        public static function getCacheDuration() : ?string
+        public static function getCacheDuration(): ?string
         {
             return Symphony::Configuration()->get('cache_duration', 'api_framework');
         }
@@ -238,12 +249,13 @@ if (!class_exists("\\Extension_API_Framework")) {
         /**
          * Takes the cache lifetime and duration and calculate when cache should
          * expire.
+         *
          * @returns timestamp
          */
-        public static function calculateNextCacheExpiryTime() : int
+        public static function calculateNextCacheExpiryTime(): int
         {
             return strtotime(sprintf(
-                "+%s %s",
+                '+%s %s',
                 self::getCacheLifetime(),
                 self::getCacheDuration()
             ));
@@ -252,14 +264,14 @@ if (!class_exists("\\Extension_API_Framework")) {
         /**
          * Converts cache lifetime and cache duration into seconds. This is used
          * when calculating the cache expiry time.
+         *
          * @returns integer
          */
-        public static function cacheLifetimeReal() : int
+        public static function cacheLifetimeReal(): int
         {
             $value = self::getCacheLifetime();
 
             switch (self::getCacheDuration()) {
-
             case self::DURATION_WEEK:
                 $value *= 7;
 
@@ -271,7 +283,6 @@ if (!class_exists("\\Extension_API_Framework")) {
             case self::DURATION_HOUR:
                 $value *= 60;
                 break;
-
         }
 
             return $value;
@@ -281,9 +292,9 @@ if (!class_exists("\\Extension_API_Framework")) {
          * Append type for cacheable pages to page editor.
          *
          * @param array $context
-         *  delegate context
+         *                       delegate context
          */
-        public function appendCacheablePageType(array &$context) : void
+        public function appendCacheablePageType(array &$context): void
         {
             // Find page types
             $elements = $context['form']->getChildren();
@@ -295,7 +306,7 @@ if (!class_exists("\\Extension_API_Framework")) {
             // Search for existing cacheable type
             $cacheableTypeAlreadyExists = false;
             foreach ($types as $type) {
-                if ($type->getValue() == 'cacheable') {
+                if ('cacheable' == $type->getValue()) {
                     $cacheableTypeAlreadyExists = true;
                     break;
                 }
@@ -307,17 +318,17 @@ if (!class_exists("\\Extension_API_Framework")) {
             }
         }
 
-        public function appendTransformations(array &$context) : void
+        public function appendTransformations(array &$context): void
         {
             // Add the @jsonForceArray transformation
             $context['transformer']->append(new ApiFramework\Transformation(
-                function (array $input, array $attributes=[]) {
+                function (array $input, array $attributes = []) {
                     // First make sure there is an attributes array
                     if (empty($attributes)) {
                         return false;
                     }
                     // Only looking at the jsonForceArray property
-                    elseif (!isset($attributes['jsonForceArray']) || $attributes['jsonForceArray'] !== "true") {
+                    elseif (!isset($attributes['jsonForceArray']) || 'true' !== $attributes['jsonForceArray']) {
                         return false;
                     }
                     // This is already an indexed array.
@@ -327,7 +338,7 @@ if (!class_exists("\\Extension_API_Framework")) {
                     // jsonForceArray is set, and it's true
                     return true;
                 },
-                function (array $input, array $attributes=[]) {
+                function (array $input, array $attributes = []) {
                     $result = [];
                     // Encapsulate everything in an array
                     foreach ($input as $key => $value) {
@@ -335,6 +346,7 @@ if (!class_exists("\\Extension_API_Framework")) {
                         unset($input[$key]);
                     }
                     $input[] = $result;
+
                     return $input;
                 }
             ));
@@ -344,26 +356,28 @@ if (!class_exists("\\Extension_API_Framework")) {
             // i.e. <banana></banana>, normally converted to
             // array(0) {} and thus banana: [], becomes banana: ""
             $context['transformer']->append(new ApiFramework\Transformation(
-                function (array $input, array $attributes=[]) {
+                function (array $input, array $attributes = []) {
                     if (isset($attributes['convertEmptyElementsToString'])) {
                         return true;
                     }
+
                     return false;
                 },
-                function (array $input, array $attributes=[]) {
+                function (array $input, array $attributes = []) {
                     foreach ($input as $key => $value) {
                         if (empty($value)) {
-                            $input[$key] = "";
+                            $input[$key] = '';
                         }
                     }
+
                     return $input;
                 }
             ));
         }
 
-        public function setJSONLauncher(array &$context) : void
+        public function setJSONLauncher(array &$context): void
         {
-            if ($_REQUEST['mode'] == 'administration') {
+            if ('administration' == $_REQUEST['mode']) {
                 return;
             }
             define('SYMPHONY_LAUNCHER', 'Symphony\\ApiFramework\\ApiFramework\\renderer_json');

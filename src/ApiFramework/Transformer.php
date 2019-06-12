@@ -1,28 +1,32 @@
-<?php declare(strict_types=1);
-namespace Symphony\ApiFramework\ApiFramework;
+<?php
+
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework;
 
 use pointybeard\Helpers\Functions\Arrays;
 
 /**
  * Transformer
- * Modifies an array with various transformations
+ * Modifies an array with various transformations.
  */
 class Transformer
 {
     private $transformations = [];
 
-    public function append(Transformation $transformation) : self
+    public function append(Transformation $transformation): self
     {
         $this->transformations[] = $transformation;
+
         return $this;
     }
 
-    public function transformations() : array
+    public function transformations(): array
     {
         return $this->transformations;
     }
 
-    public function run(array $input) : array
+    public function run(array $input): array
     {
         $totalTransformantionCount = count($this->transformations);
         $preserveAttributes = true;
@@ -38,10 +42,11 @@ class Transformer
             // Run the transformation.
             $input = $this->recursiveApplyTransformationToArray($input, $t, $preserveAttributes);
         }
+
         return $input;
     }
 
-    private function recursiveApplyTransformationToArray(array $input, Transformation $transformation, bool $preserveAttributes = true) : array
+    private function recursiveApplyTransformationToArray(array $input, Transformation $transformation, bool $preserveAttributes = true): array
     {
         $result = [];
 
@@ -52,7 +57,7 @@ class Transformer
 
         // Run the input against the transformation test. If it passes, run
         // the actual transformation
-        if ($transformation->test($input, $attributes) === true) {
+        if (true === $transformation->test($input, $attributes)) {
             $input = $transformation->action($input, $attributes);
         }
 
@@ -78,8 +83,8 @@ class Transformer
         // left out, put attributes back. They may be required by subsequent
         // transformers. The last transformer in the chain will trigger a cleanup
         // anyway.
-        if ($preserveAttributes == true && !empty($attributes)) {
-            $result["@attributes"] = $attributes;
+        if (true == $preserveAttributes && !empty($attributes)) {
+            $result['@attributes'] = $attributes;
         }
 
         return $result;

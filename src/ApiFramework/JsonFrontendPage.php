@@ -1,5 +1,8 @@
-<?php declare(strict_types=1);
-namespace Symphony\ApiFramework\ApiFramework;
+<?php
+
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework;
 
 /**
  * This extends the core FrontendPage class of Symphony to give us a vector to
@@ -23,16 +26,16 @@ class JsonFrontendPage extends \FrontendPage
     }
 
     // Accessor method for rendering the page headers.
-    public function renderHeaders() : void
+    public function renderHeaders(): void
     {
         \Page::__renderHeaders();
     }
 
-    public function addRenderTimeToHeaders() : void
+    public function addRenderTimeToHeaders(): void
     {
         \Profiler::instance()->sample('API JSON Rendering complete.');
 
-        $profile = (object)array_combine(
+        $profile = (object) array_combine(
             ['message', 'elapsed', 'created', 'type', 'queries', 'memory'],
             \Symphony::Profiler()->retrieveLast()
         );
@@ -43,12 +46,11 @@ class JsonFrontendPage extends \FrontendPage
         );
     }
 
-    public function generate($page=null) : string
+    public function generate($page = null): string
     {
         $output = parent::generate($page);
         cleanup_session_cookies();
         if (in_array('JSON', $this->pageData()['type'])) {
-
             // Load the output into a SimpleXML Container and convert to JSON
             try {
                 $xml = new \SimpleXMLElement($output, LIBXML_NOCDATA);
@@ -61,7 +63,7 @@ class JsonFrontendPage extends \FrontendPage
                 // add their transormations to this.
                 $transformer = new Transformer();
 
-                /**
+                /*
                  * Allow other extensions to add their own transformers
                  */
                 \Symphony::ExtensionManager()->notifyMembers(

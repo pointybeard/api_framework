@@ -1,108 +1,133 @@
-<?php declare(strict_types=1);
-namespace Symphony\ApiFramework\ApiFramework\Models;
+<?php
+
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework\Models;
 
 use SymphonyPDO;
-use Symphony\ApiFramework\ApiFramework;
-use Symphony\ClassMapper\ClassMapper as ClassMapper;
+use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Classmapper;
 
-final class PageCache extends ClassMapper\AbstractModel
+final class PageCache extends Classmapper\AbstractModel
 {
-    use ClassMapper\Traits\hasModelTrait;
+    use Classmapper\Traits\hasModelTrait;
+    use Classmapper\Traits\HasFilterableModelTrait;
 
-    const SECTION = "page-cache";
+    public function getSectionHandle(): string
+    {
+        return 'page-cache';
+    }
 
-    protected static function getCustomFieldMapping() : array
+    protected static function getCustomFieldMapping(): array
     {
         return [
-
             'created-at' => [
-                'classMemberName' => 'dateCreatedAt'
+                'classMemberName' => 'dateCreatedAt',
+                'flags' => self::FLAG_REQUIRED,
+            ],
+
+            'contents' => [
+                'flags' => self::FLAG_REQUIRED,
+            ],
+
+            'page' => [
+                'flags' => self::FLAG_REQUIRED,
+            ],
+
+            'headers' => [
+                'flags' => self::FLAG_REQUIRED,
             ],
 
             'expires-at' => [
                 'classMemberName' => 'dateExpiresAt',
-                'flags' => self::FLAG_NULL
+                'flags' => self::FLAG_NULL,
             ],
 
+            'query-string' => [
+                'flags' => self::FLAG_STR | self::FLAG_NULL,
+            ],
+
+            'meta' => [
+                'flags' => self::FLAG_STR | self::FLAG_ARRAY | self::FLAG_NULL,
+            ],
         ];
     }
 
-    protected function getData() : array
+    protected function getData(): array
     {
         $data = parent::getData();
         $data['headers'] = self::removeAPIFrameworkHeadersFromJsonString($data['headers']);
+
         return $data;
     }
 
-    public static function loadCurrentFromPageAndQueryString($page, $queryString)
+    public static function loadCurrentFromPageAndQueryString(string $page, ?string $queryString): ?self
     {
         self::findSectionFields();
 
-        $queryStringSQL = "%2\$s.value = :query_string";
-        if (empty($queryString)) {
-            $queryStringSQL = "(%2\$s.value IS NULL OR %2\$s.value = '')";
-        }
-
-        $db = SymphonyPDO\Loader::instance();
-        $query = $db->prepare(self::fetchSQL(sprintf(
-            " %1\$s.value = :page AND {$queryStringSQL} AND %3\$s.date > NOW()",
-            self::findJoinTableFieldName('page'),
-            self::findJoinTableFieldName('query-string'),
-            self::findJoinTableFieldName('expires-at')
-        )));
-
-        $query->bindValue(':page', $page, \PDO::PARAM_STR);
-
-        if (!empty($queryString)) {
-            $query->bindValue(':query_string', $queryString, \PDO::PARAM_STR);
-        }
-
-        $query->execute();
-
-        $result = (new SymphonyPDO\Lib\ResultIterator(__CLASS__, $query));
-
-        if ($result->count() > 1) {
-            // Multiple valid cache entries. Delete them all and let a new cache
-            // entry be produced.
-            foreach ($result as $r) {
-                $r->delete();
-            }
-
-            return false;
-        }
-
-        return $result->current();
-    }
-
-    public static function loadFromPage($page) : ?self
-    {
-        return self::fetch([
-            ['page', $page, \PDO::PARAM_STR]
-        ])->current();
-    }
-
-    public static function fetchExpired() : SymphonyPDO\Lib\ResultIterator
-    {
-        return (new self)
-            ->appendFilter(new ClassMapper\Filters\FilterNow(
+        $pageCache = (new self())
+            ->appendFilter(Classmapper\FilterFactory::build('Basic', 'page', $page))
+            ->appendFilter(Classmapper\FilterFactory::build(
+                'Now',
                 'dateExpiresAt',
-                ClassMapper\Filter::OPERATOR_AND,
-                ClassMapper\Filter::COMPARISON_OPERATOR_LT
+                Classmapper\Filters\Basic::COMPARISON_OPERATOR_GT
             ))
-            ->filter()
         ;
+
+        if (empty($queryString)) {
+            $pageCache->appendFilter(
+                Classmapper\FilterFactory::build('IsNull', 'queryString')
+            );
+        } else {
+            $pageCache->appendFilter(
+                Classmapper\FilterFactory::build('Basic', 'queryString', $queryString)
+            );
+        }
+
+        // Check for multiple valid cache entries
+        if ($pageCache->filter()->count() > 1) {
+            // Delete them all and let a new cache entry be produced.
+            $pageCache->filter()->each(function (self $f) {
+                $r->delete();
+            });
+
+            return null;
+        }
+
+        $result = $pageCache->filter()->current();
+
+        return $result instanceof self ? $result : null;
     }
 
-    public static function deleteExpired() : ?int
+    public static function loadFromPage(string $page): ?self
+    {
+        return self::fetch(
+            Classmapper\FilterFactory::build('Basic', 'page', $page)
+        )->current();
+    }
+
+    public static function fetchExpired(): SymphonyPDO\Lib\ResultIterator
+    {
+        return self::fetch(
+            Classmapper\FilterFactory::build(
+                'Now',
+                'dateExpiresAt',
+                Classmapper\Filters\Basic::COMPARISON_OPERATOR_LT
+            )
+        );
+    }
+
+    public static function deleteExpired(): ?int
     {
         $expired = self::fetchExpired();
         foreach ($expired as $c) {
             $c->delete();
         }
+
         return $expired->count();
     }
 
-    public static function removeAPIFrameworkHeadersFromJsonString($headers) : string
+    public static function removeAPIFrameworkHeadersFromJsonString($headers): string
     {
         return json_encode(
             self::removeAPIFrameworkHeadersFromArray(json_decode($headers, true)),
@@ -110,13 +135,14 @@ final class PageCache extends ClassMapper\AbstractModel
         );
     }
 
-    public static function removeAPIFrameworkHeadersFromArray(array $headers) : array
+    public static function removeAPIFrameworkHeadersFromArray(array $headers): array
     {
         foreach ($headers as $name => $value) {
-            if (preg_match("@^X-API-Framework-@i", $name)) {
+            if (preg_match('@^X-API-Framework-@i', $name)) {
                 unset($headers[$name]);
             }
         }
+
         return $headers;
     }
 
@@ -127,8 +153,8 @@ final class PageCache extends ClassMapper\AbstractModel
         $headers['Last-Modified'] = date(DATE_RFC2822, strtotime($this->dateCreatedAt));
         $headers['Expires'] = date(
             DATE_RFC2822,
-            is_null($this->dateExpiresAt)
-                ? strtotime("+1 year")
+            null === $this->dateExpiresAt
+                ? strtotime('+1 year')
                 : strtotime($this->dateExpiresAt)
         );
 
@@ -144,16 +170,16 @@ final class PageCache extends ClassMapper\AbstractModel
         return $this->contents;
     }
 
-    public function expire() : self
+    public function expire(): self
     {
         return $this
-            ->dateExpiresAt("now")
+            ->dateExpiresAt('now')
             ->save()
         ;
     }
 
-    public function hasExpired() : bool
+    public function hasExpired(): bool
     {
-        return (bool)(strtotime($this->dateExpiresAt) < time());
+        return (bool) (strtotime($this->dateExpiresAt) < time());
     }
 }

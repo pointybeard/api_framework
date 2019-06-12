@@ -1,27 +1,32 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 use Symfony\Component\HttpFoundation;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symphony\ApiFramework\ApiFramework;
+use Symphony\Extensions\ApiFramework;
 
 class eventController extends SectionEvent
 {
-    public static function about() : array
+    public static function about(): array
     {
         return [
             'name' => 'API Framework: Controller',
             'author' => [
                 'name' => 'Alannah Kearney',
                 'website' => 'http://alannahkearney.com',
-                'email' => 'hi@alannahkearney.com'
+                'email' => 'hi@alannahkearney.com',
             ],
-            'release-date' => '2019-05-11',
-            'trigger-condition' => 'POST|PUT|PATCH|DELETE'
+            'release-date' => '2019-06-12',
+            'trigger-condition' => 'POST|PUT|PATCH|DELETE',
         ];
     }
 
-    public function load() : void
+    public function load(): void
     {
+        // This ensures the composer autoloader for the framework is included
+        Extension_API_Framework::init();
+
         try {
             $request = ApiFramework\JsonRequest::createFromGlobals();
 
@@ -29,16 +34,14 @@ class eventController extends SectionEvent
         } catch (ApiFramework\Exceptions\RequestJsonInvalidException $ex) {
             $request = HttpFoundation\Request::createFromGlobals();
 
-            // The input is discarded, but we need to emulate the json ParameterBag
-            // object.
-            $request->json = new HttpFoundation\ParameterBag;
+            // The input is discarded, but we need to emulate the json
+            // ParameterBag object.
+            $request->json = new HttpFoundation\ParameterBag();
         }
 
-        // This ensures the composer autoloader for the framework is included
-        Symphony::ExtensionManager()->create('api_framework');
-
-        // Event controller only responds to certain methods. GET is handled by the data sources
-        if ($request->getMethod() == 'GET') {
+        // Event controller only responds to certain methods. GET is handled
+        // by the data sources
+        if ('GET' == $request->getMethod()) {
             return;
         }
 
@@ -49,16 +52,16 @@ class eventController extends SectionEvent
 
         // #5 - Use the full page path to generate the controller class name
         // #7 - Use a PSR-4 folder structure and build the namespace accordingly
-        // #14 - Each page has a parent-path (somtimes this is / when at root). In
-        // order to find the correct controller path, we need to combine
+        // #14 - Each page has a parent-path (somtimes this is / when at root).
+        // In order to find the correct controller path, we need to combine
         // current-page with parent-path
 
         // Grab out the "current-page". Our controller will always be named
         // using this
-        $controllerName = "Controller" . ucfirst(trim(
+        $controllerName = 'Controller'.ucfirst(trim(
             ApiFramework\JsonFrontend::instance()
                 ->Page()
-                ->Params()["current-page"]
+                ->Params()['current-page']
         ));
 
         // Next, do some processing over the "parent-path" (if there is one) to
@@ -66,11 +69,11 @@ class eventController extends SectionEvent
         $currentPagePath = trim(
             ApiFramework\JsonFrontend::instance()
                 ->Page()
-                ->Params()["parent-path"],
+                ->Params()['parent-path'],
             '/'
         );
-        $parts = array_map("ucfirst", preg_split("@\/@", $currentPagePath));
-        $controllerPath = implode($parts, "\\") . "\\";
+        $parts = array_map('ucfirst', preg_split("@\/@", $currentPagePath));
+        $controllerPath = implode($parts, '\\').'\\';
 
         $controllerPath = sprintf(
             "Symphony\ApiFramework\Controllers\\%s%s",
@@ -90,7 +93,7 @@ class eventController extends SectionEvent
         if (!($controller instanceof ApiFramework\AbstractController)) {
             throw new ApiFramework\Exceptions\ControllerNotValidException(
                 sprintf(
-                    "'%s' is not a valid controller. Check implementation conforms toApiFramework\AbstractController.",
+                    "'%s' is not a valid controller. Check implementation conforms to AbstractController and ControllerInterface",
                     $controllerPath
             )
             );
@@ -115,7 +118,7 @@ class eventController extends SectionEvent
         );
 
         // Find any request or response schemas to apply
-        if ($canValidate == true) {
+        if (true == $canValidate) {
             $schemas = $controller->schemas($request->getMethod());
 
             // Validate the request. We dont care about the returned data
@@ -129,7 +132,7 @@ class eventController extends SectionEvent
         $response = $controller->$method($request, $response);
 
         // Validate the response. We dont care about the returned data
-        if ($canValidate == true) {
+        if (true == $canValidate) {
             $controller->validate($response->getContent(), $schemas->response);
         }
 
@@ -137,7 +140,7 @@ class eventController extends SectionEvent
         exit;
     }
 
-    public static function documentation() : string
+    public static function documentation(): string
     {
         return '<h3>Event Controller</h3><p>Handles passing off work to controllers depending on what has been requested.</p>';
     }

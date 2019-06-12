@@ -1,11 +1,14 @@
-<?php declare(strict_types=1);
-namespace Symphony\ApiFramework\ApiFramework;
+<?php
+
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework;
 
 class ExceptionHandler extends \GenericExceptionHandler
 {
     private static $debug;
 
-    public static function initialise(bool $debug=false) : void
+    public static function initialise(bool $debug = false): void
     {
         self::$enabled = true;
         self::$debug = $debug;
@@ -13,13 +16,13 @@ class ExceptionHandler extends \GenericExceptionHandler
         set_exception_handler(array(__CLASS__, 'handler'));
     }
 
-    public static function handler(\Throwable $ex) : void
+    public static function handler(\Throwable $ex): void
     {
         try {
             $class = __CLASS__;
             $exception_type = get_class($ex);
 
-            $handler = __NAMESPACE__ . "\Exceptions\{$exception_type}Handler";
+            $handler = __NAMESPACE__."\Exceptions\{$exception_type}Handler";
             if (class_exists($handler) && method_exists($handler, 'render')) {
                 $class = $handler;
             }
@@ -33,7 +36,7 @@ class ExceptionHandler extends \GenericExceptionHandler
         }
     }
 
-    private static function getCodeTrace(array $trace) : array
+    private static function getCodeTrace(array $trace): array
     {
         $result = [];
         foreach ($trace as $t) {
@@ -46,10 +49,11 @@ class ExceptionHandler extends \GenericExceptionHandler
                 $t['function']
             );
         }
+
         return $result;
     }
 
-    private static function getDatabaseTrace(array $queries) : array
+    private static function getDatabaseTrace(array $queries): array
     {
         $result = [];
         foreach ($queries as $query) {
@@ -59,18 +63,19 @@ class ExceptionHandler extends \GenericExceptionHandler
                 (isset($query['execution_time']) ? $query['execution_time'] : null)
             );
         }
+
         return $result;
     }
 
-    public static function render(\Throwable $ex) : void
+    public static function render(\Throwable $ex): void
     {
-        header("Content-Type: application/json");
+        header('Content-Type: application/json');
 
         // Build the JSON
         $output = [
-            "status" => 500,
-            "error" => $ex->getCode(),
-            "message" => $ex->getMessage()
+            'status' => 500,
+            'error' => $ex->getCode(),
+            'message' => $ex->getMessage(),
         ];
 
         // Check for a custom status code
@@ -79,7 +84,7 @@ class ExceptionHandler extends \GenericExceptionHandler
         }
 
         // Let the exception modify the output if it wants to.
-        if (in_array("Symphony\ApiFramework\ApiFramework\Interfaces\ModifiesExceptionOutputInterface", class_implements($ex))) {
+        if (in_array("Symphony\Extensions\ApiFramework\Interfaces\ModifiesExceptionOutputInterface", class_implements($ex))) {
             $output = $ex->modifyOutput($output);
         }
 
@@ -110,7 +115,7 @@ class ExceptionHandler extends \GenericExceptionHandler
             // since that is what is most likely failing.
             if (
                 $e instanceof \SymphonyErrorPage &&
-                $ex->getTemplateName() == 'xslt' &&
+                'xslt' == $ex->getTemplateName() &&
                 isset($ex->getAdditional()->proc)
             ) {
                 $err = $ex->getAdditional()->proc->getError(false, true);
@@ -119,11 +124,11 @@ class ExceptionHandler extends \GenericExceptionHandler
 
                     // Convert double quotes into single quotes. This stops
                     // JSON from escaping double quotes
-                    $xml = preg_replace("@\"@", "'", $xml);
+                    $xml = preg_replace('@"@', "'", $xml);
 
                     // Convert tab characters into 2 spaces. We cannot display
                     // control characters in JSON output.
-                    $xml = preg_replace("@\t@", "  ", $xml);
+                    $xml = preg_replace("@\t@", '  ', $xml);
 
                     // Split the XML into individual lines. This is because
                     // any newline control characters will be escaped
@@ -133,7 +138,7 @@ class ExceptionHandler extends \GenericExceptionHandler
                     // line number for readablity.
                     $output['debug']['context'] = [];
                     foreach ($xmlLines as $n => $l) {
-                        $output['debug']['context'][sprintf('%04d', $n+1)] = $l;
+                        $output['debug']['context'][sprintf('%04d', $n + 1)] = $l;
                     }
                 }
             }

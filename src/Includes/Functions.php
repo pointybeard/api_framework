@@ -1,11 +1,13 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Symphony\ApiFramework\ApiFramework;
+declare(strict_types=1);
 
-if (!function_exists(__NAMESPACE__ . '\renderer_json')) {
-    function renderer_json(?string $mode) : void
+namespace Symphony\Extensions\ApiFramework;
+
+if (!function_exists(__NAMESPACE__.'\renderer_json')) {
+    function renderer_json(?string $mode): void
     {
-        if ($mode !== null && strcasecmp('administration', $mode) == 0) {
+        if (null !== $mode && 0 == strcasecmp('administration', $mode)) {
             throw new ApiFramework\Exceptions\InvalidModeException('JSON Renderer launcher is only available on the frontend');
         }
 
@@ -18,12 +20,12 @@ if (!function_exists(__NAMESPACE__ . '\renderer_json')) {
 
         // #1808
         if (isset($_SERVER['HTTP_MOD_REWRITE'])) {
-            throw new Exception("mod_rewrite is required, however is not enabled.");
+            throw new Exception('mod_rewrite is required, however is not enabled.');
         }
 
         $output = JsonFrontend::instance()->display(getCurrentPage());
 
-        /**
+        /*
          * This is just prior to the page headers being re-rendered
          * @delegate JsonFrontendPreRenderHeaders
          * @param string $context

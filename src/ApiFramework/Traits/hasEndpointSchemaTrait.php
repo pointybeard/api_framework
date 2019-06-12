@@ -1,10 +1,12 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Symphony\ApiFramework\ApiFramework\Traits;
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework\Traits;
 
 use JsonSchema;
 use Symfony\Component\HttpFoundation\Request;
-use Symphony\ApiFramework\ApiFramework;
+use Symphony\Extensions\ApiFramework;
 
 /**
  * This trait will help resolve schema for a particular endpoint.
@@ -12,22 +14,22 @@ use Symphony\ApiFramework\ApiFramework;
 trait hasEndpointSchemaTrait
 {
     /**
-     * This will return any JSON schemas for the endpoint
-     * @return stdClass          An object containing request and response schemas
-     *                           path if they exist.
+     * This will return any JSON schemas for the endpoint.
+     *
+     * @return stdClass an object containing request and response schemas
+     *                  path if they exist
      */
-    public function schemas(string $method) : \stdClass
+    public function schemas(string $method): \stdClass
     {
-
         // Remove the common namepsace
-        $path = str_replace("Symphony\\ApiFramework\\Controllers\\", "", __CLASS__);
+        $path = str_replace('Symphony\\ApiFramework\\Controllers\\', '', __CLASS__);
 
         // Change back slashes to the system directory separator
-        $schema = str_replace("\\", DIRECTORY_SEPARATOR, $path);
+        $schema = str_replace('\\', DIRECTORY_SEPARATOR, $path);
 
         // Join the HTTP method and workspace folder to the schema path
         $schema = sprintf(
-            "%s%sschemas%s%s.%s",
+            '%s%sschemas%s%s.%s',
             realpath(WORKSPACE),
             DIRECTORY_SEPARATOR,
             DIRECTORY_SEPARATOR,
@@ -37,12 +39,12 @@ trait hasEndpointSchemaTrait
 
         // Format is [controller-name].[http-method].[request|response].json
         // Generate potential paths for both a request and response
-        $requestSchemaPath =  $schema . ".request.json";
-        $responseSchemaPath = $schema . ".response.json";
+        $requestSchemaPath = $schema.'.request.json';
+        $responseSchemaPath = $schema.'.response.json';
 
-        $result = (object)[
-            "request" => null,
-            "response" => null
+        $result = (object) [
+            'request' => null,
+            'response' => null,
         ];
 
         // Check to see if the schemas exists.
@@ -54,25 +56,26 @@ trait hasEndpointSchemaTrait
             $result->response = $responseSchemaPath;
         }
 
-        return (object)$result;
+        return (object) $result;
     }
 
     /**
      * Provided with an array of data and a schema, this will validate it and
-     * throw an exception if said validation failes
-     * @param  mixed  $data   The data to validate against. This is expected to
-     *                        be either a JSON formatted string, or an array.
-     * @param  string  $schema Optional. Path to the JSON schema
-     * @return object         An stdClass object representation of the inputted
-     *                           data
+     * throw an exception if said validation failes.
+     *
+     * @param mixed  $data   The data to validate against. This is expected to
+     *                       be either a JSON formatted string, or an array.
+     * @param string $schema Optional. Path to the JSON schema
+     *
+     * @return object An stdClass object representation of the inputted
+     *                data
      *
      * @throwsApiFramework\Exceptions\SchemaValidationFailedException
      *
      * @usedby eventController
      */
-    public function validate($data, string $schema = null) : \stdClass
+    public function validate($data, string $schema = null): \stdClass
     {
-
         // We need to convert the entire data array into an object. Quick way
         // is to convert to json and back again.
         $data = json_decode(
@@ -83,26 +86,25 @@ trait hasEndpointSchemaTrait
 
         // Handle a situation with $data is empty. We still need an object.
         if (empty($data)) {
-            $data = (object)$data;
+            $data = (object) $data;
         }
 
         // We only need to validate if a schema was supplied
-        if ($schema != null) {
-
+        if (null != $schema) {
             // Validate
-            $validator = new JsonSchema\Validator;
+            $validator = new JsonSchema\Validator();
             $validator->validate(
                 $data,
-                (object)['$ref' => 'file://' . realpath($schema)]
+                (object) ['$ref' => 'file://'.realpath($schema)]
             );
 
             // The result was not valid, but we need to dig a little deeper to
             // see what the problem might be.
-            if ($validator->isValid() !== true) {
+            if (true !== $validator->isValid()) {
                 $errors = [];
 
                 foreach ($validator->getErrors() as $error) {
-                    $errors[] = sprintf("[%s] %s", $error['property'], $error['message']);
+                    $errors[] = sprintf('[%s] %s', $error['property'], $error['message']);
                 }
 
                 // Now throw up an exception along with the processed errors

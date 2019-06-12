@@ -1,7 +1,10 @@
-<?php declare(strict_types=1);
-namespace Symphony\ApiFramework\ApiFramework;
+<?php
 
-use \Symphony;
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework;
+
+use Symphony;
 
 /**
  * This extends the core Symphony class to give us a vector to
@@ -11,14 +14,14 @@ use \Symphony;
  */
 class JsonFrontend extends Symphony
 {
-
     // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
     const DEFAULT_ENCODING_OPTIONS = 207;
 
     protected $encodingOptions = self::DEFAULT_ENCODING_OPTIONS;
 
     /**
-     * An instance of the ApiFramework\ApiFrameworkJsonFrontendPage class
+     * An instance of the ApiFramework\ApiFrameworkJsonFrontendPage class.
+     *
      * @var JsonFrontendPage
      */
     protected static $_page;
@@ -42,15 +45,15 @@ class JsonFrontend extends Symphony
      * Code duplication from core Frontend class, however it returns an
      * instance of JsonFrontendPage rather than FrontendPage.
      */
-    public function display(string $page) : string
+    public function display(string $page): string
     {
-        $resolvedPage = (new \FrontendPage)->resolvePage($page);
+        $resolvedPage = (new \FrontendPage())->resolvePage($page);
 
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =
         (
             \Extension_API_Framework::isCacheEnabled()
-            && $_SERVER['REQUEST_METHOD'] == 'GET'
+            && 'GET' == $_SERVER['REQUEST_METHOD']
             && is_array($resolvedPage)
             && in_array('cacheable', $resolvedPage['type'])
         );
@@ -75,10 +78,10 @@ class JsonFrontend extends Symphony
      * Code duplication from core Frontend class, however it returns an
      * instance of self rather than hard coding the class name.
      */
-    public static function instance() : self
+    public static function instance(): self
     {
         if (!(self::$_instance instanceof self)) {
-            self::$_instance = new self;
+            self::$_instance = new self();
         }
 
         return self::$_instance;
@@ -95,21 +98,21 @@ class JsonFrontend extends Symphony
     /**
      * Code duplication from core Frontend class.
      */
-    public static function isLoggedIn() : bool
+    public static function isLoggedIn(): bool
     {
-        if (isset($_REQUEST['auth-token']) && $_REQUEST['auth-token'] && strlen($_REQUEST['auth-token']) == 8) {
+        if (isset($_REQUEST['auth-token']) && $_REQUEST['auth-token'] && 8 == strlen($_REQUEST['auth-token'])) {
             return self::loginFromToken($_REQUEST['auth-token']);
         }
 
         return Symphony::isLoggedIn();
     }
 
-    public function getEncodingOptions() : int
+    public function getEncodingOptions(): int
     {
         return $this->encodingOptions;
     }
 
-    public function setEncodingOptions(int $options) : void
+    public function setEncodingOptions(int $options): void
     {
         $this->encodingOptions = $options;
     }

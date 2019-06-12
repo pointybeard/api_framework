@@ -1,11 +1,12 @@
-<?php declare(strict_types=1);
-use Symphony\ApiFramework\ApiFramework;
+<?php
+
+declare(strict_types=1);
+use Symphony\Extensions\ApiFramework;
 
 class TransformerTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
-     * Create new Transformation object
+     * Create new Transformation object.
      **/
     public function testValidTraformationObjectCreation()
     {
@@ -14,15 +15,15 @@ class TransformerTest extends \PHPUnit_Framework_TestCase
     }
 
     /**
-     * Create a new Transform object
+     * Create a new Transform object.
      **/
     public function testValidCreateTransformation()
     {
-        $test = function (array $input, array $attributes=[]) {
+        $test = function (array $input, array $attributes = []) {
             return true;
         };
 
-        $action = function (array $input, array $attributes=[]) {
+        $action = function (array $input, array $attributes = []) {
             return $input;
         };
 

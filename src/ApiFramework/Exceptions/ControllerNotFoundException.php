@@ -1,8 +1,10 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Symphony\ApiFramework\ApiFramework\Exceptions;
+declare(strict_types=1);
 
-use Symphony\ApiFramework\ApiFramework;
+namespace Symphony\Extensions\ApiFramework\Exceptions;
+
+use Symphony\Extensions\ApiFramework;
 use Symfony\Component\HttpFoundation\Response;
 
 class ControllerNotFoundException extends ApiFramework\AbstractApiException

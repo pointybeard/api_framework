@@ -5,7 +5,7 @@
 -   [Release notes](https://github.com/pointybeard/api_framework/blob/master/CHANGELOG.md)
 -   [GitHub repository](https://github.com/pointybeard/api_framework)
 
-JSON renderer and event driven controller interface for Symphony CMS which is designed to help rapidly prototype and build RESTful APIs.
+JSON renderer and event driven controller interface to help rapidly prototype and build RESTful APIs in Symphony CMS
 
 -   [Installation](#installation)
     -   [Dependencies](#dependencies)
@@ -206,9 +206,9 @@ namespace Symphony\ApiFramework\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symphony\ApiFramework\ApiFramework;
-use Symphony\ApiFramework\ApiFrameworkAbstractController;
-use Symphony\ApiFramework\ApiFramework\Traits;
+use Symphony\Extensions\ApiFramework;
+use Symphony\Extensions\ApiFrameworkAbstractController;
+use Symphony\Extensions\ApiFramework\Traits;
 
 final class ControllerExample extends AbstractController{
 
@@ -522,7 +522,7 @@ instead becomes this
 This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of ApiFramework\Transformer`. Use the `append()` method to add your own transformations. E.g.
 
 ```php
-use Symphony\ApiFramework\ApiFramework;
+use Symphony\Extensions\ApiFramework;
 
 Class extension_example extends Extension
 {
@@ -566,7 +566,7 @@ Cache entries can be viewed by going to `System > Page Cache` in the Symphony ad
 
 By default, every time a cacheable page is rendered, the system looks for expired cache entries and removes them. This can add overhead to a busy site with many cached pages so it can be disabled in `System > Preferences`.
 
-It is possible to manually manage the page cache via `System > Page Cache` in the Symphony admin or via the terminal with the cache shell command. e.g. `symphony api_framework cache clean` (requires the [Symphony Console Extension](https://github.com/pointybeard/console) to be installed).
+It is possible to manually manage the page cache via `System > Page Cache` in the Symphony admin or via the terminal with the cache console command. e.g. `symphony api_framework cache clean` (requires the [Symphony Console Extension](https://github.com/pointybeard/console) to be installed).
 
 ## Support
 

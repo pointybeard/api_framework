@@ -1,6 +1,8 @@
-<?php declare(strict_types=1);
+<?php
 
-namespace Symphony\ApiFramework\ApiFramework\Exceptions;
+declare(strict_types=1);
+
+namespace Symphony\Extensions\ApiFramework\Exceptions;
 
 class ControllerNotValidException extends \Exception
 {
