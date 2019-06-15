@@ -99,7 +99,7 @@ class ExceptionHandler extends \GenericExceptionHandler
                 'file' => $ex->getFile(),
                 'line' => $ex->getLine(),
                 'severity' => (
-                    $e instanceof ApiFramework\ErrorException
+                    $e instanceof \ErrorException
                         ? \GenericErrorHandler::$errorTypeStrings[$ex->getSeverity()]
                         : 'Fatal Error'
                 ),

@@ -28,10 +28,10 @@ class eventController extends SectionEvent
         Extension_API_Framework::init();
 
         try {
-            $request = ApiFramework\JsonRequest::createFromGlobals();
+            $request = Api_Framework\JsonRequest::createFromGlobals();
 
             // We want to allow non-JSON requests in certain situations.
-        } catch (ApiFramework\Exceptions\RequestJsonInvalidException $ex) {
+        } catch (Api_Framework\Exceptions\RequestJsonInvalidException $ex) {
             $request = HttpFoundation\Request::createFromGlobals();
 
             // The input is discarded, but we need to emulate the json
@@ -59,7 +59,7 @@ class eventController extends SectionEvent
         // Grab out the "current-page". Our controller will always be named
         // using this
         $controllerName = 'Controller'.ucfirst(trim(
-            ApiFramework\JsonFrontend::instance()
+            Api_Framework\JsonFrontend::instance()
                 ->Page()
                 ->Params()['current-page']
         ));
@@ -67,7 +67,7 @@ class eventController extends SectionEvent
         // Next, do some processing over the "parent-path" (if there is one) to
         // determine the folder path.
         $currentPagePath = trim(
-            ApiFramework\JsonFrontend::instance()
+            Api_Framework\JsonFrontend::instance()
                 ->Page()
                 ->Params()['parent-path'],
             '/'
@@ -76,7 +76,7 @@ class eventController extends SectionEvent
         $controllerPath = implode($parts, '\\').'\\';
 
         $controllerPath = sprintf(
-            "Symphony\ApiFramework\Controllers\\%s%s",
+            "pointybeard\Symphony\Extensions\Api_Framework\Controllers\\%s%s",
             ltrim($controllerPath, '\\'),
             $controllerName
         );
@@ -84,14 +84,14 @@ class eventController extends SectionEvent
         // #6 - Check if the controller exists before trying to include it.
         // Throw an exception if it cannot be located.
         if (!class_exists($controllerPath)) {
-            throw new ApiFramework\Exceptions\ControllerNotFoundException($controllerPath);
+            throw new Api_Framework\Exceptions\ControllerNotFoundException($controllerPath);
         }
 
         $controller = new $controllerPath();
 
         // Make sure the controller extends the AbstractController class
-        if (!($controller instanceof ApiFramework\AbstractController)) {
-            throw new ApiFramework\Exceptions\ControllerNotValidException(
+        if (!($controller instanceof Api_Framework\AbstractController)) {
+            throw new Api_Framework\Exceptions\ControllerNotValidException(
                 sprintf(
                     "'%s' is not a valid controller. Check implementation conforms to AbstractController and ControllerInterface",
                     $controllerPath
@@ -102,10 +102,10 @@ class eventController extends SectionEvent
         $method = strtolower($request->getMethod());
 
         if (!method_exists($controller, $method)) {
-            throw new ApiFramework\Exceptions\MethodNotAllowedException($request->getMethod());
+            throw new Api_Framework\Exceptions\MethodNotAllowedException($request->getMethod());
         }
 
-        $canValidate = ($controller instanceof ApiFramework\Interfaces\JsonSchemaValidationInterface);
+        $canValidate = ($controller instanceof Api_Framework\Interfaces\JsonSchemaValidationInterface);
 
         // Run any controller pre-flight code
         $controller->execute($request);
@@ -114,7 +114,7 @@ class eventController extends SectionEvent
         $response = new JsonResponse();
         $response->headers->set('Content-Type', 'application/json');
         $response->setEncodingOptions(
-            ApiFramework\JsonFrontend::instance()->getEncodingOptions()
+            Api_Framework\JsonFrontend::instance()->getEncodingOptions()
         );
 
         // Find any request or response schemas to apply

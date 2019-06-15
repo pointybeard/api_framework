@@ -202,12 +202,12 @@ Here is an example of a completed controller:
 
 ```php
 
-namespace Symphony\ApiFramework\Controllers;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use pointybeard\Symphony\Extensions\Api_Framework;
-use pointybeard\Symphony\Extensions\Api_FrameworkAbstractController;
+use pointybeard\Symphony\Extensions\Api_Framework\AbstractController;
 use pointybeard\Symphony\Extensions\Api_Framework\Traits;
 
 final class ControllerExample extends AbstractController{
@@ -247,7 +247,7 @@ final class ControllerExample extends AbstractController{
 
     public function put(Request $request, Response $response)
     {
-        $someEntryId = (intApiFramework\JsonFrontend::instance()
+        $someEntryId = (int)Api_Framework\JsonFrontend::instance()
             ->Page()
             ->Params()['some-id'];
 
@@ -316,15 +316,15 @@ Incoming request and output response JSON can be validated against a [JSON Schem
 To use JSON Schema validation, implement the `JsonSchemaValidationInterface` Interface and use the `Traits\hasEndpointSchemaTrait` trait in your controller. E.g.
 
 ```
-namespace Symphony\ApiFramework\Controllers;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Controllers;
 
-use Symphony\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
 ...
 
-final class ControllerSchema extends ApiFramework\AuthenticatedAbstractController Implements ApiFramework\ApiFramework\Interfaces\JsonSchemaValidationInterface {
+final class ControllerSchema extends Api_Framework\AuthenticatedAbstractController Implements Api_Framework\Api_Framework\Interfaces\JsonSchemaValidationInterface {
 
-    use ApiFramework\ApiFramework\Traits\hasEndpointSchemaTrait;
+    use Api_Framework\Api_Framework\Traits\hasEndpointSchemaTrait;
 
 ```
 
@@ -519,7 +519,7 @@ instead becomes this
 
 ### Writing Custom Transformers
 
-This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of ApiFramework\Transformer`. Use the `append()` method to add your own transformations. E.g.
+This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of Api_Framework\Transformer`. Use the `append()` method to add your own transformations. E.g.
 
 ```php
 use pointybeard\Symphony\Extensions\Api_Framework;
@@ -537,7 +537,7 @@ Class extension_example extends Extension
   public function appendTransformations($context) {
 
     $context['transformer']->append(
-      new ApiFramework\Transformation(
+      new Api_Framework\Transformation(
 
         // This is the test. If it returns true, the action will be run
         function(array $input, array $attributes=[]){

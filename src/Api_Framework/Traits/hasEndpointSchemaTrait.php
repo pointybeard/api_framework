@@ -22,7 +22,7 @@ trait hasEndpointSchemaTrait
     public function schemas(string $method): \stdClass
     {
         // Remove the common namepsace
-        $path = str_replace('Symphony\\ApiFramework\\Controllers\\', '', __CLASS__);
+        $path = str_replace('pointybeard\\Symphony\\Extensions\\Api_Framework\\Controllers\\', '', __CLASS__);
 
         // Change back slashes to the system directory separator
         $schema = str_replace('\\', DIRECTORY_SEPARATOR, $path);
@@ -70,7 +70,7 @@ trait hasEndpointSchemaTrait
      * @return object An stdClass object representation of the inputted
      *                data
      *
-     * @throwsApiFramework\Exceptions\SchemaValidationFailedException
+     * @throws Api_Framework\Exceptions\SchemaValidationFailedException
      *
      * @usedby eventController
      */
@@ -108,7 +108,7 @@ trait hasEndpointSchemaTrait
                 }
 
                 // Now throw up an exception along with the processed errors
-                throw new ApiFramework\Exceptions\SchemaValidationFailedException($errors, $schema, $data);
+                throw new Api_Framework\Exceptions\SchemaValidationFailedException($errors, $schema, $data);
             }
         }
 

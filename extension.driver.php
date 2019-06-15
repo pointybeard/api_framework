@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 require_once __DIR__.'/vendor/autoload.php';
 
-use pointybeard\Symphony\Extensions\Api_Framework;
 use pointybeard\Helpers\Functions\Arrays;
 use pointybeard\Symphony\SectionBuilder;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
 // This file is included automatically in the composer autoloader, however,
 // Symphony might try to include it again which would cause a fatal error.
@@ -321,7 +321,7 @@ if (!class_exists('\\Extension_API_Framework')) {
         public function appendTransformations(array &$context): void
         {
             // Add the @jsonForceArray transformation
-            $context['transformer']->append(new ApiFramework\Transformation(
+            $context['transformer']->append(new Api_Framework\Transformation(
                 function (array $input, array $attributes = []) {
                     // First make sure there is an attributes array
                     if (empty($attributes)) {
@@ -355,7 +355,7 @@ if (!class_exists('\\Extension_API_Framework')) {
             // Render empty string values instead of empty arrays
             // i.e. <banana></banana>, normally converted to
             // array(0) {} and thus banana: [], becomes banana: ""
-            $context['transformer']->append(new ApiFramework\Transformation(
+            $context['transformer']->append(new Api_Framework\Transformation(
                 function (array $input, array $attributes = []) {
                     if (isset($attributes['convertEmptyElementsToString'])) {
                         return true;
@@ -380,7 +380,7 @@ if (!class_exists('\\Extension_API_Framework')) {
             if ('administration' == $_REQUEST['mode']) {
                 return;
             }
-            define('SYMPHONY_LAUNCHER', 'Symphony\\ApiFramework\\ApiFramework\\renderer_json');
+            define('SYMPHONY_LAUNCHER', 'pointybeard\\Symphony\\Extensions\\Api_Framework\\renderer_json');
         }
     }
 }

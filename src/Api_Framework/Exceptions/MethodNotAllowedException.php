@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
-use pointybeard\Symphony\Extensions\Api_Framework;
 use Symfony\Component\HttpFoundation\Response;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
-class MethodNotAllowedException extends ApiFramework\AbstractApiException
+class MethodNotAllowedException extends Api_Framework\AbstractApiException
 {
     public $method;
 

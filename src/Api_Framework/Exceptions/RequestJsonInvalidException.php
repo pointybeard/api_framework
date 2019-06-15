@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
-use pointybeard\Symphony\Extensions\Api_Framework;
 use Symfony\Component\HttpFoundation\Response;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
-class RequestJsonInvalidException extends ApiFramework\AbstractApiException
+class RequestJsonInvalidException extends Api_Framework\AbstractApiException
 {
     public function __construct(int $code = 0, Exception $previous = null)
     {

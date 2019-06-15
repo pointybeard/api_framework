@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace pointybeard\Symphony\Extensions\Api_Framework\Models;
 
 use SymphonyPDO;
-use pointybeard\Symphony\Extensions\Api_Framework;
 use pointybeard\Symphony\Classmapper;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
 final class PageCache extends Classmapper\AbstractModel
 {
@@ -159,13 +159,13 @@ final class PageCache extends Classmapper\AbstractModel
         );
 
         foreach ($headers as $name => $value) {
-            ApiFramework\JsonFrontend::Page()->addHeaderToPage(
+            Api_Framework\JsonFrontend::Page()->addHeaderToPage(
                 $name,
                 $value
             );
         }
 
-        ApiFramework\JsonFrontend::Page()->addRenderTimeToHeaders();
+        Api_Framework\JsonFrontend::Page()->addRenderTimeToHeaders();
 
         return $this->contents;
     }

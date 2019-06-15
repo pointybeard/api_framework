@@ -20,7 +20,7 @@ class JsonFrontend extends Symphony
     protected $encodingOptions = self::DEFAULT_ENCODING_OPTIONS;
 
     /**
-     * An instance of the ApiFramework\ApiFrameworkJsonFrontendPage class.
+     * An instance of the Api_Framework\JsonFrontendPage class.
      *
      * @var JsonFrontendPage
      */
