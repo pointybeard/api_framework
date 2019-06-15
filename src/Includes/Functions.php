@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework;
+namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 if (!function_exists(__NAMESPACE__.'\renderer_json')) {
     function renderer_json(?string $mode): void

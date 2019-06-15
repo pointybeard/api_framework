@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework\Exceptions;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
-use Symphony\Extensions\ApiFramework;
-use Symphony\Extensions\ApiFramework\Interfaces;
+use pointybeard\Symphony\Extensions\Api_Framework;
+use pointybeard\Symphony\Extensions\Api_Framework\Interfaces;
 use Symfony\Component\HttpFoundation\Response;
 
 /**
- * @thrownby Symphony\Extensions\ApiFramework\Traits\hasEndpointSchemaTrait
+ * @thrownby pointybeard\Symphony\Extensions\Api_Framework\Traits\hasEndpointSchemaTrait
  */
 class SchemaValidationFailedException extends ApiFramework\AbstractApiException implements Interfaces\ModifiesExceptionOutputInterface
 {

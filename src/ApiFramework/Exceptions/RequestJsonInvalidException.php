@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework\Exceptions;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
-use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 use Symfony\Component\HttpFoundation\Response;
 
 class RequestJsonInvalidException extends ApiFramework\AbstractApiException

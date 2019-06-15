@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework;
+namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use GenericErrorHandler;
 use ErrorException;

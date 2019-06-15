@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 use Symfony\Component\HttpFoundation;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
 class eventController extends SectionEvent
 {

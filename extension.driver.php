@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 require_once __DIR__.'/vendor/autoload.php';
 
-use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 use pointybeard\Helpers\Functions\Arrays;
 use pointybeard\Symphony\SectionBuilder;
 

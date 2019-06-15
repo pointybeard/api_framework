@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework;
+namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 class ExceptionHandler extends \GenericExceptionHandler
 {
@@ -84,7 +84,7 @@ class ExceptionHandler extends \GenericExceptionHandler
         }
 
         // Let the exception modify the output if it wants to.
-        if (in_array("Symphony\Extensions\ApiFramework\Interfaces\ModifiesExceptionOutputInterface", class_implements($ex))) {
+        if (in_array("pointybeard\Symphony\Extensions\Api_Framework\Interfaces\ModifiesExceptionOutputInterface", class_implements($ex))) {
             $output = $ex->modifyOutput($output);
         }
 

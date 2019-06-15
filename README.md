@@ -206,9 +206,9 @@ namespace Symphony\ApiFramework\Controllers;
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symphony\Extensions\ApiFramework;
-use Symphony\Extensions\ApiFrameworkAbstractController;
-use Symphony\Extensions\ApiFramework\Traits;
+use pointybeard\Symphony\Extensions\Api_Framework;
+use pointybeard\Symphony\Extensions\Api_FrameworkAbstractController;
+use pointybeard\Symphony\Extensions\Api_Framework\Traits;
 
 final class ControllerExample extends AbstractController{
 
@@ -522,7 +522,7 @@ instead becomes this
 This extension provides the delegate `APIFrameworkJSONRendererAppendTransformations` on all frontend pages with the `JSON` type. The context includes an instance of ApiFramework\Transformer`. Use the `append()` method to add your own transformations. E.g.
 
 ```php
-use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
 Class extension_example extends Extension
 {

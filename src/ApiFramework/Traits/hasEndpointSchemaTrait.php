@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework\Traits;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Traits;
 
 use JsonSchema;
 use Symfony\Component\HttpFoundation\Request;
-use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
 /**
  * This trait will help resolve schema for a particular endpoint.

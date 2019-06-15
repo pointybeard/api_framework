@@ -1,7 +1,7 @@
 <?php
 
 declare(strict_types=1);
-use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 
 class TransformerTest extends \PHPUnit_Framework_TestCase
 {

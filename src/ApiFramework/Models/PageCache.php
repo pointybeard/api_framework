@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework\Models;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Models;
 
 use SymphonyPDO;
-use Symphony\Extensions\ApiFramework;
+use pointybeard\Symphony\Extensions\Api_Framework;
 use pointybeard\Symphony\Classmapper;
 
 final class PageCache extends Classmapper\AbstractModel

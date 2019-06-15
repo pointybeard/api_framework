@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Extensions\ApiFramework\Exceptions;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
 class ControllerNotValidException extends \Exception
 {

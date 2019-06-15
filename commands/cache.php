@@ -7,7 +7,7 @@ namespace Symphony\Console\Commands\Api_Framework;
 use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use Symphony\Console as Console;
-use Symphony\Extensions\ApiFramework\Models\PageCache;
+use pointybeard\Symphony\Extensions\Api_Framework\Models\PageCache;
 use pointybeard\Helpers\Cli;
 
 class Cache extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface
