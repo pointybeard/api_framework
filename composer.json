@@ -25,7 +25,6 @@
     },
     "autoload": {
         "psr-4": {
-            "Symphony\\Console\\Commands\\Api_Framework\\": "commands",
             "pointybeard\\Symphony\\Extensions\\": "src",
             "pointybeard\\Symphony\\Extensions\\Api_Framework\\Controllers\\": "../../workspace/controllers"
         },
