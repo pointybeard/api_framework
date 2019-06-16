@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Symphony\Console\Commands\Api_Framework;
+namespace pointybeard\Symphony\Extensions\Console\Commands\Api_Framework;
 
-use Symphony\Console as Console;
+use pointybeard\Symphony\Extensions\Console as Console;
 use pointybeard\Helpers\Cli;
 use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
