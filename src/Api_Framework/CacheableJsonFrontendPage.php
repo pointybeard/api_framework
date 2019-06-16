@@ -9,7 +9,7 @@ namespace pointybeard\Symphony\Extensions\Api_Framework;
  */
 class CacheableJsonFrontendPage extends JsonFrontendPage
 {
-    public function generate(string $page = null): string
+    public function generate($page = null): string
     {
         // Check if "Disable Cache Cleanup" has been set. If not, go ahead and
         // delete all expired cache entries. This can be disabled in the
