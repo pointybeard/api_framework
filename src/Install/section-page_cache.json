@@ -19,7 +19,7 @@
                     "label": "Created At",
                     "type": "date",
                     "custom": {
-                        "prePopulate": "",
+                        "prePopulate": false,
                         "calendar": false,
                         "time": true
                     }
@@ -46,7 +46,7 @@
                     "label": "Expires At",
                     "type": "date",
                     "custom": {
-                        "prePopulate": "",
+                        "prePopulate": false,
                         "calendar": false,
                         "time": true
                     }
