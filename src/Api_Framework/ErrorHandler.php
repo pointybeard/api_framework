@@ -21,7 +21,7 @@ class ErrorHandler extends GenericErrorHandler
      * Initialise will set the error handler to be the `__CLASS__::handler`
      * function.
      */
-    public static function initialise(): void
+    public static function initialise($Log = NULL)
     {
         restore_error_handler();
         set_error_handler(array(__CLASS__, 'handler'), error_reporting());
@@ -75,7 +75,7 @@ class ErrorHandler extends GenericErrorHandler
      * @return string
      *                Usually a string of HTML that will displayed to a user
      */
-    public static function handler(int $code, string $message, string $file = null, int $line = null): void
+    public static function handler($code, $message, $file = NULL, $line = NULL)
     {
         if (self::isEnabled()) {
             throw new ErrorException($message, 0, $code, $file, $line);

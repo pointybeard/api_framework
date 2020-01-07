@@ -11,19 +11,16 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
             throw new Exceptions\InvalidModeException('JSON Renderer launcher is only available on the frontend');
         }
 
-        // Check if we should enable exception debug information
-        $exceptionDebugEnabled = \Symphony::isLoggedIn();
-
         // Use the JSON exception and error handlers instead of the \Symphony one.
-        ExceptionHandler::initialise($exceptionDebugEnabled);
-        ErrorHandler::initialise($exceptionDebugEnabled);
+        ExceptionHandler::initialise();
+        ErrorHandler::initialise();
 
         // #1808
         if (isset($_SERVER['HTTP_MOD_REWRITE'])) {
             throw new Exception('mod_rewrite is required, however is not enabled.');
         }
 
-        $output = JsonFrontend::instance()->display(getCurrentPage());
+        $output = JsonFrontend::instance()->display((string)getCurrentPage());
 
         /*
          * This is just prior to the page headers being re-rendered

@@ -8,15 +8,15 @@ class ExceptionHandler extends \GenericExceptionHandler
 {
     private static $debug;
 
-    public static function initialise(bool $debug = false): void
+    public static function initialise($Log = NULL)
     {
         self::$enabled = true;
-        self::$debug = $debug;
+        self::$debug = true == \Symphony::isLoggedIn();
         restore_exception_handler();
         set_exception_handler(array(__CLASS__, 'handler'));
     }
 
-    public static function handler(\Throwable $ex): void
+    public static function handler($ex): void
     {
         try {
             $class = __CLASS__;
@@ -67,7 +67,7 @@ class ExceptionHandler extends \GenericExceptionHandler
         return $result;
     }
 
-    public static function render(\Throwable $ex): void
+    public static function render($ex): void
     {
         header('Content-Type: application/json');
 
