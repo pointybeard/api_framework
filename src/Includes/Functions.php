@@ -11,6 +11,9 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
             throw new Exceptions\InvalidModeException('JSON Renderer launcher is only available on the frontend');
         }
 
+        // Initialise the Frontend object
+        JsonFrontend::instance();
+
         // Use the JSON exception and error handlers instead of the \Symphony one.
         ExceptionHandler::initialise();
         ErrorHandler::initialise();
