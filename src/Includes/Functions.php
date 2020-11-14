@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
+use Symfony\Component\HttpFoundation;
+
 if (!function_exists(__NAMESPACE__.'\renderer_json')) {
     function renderer_json(?string $mode): void
     {
@@ -18,6 +20,9 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
         ExceptionHandler::initialise();
         ErrorHandler::initialise();
 
+        // This ensures the composer autoloader for the framework is included
+        \Extension_API_Framework::init();
+
         // #1808
         if (isset($_SERVER['HTTP_MOD_REWRITE'])) {
             throw new Exception('mod_rewrite is required, however is not enabled.');
@@ -25,21 +30,50 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
 
         $output = JsonFrontend::instance()->display((string)getCurrentPage());
 
-        /*
-         * This is just prior to the page headers being re-rendered
-         * @delegate JsonFrontendPreRenderHeaders
-         * @param string $context
-         * '/json_frontend/'
-         */
-        \Symphony::ExtensionManager()->notifyMembers(
-            'JsonFrontendPreRenderHeaders',
-            '/json_frontend/',
-            []
-        );
+        if(true == (JsonFrontend::Page() instanceof JsonFrontendPage)) {
 
-        // This will render new headers.
-        JsonFrontend::Page()->renderHeaders();
+            /*
+             * This is just prior to the page headers being re-rendered
+             * @delegate JsonFrontendPreRenderHeaders
+             * @param string $context
+             * '/json_frontend/'
+             */
+            \Symphony::ExtensionManager()->notifyMembers(
+                'JsonFrontendPreRenderHeaders',
+                '/json_frontend/',
+                []
+            );
 
-        echo $output;
+            $profile = (object) array_combine(
+                ['message', 'elapsed', 'created', 'type', 'queries', 'memory'],
+                \Symphony::Profiler()->retrieveLast()
+            );
+
+            JsonFrontend::Page()->addHeaderToPage(
+                'X-API-Framework-Render-Time',
+                number_format($profile->elapsed, 4)
+            );
+
+            if(true == ($output instanceof HttpFoundation\Response)) {
+
+                // Transfer all the page headers over to the Response object
+                foreach(JsonFrontend::Page()->headers() as $h) {
+                    $output->headers->set(...explode(":", $h['header'], 2));
+                }
+                $output->send();
+                
+            } else {
+                // This will render new headers.
+                JsonFrontend::Page()->renderHeaders();
+                echo $output;
+            }
+
+        } else {
+            echo $output;
+        }
+
+        // Make sure nothing happens after calling this method. It shouldn't
+        // but just in case.
+        exit;
     }
 }

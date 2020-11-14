@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use Symphony;
+use Symfony\Component\HttpFoundation;
 
 /**
  * This extends the core Symphony class to give us a vector to
@@ -45,17 +46,18 @@ class JsonFrontend extends Symphony
      * Code duplication from core Frontend class, however it returns an
      * instance of JsonFrontendPage rather than FrontendPage.
      */
-    public function display(string $page): string
+    public function display(string $page)
     {
+
         $resolvedPage = (new \FrontendPage())->resolvePage($page);
 
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =
         (
-            \Extension_API_Framework::isCacheEnabled()
+            true == \Extension_API_Framework::isCacheEnabled()
             && 'GET' == $_SERVER['REQUEST_METHOD']
-            && is_array($resolvedPage)
-            && in_array('cacheable', $resolvedPage['type'])
+            && true == is_array($resolvedPage)
+            && true == in_array(JsonFrontendPage::PAGE_TYPE_CACHEABLE, $resolvedPage['type'])
         );
 
         self::$_page = $isCacheable
@@ -63,15 +65,94 @@ class JsonFrontend extends Symphony
             : new JsonFrontendPage()
         ;
 
-        self::$_page->addHeaderToPage(
+        $this->Page()->addHeaderToPage(
             'X-API-Framework-Page-Renderer',
             array_pop(explode('\\', get_class(self::$_page)))
         );
 
-        Symphony::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
-        $output = self::$_page->generate($page);
+        \Symphony::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
+        
+        // Get the controller
+        try {
+            $controller = $this->Page()->getController();
+        } catch(Exceptions\ControllerNotFoundException $ex) {
+            // It's okay if controller ends up as nothing
+        }
 
-        return $output;
+        $this->Page()->addHeaderToPage(
+            'X-API-Framework-Controller',
+            true == ($controller instanceof AbstractController)
+                ? get_class($controller)
+                : "none"
+        );
+
+        // Built a HTTP request object
+        try {
+            $request = JsonRequest::createFromGlobals();
+
+        // We want to allow non-JSON requests in certain situations.
+        } catch (Exceptions\RequestJsonInvalidException $ex) {
+            $request = HttpFoundation\Request::createFromGlobals();
+
+            // The input is discarded, but we need to emulate the json
+            // ParameterBag object.
+            $request->json = new HttpFoundation\ParameterBag();
+        }
+
+        // There are a couple of pathways here:
+        // 1. There is no controller so it should just
+        //      pass on the normal page rendering process
+        if(false == ($controller instanceof AbstractController)) {
+            return self::$_page->generate($page);
+
+        // 2a. There is a page controller
+        //      but it does not respond to GET requests AND it indicates a 403
+        //      should not be thrown, or 
+        } elseif (HttpFoundation\Request::METHOD_GET == $request->getMethod() 
+            && false == $controller->respondsToRequestMethod($request->getMethod()) 
+            && false == $controller->throwMethodNotAllowedExceptionOnGet()
+        ) {
+            return self::$_page->generate($page);
+        }
+
+        // 2b. There is a page controller for this page and it takes over 
+        //      generating the output, or 
+        if (false == $controller->respondsToRequestMethod($request->getMethod())) {
+            throw new Exceptions\MethodNotAllowedException($request->getMethod());
+        }
+
+        // Run any controller pre-flight code
+        $controller->execute($request);
+
+        // Prepare the response.
+        $response = new HttpFoundation\JsonResponse();
+        $response->headers->set('Content-Type', 'application/json');
+        $response->setEncodingOptions(
+            JsonFrontend::instance()->getEncodingOptions()
+        );
+
+        // Find any request or response schemas to apply
+        if (true == $canValidate) {
+            $schemas = $controller->schemas($request->getMethod());
+
+            // Validate the request. We dont care about the returned data
+            $controller->validate(
+                $request->request->all(),
+                $schemas->request
+            );
+        }
+
+        // Run the controller's method that corresponds to the request method
+        $response = call_user_func([$controller, strtolower($request->getMethod())], $request, $response);
+        //$response = $controller->$method($request, $response);
+
+        // Validate the response. We dont care about the returned data
+        if (true == $canValidate) {
+            $controller->validate($response->getContent(), $schemas->response);
+        }
+
+        return $response;
+
     }
 
     /**

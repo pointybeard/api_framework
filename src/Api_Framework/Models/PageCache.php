@@ -165,8 +165,6 @@ final class PageCache extends Classmapper\AbstractModel
             );
         }
 
-        Api_Framework\JsonFrontend::Page()->addRenderTimeToHeaders();
-
         return $this->contents;
     }
 
