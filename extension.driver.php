@@ -388,7 +388,14 @@ if (!class_exists('\\Extension_API_Framework')) {
             if ('administration' == $_REQUEST['mode']) {
                 return;
             }
-            define('SYMPHONY_LAUNCHER', 'pointybeard\\Symphony\\Extensions\\Api_Framework\\renderer_json');
+
+            // We need to determine if this is a JSON page or not and set the
+            // renderer accordingly
+            $page = (new API_Framework\PageResolver((string)getCurrentPage()))->resolve();
+
+            if ($page instanceof \stdClass && true == in_array(Api_Framework\JsonFrontendPage::PAGE_TYPE_JSON, $page->type)) {
+                define('SYMPHONY_LAUNCHER', 'pointybeard\\Symphony\\Extensions\\Api_Framework\\renderer_json');
+            }
         }
     }
 }
