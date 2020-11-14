@@ -17,4 +17,14 @@ abstract class AbstractController implements Interfaces\ControllerInterface
 
         return $response;
     }
+
+    public function respondsToRequestMethod(string $method): bool
+    {
+        return (bool)method_exists($this, strtolower($method));
+    }
+
+    public function throwMethodNotAllowedExceptionOnGet(): bool
+    {
+        return false;
+    }
 }
