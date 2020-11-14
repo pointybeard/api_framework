@@ -8,7 +8,7 @@ abstract class AbstractApiException extends \Exception
 {
     private $status;
 
-    public function getHttpStatusCode(): string
+    public function getHttpStatusCode(): int
     {
         return $this->status;
     }
