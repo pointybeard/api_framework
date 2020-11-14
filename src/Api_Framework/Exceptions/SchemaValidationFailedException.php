@@ -35,7 +35,7 @@ class SchemaValidationFailedException extends Api_Framework\AbstractApiException
      */
     private $dataProvided = null;
 
-    public function __construct(array $schemaErrors, string $schemaPath, $dataProvided, int $code = 0, Exception $previous = null)
+    public function __construct(array $schemaErrors, string $schemaPath, $dataProvided, int $code = 0, \Exception $previous = null)
     {
         $this->schemaErrors = $schemaErrors;
         $this->schemaPath = $schemaPath;

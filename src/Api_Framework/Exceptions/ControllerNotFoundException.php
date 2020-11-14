@@ -9,7 +9,7 @@ use Symfony\Component\HttpFoundation\Response;
 
 class ControllerNotFoundException extends Api_Framework\AbstractApiException
 {
-    public function __construct(string $controller, int $code = 0, Exception $previous = null)
+    public function __construct(string $controller, int $code = 0, \Exception $previous = null)
     {
         parent::__construct(Response::HTTP_NOT_FOUND, "Controller '{$controller}' could not be located.", $code, $previous);
     }

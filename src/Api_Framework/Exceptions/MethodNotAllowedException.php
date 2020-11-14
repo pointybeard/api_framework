@@ -16,7 +16,7 @@ class MethodNotAllowedException extends Api_Framework\AbstractApiException
         return $this->method;
     }
 
-    public function __construct(string $method, int $code = 0, Exception $previous = null)
+    public function __construct(string $method, int $code = 0, \Exception $previous = null)
     {
         // Save the method
         $this->method = $method;
