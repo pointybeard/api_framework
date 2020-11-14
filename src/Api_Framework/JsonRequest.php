@@ -13,27 +13,25 @@ use Symfony\Component\HttpFoundation;
  */
 class JsonRequest extends HttpFoundation\Request
 {
-    public static function createFromGlobals()
+    public static function createFromGlobals(?int $options = 0): HttpFoundation\Request
     {
         // Call the parent method to generate a standard request object and
         // populate with data.
         $request = parent::createFromGlobals();
 
         // Grab whatever we were sent; hopefully it's valid Json.
-        $requestBody = file_get_contents('php://input');
+        $requestBody = trim((string)file_get_contents('php://input'));
 
         // Initialise an array to hold our input data.
         $input = [];
 
         // If we got something, decode it (making the assumption it's actually
         // json.)
-        if (!empty($requestBody)) {
-            $input = json_decode($requestBody, true);
-
-            // json_decode() will return false or NULL. NULL specifically
-            // means the json was invalid.
-            if (false === $input || null === $input) {
-                throw new Exceptions\RequestJsonInvalidException();
+        if (false == empty($requestBody)) {
+            try {
+                $input = json_decode($requestBody, true, 512, JSON_THROW_ON_ERROR | $options);
+            } catch (\JsonException $ex) {
+                throw new Exceptions\RequestJsonInvalidException(0, $ex);
             }
         }
 
