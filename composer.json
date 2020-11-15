@@ -1,13 +1,25 @@
 {
-    "name": "pointybeard/symphony-api-framework",
+    "name": "pointybeard/symext-api-framework",
     "description": "JSON renderer and event driven controller interface to help rapidly prototype and build RESTful APIs in Symphony CMS",
     "homepage": "http://alannahkearney.com",
     "license": "MIT",
     "minimum-stability": "stable",
+    "type": "library",
+    "keywords": [
+        "php",
+        "symphony",
+        "symphonycms",
+        "symphony extension",
+        "symphonycms extension",
+        "restful",
+        "json"
+    ],
     "authors": [
         {
             "name": "Alannah Kearney",
-            "email": "hi@alannahkearney.com"
+            "email": "hi@alannahkearney.com",
+            "homepage": "http://alannahkearney.com",
+            "role": "Developer"
         }
     ],
     "support": {
@@ -15,13 +27,20 @@
       "wiki": "https://github.com/pointybeard/api_framework/wiki"
     },
     "require": {
-        "php": ">=7.3",
-        "symfony/http-foundation": "~4.2.0",
-        "justinrainbow/json-schema": "~5.2.0",
-        "pointybeard/symphony-section-builder": "~0.2.0",
-        "pointybeard/symphony-classmapper": "~2.0",
+        "php": ">=7.4",
+        "pointybeard/helpers": "~1.2.0",
         "pointybeard/symphony-pdo": "~0.1.7.0",
-        "pointybeard/helpers": "~1.2.0"
+        "pointybeard/symphony-extended": ">=1.0.1.1",
+        "pointybeard/symphony-classmapper": "~2.0",
+        "symfony/http-foundation": "~4.2.0",
+        "justinrainbow/json-schema": "~5.2.0"
+    },
+    "require-dev": {
+        "squizlabs/php_codesniffer": "3.*",
+        "friendsofphp/php-cs-fixer": "^2.16",
+        "php-mock/php-mock-prophecy": "^0.0.2",
+        "damianopetrungaro/php-commitizen": "^0.1.2",
+        "php-parallel-lint/php-parallel-lint": "^1.2"
     },
     "autoload": {
         "psr-4": {
@@ -29,8 +48,21 @@
             "pointybeard\\Symphony\\Extensions\\Api_Framework\\Controllers\\": "../../workspace/controllers"
         },
         "files": [
-            "src/Includes/Functions.php",
-            "extension.driver.php"
+            "src/Includes/Renderer.php"
         ]
+    },
+    "scripts": {
+        "post-update-cmd": "mkdir -p commands",
+        "tidy": "php-cs-fixer fix --config=.php_cs.dist -v --using-cache=no",
+        "tidyDry": "@tidy --dry-run",
+        "test": [
+            "parallel-lint . --exclude vendor",
+            "phpunit"
+        ],
+        "clean": "rm -rf commands vendor"
+    },
+    "config": {
+        "sort-packages": true,
+        "process-timeout": 0
     }
 }
