@@ -2,11 +2,6 @@
 All notable changes to this project will be documented in this file.
 This project adheres to [Semantic Versioning](http://semver.org/).
 
-**View all [Unreleased][] changes here**
-
-## [1.1.0][] - 2019-05-11
-
-
 ## [1.0.0][] - 2019-01-05
 #### Added
 -   Added cacheable page type, caching option to preferences, and caching logic for GET requests
@@ -95,9 +90,7 @@ This project adheres to [Semantic Versioning](http://semver.org/).
 -   Initial release
 -   Added Symphony PDO as requirement
 
-[Unreleased]: https://github.com/pointybeard/api_framework/compare/v1.0.0...integration
-[1.1.0]: https://github.com/pointybeard/api_framework/compare/1.0.0...1.1.0
-[1.0.0]: https://github.com/pointybeard/api_framework/compare/v0.9.0...v1.0.0
+[1.0.0]: https://github.com/pointybeard/api_framework/compare/v0.9.0...1.0.0
 [0.9.0]: https://github.com/pointybeard/api_framework/compare/v0.2.1...v0.9.0
 [0.2.1]: https://github.com/pointybeard/api_framework/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0
