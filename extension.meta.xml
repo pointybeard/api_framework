@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <extension id="api_framework" status="released" xmlns="http://getsymphony.com/schemas/extension/1.0">
     <name>API Framework</name>
-    <description>JSON renderer and event driven controller interface for Symphony CMS which is designed to help rapidly prototype and build RESTful APIs.</description>
+    <description>JSON renderer and HTTP method driven controller interface for Symphony CMS which is designed to help rapidly prototype and build, JSON based, RESTful APIs.</description>
     <repo type="github">https://github.com/pointybeard/api_framework</repo>
     <types>
         <type>System</type>

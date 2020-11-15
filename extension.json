@@ -1,0 +1,65 @@
+{
+    "id": "symext-api-framework",
+    "name": "Extension Template",
+    "description": "JSON renderer and HTTP method driven controller interface for Symphony CMS which is designed to help rapidly prototype and build, JSON based, RESTful APIs.",
+    "repo": "https://github.com/pointybeard/api_framework.git",
+    "homepage": "https://github.com/pointybeard/api_framework",
+    "type": [
+        "System"
+    ],
+    "authors": [
+        {
+            "name": "Alannah Kearney",
+            "email": "hi@alannahkearney.com",
+            "homepage": "http://alannahkearney.com",
+            "role": "Developer"
+        }
+    ],
+    "require": [
+        "console"
+    ],
+    "releases": [
+        {
+            "version": "1.1.0",
+            "date": "2019-05-11",
+            "min": "2.7",
+            "notes": "see https://github.com/pointybeard/api_framework/compare/1.0.0...1.1.0"
+        },
+        {
+            "version": "1.0.0",
+            "date": "2019-01-05",
+            "min": "2.6.7",
+            "notes": "see https://github.com/pointybeard/api_framework/compare/v0.9.0...1.0.0"
+        },
+        {
+            "version": "0.9.0",
+            "date": "2018-09-27",
+            "min": "2.6.7",
+            "notes": "see https://github.com/pointybeard/api_framework/compare/v0.2.1...v0.9.0"
+        },
+        {
+            "version": "0.2.1",
+            "date": "2016-06-17",
+            "min": "2.6.7",
+            "notes": "see https://github.com/pointybeard/api_framework/compare/v0.2.0...v0.2.1"
+        },
+        {
+            "version": "0.2.0",
+            "date": "2016-05-03",
+            "min": "2.6.7",
+            "notes": "see https://github.com/pointybeard/api_framework/compare/v0.1.1...v0.2.0"
+        },
+        {
+            "version": "0.1.1",
+            "date": "2016-04-25",
+            "min": "2.6.7",
+            "notes": "see https://github.com/pointybeard/api_framework/compare/v0.1.0...v0.1.1"
+        },
+        {
+            "version": "0.1.0",
+            "date": "2015-09-13",
+            "min": "2.6",
+            "notes": "Initial release"
+        }
+    ]
+}
