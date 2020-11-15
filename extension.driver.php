@@ -12,15 +12,15 @@ if (!file_exists(__DIR__.'/vendor/autoload.php')) {
 
 require_once __DIR__.'/vendor/autoload.php';
 
+use pointybeard\Symphony\Extended;
 use pointybeard\Helpers\Functions\Arrays;
-use pointybeard\Symphony\SectionBuilder;
 use pointybeard\Symphony\Extensions\Api_Framework;
 
 // This file is included automatically in the composer autoloader, however,
 // Symphony might try to include it again which would cause a fatal error.
 // Check if the class already exists before declaring it again.
 if (!class_exists('\\Extension_API_Framework')) {
-    class Extension_API_Framework extends Extension
+    class Extension_API_Framework extends Extended\AbstractExtension
     {
         const CACHE_DURATION_MINUTE = 'minute';
         const CACHE_DURATION_DAY = 'day';
@@ -29,42 +29,6 @@ if (!class_exists('\\Extension_API_Framework')) {
 
         const CACHE_ENABLED = 'yes';
         const CACHE_DISABLED = 'no';
-
-        public static function init()
-        {
-        }
-
-        public function install()
-        {
-            $this->createCacheSection();
-
-            return true;
-        }
-
-        public function update($previousVersion = false): bool
-        {
-            return $this->install();
-        }
-
-        public function enable(): bool
-        {
-            return $this->install();
-        }
-
-        private function createCacheSection(): void
-        {
-            $pageCacheSection = SectionBuilder\Models\Section::loadFromHandle(
-                'page-cache'
-            );
-            if (!($pageCacheSection instanceof SectionBuilder\Models\Section)) {
-                SectionBuilder\Import::fromJsonFile(
-                    __DIR__.'/src/Install/section-page_cache.json',
-                    SectionBuilder\Import::FLAG_SKIP_ORDERING
-                );
-            }
-
-            return;
-        }
 
         public function getSubscribedDelegates(): array
         {
@@ -131,30 +95,30 @@ if (!class_exists('\\Extension_API_Framework')) {
                 self::getCacheLifetime(),
                 null,
                 ['size' => '6']
-        );
+            );
             $selected = self::getCacheDuration();
             $options = [
-            [
-                self::CACHE_DURATION_MINUTE,
-                (self::CACHE_DURATION_MINUTE == $selected),
-                'minute(s)',
-            ],
-            [
-                self::CACHE_DURATION_HOUR,
-                (self::CACHE_DURATION_HOUR == $selected),
-                'hour(s)',
-            ],
-            [
-                self::CACHE_DURATION_DAY,
-                (self::CACHE_DURATION_DAY == $selected),
-                'day(s)',
-            ],
-            [
-                self::CACHE_DURATION_WEEK,
-                (self::CACHE_DURATION_WEEK == $selected),
-                'week(s)',
-            ],
-        ];
+                [
+                    self::CACHE_DURATION_MINUTE,
+                    (self::CACHE_DURATION_MINUTE == $selected),
+                    'minute(s)',
+                ],
+                [
+                    self::CACHE_DURATION_HOUR,
+                    (self::CACHE_DURATION_HOUR == $selected),
+                    'hour(s)',
+                ],
+                [
+                    self::CACHE_DURATION_DAY,
+                    (self::CACHE_DURATION_DAY == $selected),
+                    'day(s)',
+                ],
+                [
+                    self::CACHE_DURATION_WEEK,
+                    (self::CACHE_DURATION_WEEK == $selected),
+                    'week(s)',
+                ],
+            ];
             $select = Widget::Select('settings[api_framework][cache_duration]', $options, ['class' => 'inline', 'style' => 'display: inline; width: auto;']);
 
             $label->setValue(__('Refresh page cache every %s %s', [$input->generate(false), $select->generate(false)]));
