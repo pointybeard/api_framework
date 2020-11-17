@@ -381,7 +381,8 @@ if (!class_exists('\\Extension_API_Framework')) {
 
         public function setJSONLauncher(array &$context): void
         {
-            if ('administration' == $_REQUEST['mode']) {
+            // JSON rendering only works on the frontend
+            if (false == isset($_REQUEST['mode']) || 'frontend' != $_REQUEST['mode']) {
                 return;
             }
 
