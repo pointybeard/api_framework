@@ -30,6 +30,9 @@ if (!class_exists('\\Extension_API_Framework')) {
         const CACHE_ENABLED = 'yes';
         const CACHE_DISABLED = 'no';
 
+        const EXCEPTION_DEBUG_ENABLED = 'yes';
+        const EXCEPTION_DEBUG_DISABLED = 'no';
+
         public function getSubscribedDelegates(): array
         {
             return [
@@ -141,6 +144,20 @@ if (!class_exists('\\Extension_API_Framework')) {
             // Append help
             $group->appendChild(new XMLElement('p', __('By default, any expired cache entries are automatically checked for and removed each time a cacheable page is rendered. If there the site has a large volume of cached content, you may wish to disable this to reduce load.'), ['class' => 'help']));
 
+            // Append enable cache
+            $label = Widget::Label();
+            $input = Widget::Input('settings[api_framework][enable_exception_debug_output]', self::EXCEPTION_DEBUG_ENABLED, 'checkbox');
+
+            if (self::isExceptionDebugOutputEnabled()) {
+                $input->setAttribute('checked', 'checked');
+            }
+
+            $label->setValue($input->generate().' '.__('Enable exception debug output'));
+            $group->appendChild($label);
+
+            // Append exception debug
+            $group->appendChild(new XMLElement('p', __('When there is an uncaught exception, enabling this will display more information including a debug trace and list of executed SQL extensions. Not recommened to enable this on production environments.'), ['class' => 'help']));
+
             // Append new preference group
             $context['wrapper']->appendChild($group);
         }
@@ -161,17 +178,23 @@ if (!class_exists('\\Extension_API_Framework')) {
                     'cache_lifetime' => 1,
                     'cache_duration' => self::CACHE_DURATION_HOUR,
                     'cache_disable_cleanup' => 'no',
+                    'enable_exception_debug_output' => 'no',
                 ],
             ];
             } else {
-                if (!isset($context['settings']['api_framework']['enable_caching'])) {
+                if (false == isset($context['settings']['api_framework']['enable_caching'])) {
                     // Disable caching if it has not been checked
                     $context['settings']['api_framework']['enable_caching'] = self::CACHE_DISABLED;
                 }
 
-                if (!isset($context['settings']['api_framework']['cache_disable_cleanup'])) {
+                if (false == isset($context['settings']['api_framework']['cache_disable_cleanup'])) {
                     // Disable cache cheanup had been checked
                     $context['settings']['api_framework']['cache_disable_cleanup'] = 'no';
+                }
+
+                if (false == isset($context['settings']['api_framework']['enable_exception_debug_output'])) {
+                    // Disable cache cheanup had been checked
+                    $context['settings']['api_framework']['enable_exception_debug_output'] = self::EXCEPTION_DEBUG_DISABLED;
                 }
 
                 $context['settings']['api_framework']['cache_lifetime'] = max(1, (int) $context['settings']['api_framework']['cache_lifetime']);
@@ -184,12 +207,21 @@ if (!class_exists('\\Extension_API_Framework')) {
         public static function isCacheEnabled(): bool
         {
             return
-            self::CACHE_ENABLED == Symphony::Configuration()->get('enable_caching', 'api_framework')
-                ? true
-                : false
-        ;
+                self::CACHE_ENABLED == Symphony::Configuration()->get('enable_caching', 'api_framework')
+                    ? true
+                    : false
+            ;
         }
 
+        public static function isExceptionDebugOutputEnabled(): bool
+        {
+            return
+                self::CACHE_ENABLED == Symphony::Configuration()->get('enable_exception_debug_output', 'api_framework')
+                    ? true
+                    : false
+                ;
+        }
+        
         /**
          * Check if cache cleanup is enabled.
          */

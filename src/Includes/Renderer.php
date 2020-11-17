@@ -23,6 +23,10 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
         // This ensures the composer autoloader for the framework is included
         \Extension_API_Framework::init();
 
+        if(true == \Extension_API_Framework::isExceptionDebugOutputEnabled()) {
+            ExceptionHandler::enableDebugOutput();
+        }
+
         // #1808
         if (isset($_SERVER['HTTP_MOD_REWRITE'])) {
             throw new Exception('mod_rewrite is required, however is not enabled.');

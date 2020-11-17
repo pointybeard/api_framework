@@ -16,6 +16,14 @@ class ExceptionHandler extends \GenericExceptionHandler
         set_exception_handler(array(__CLASS__, 'handler'));
     }
 
+    public static function enableDebugOutput() {
+        self::$debug = true;
+    }
+
+    public static function disableDebugOutput() {
+        self::$debug = false;
+    }
+
     public static function handler($ex): void
     {
         try {
