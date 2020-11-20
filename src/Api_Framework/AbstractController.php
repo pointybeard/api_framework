@@ -11,9 +11,11 @@ use Symfony\Component\HttpFoundation\Response;
  */
 abstract class AbstractController implements Interfaces\ControllerInterface
 {
-    public function render(Response $response, array $data): Response
+    public function render(Response $response, ?array $data = null): Response
     {
-        $response->setData($data);
+        if(null !== $data) {
+            $response->setData($data);
+        }
 
         return $response;
     }
