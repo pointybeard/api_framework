@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework\Models;
 
+use Symfony\Component\HttpFoundation;
+
 use SymphonyPDO;
 use pointybeard\Symphony\Classmapper;
 use pointybeard\Symphony\Extensions\Api_Framework;
@@ -87,7 +89,7 @@ final class PageCache extends Classmapper\AbstractModel
         // Check for multiple valid cache entries
         if ($pageCache->filter()->count() > 1) {
             // Delete them all and let a new cache entry be produced.
-            $pageCache->filter()->each(function (self $f) {
+            $pageCache->filter()->each(function (self $r) {
                 $r->delete();
             });
 
@@ -146,7 +148,7 @@ final class PageCache extends Classmapper\AbstractModel
         return $headers;
     }
 
-    public function render()
+    public function render(HttpFoundation\Response $response): HttpFoundation\Response
     {
         // Headers
         $headers = json_decode($this->headers, true);
@@ -159,13 +161,12 @@ final class PageCache extends Classmapper\AbstractModel
         );
 
         foreach ($headers as $name => $value) {
-            Api_Framework\JsonFrontend::Page()->addHeaderToPage(
-                $name,
-                $value
-            );
+            $response->headers->set($name, $value);
         }
 
-        return $this->contents;
+        $response->setContent($this->contents);
+
+        return $response;
     }
 
     public function expire(): self

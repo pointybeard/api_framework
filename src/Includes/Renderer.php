@@ -32,50 +32,47 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
             throw new Exception('mod_rewrite is required, however is not enabled.');
         }
 
-        $output = JsonFrontend::instance()->display((string)getCurrentPage());
+        // Built a HTTP request object
+        try {
+            $request = JsonRequest::createFromGlobals();
 
-        if(true == (JsonFrontend::Page() instanceof JsonFrontendPage)) {
+        // We want to allow non-JSON requests in certain situations.
+        } catch (Exceptions\RequestJsonInvalidException $ex) {
+            $request = HttpFoundation\Request::createFromGlobals();
 
-            /*
-             * This is just prior to the page headers being re-rendered
-             * @delegate JsonFrontendPreRenderHeaders
-             * @param string $context
-             * '/json_frontend/'
-             */
-            \Symphony::ExtensionManager()->notifyMembers(
-                'JsonFrontendPreRenderHeaders',
-                '/json_frontend/',
-                []
-            );
-
-            $profile = (object) array_combine(
-                ['message', 'elapsed', 'created', 'type', 'queries', 'memory'],
-                \Symphony::Profiler()->retrieveLast()
-            );
-
-            JsonFrontend::Page()->addHeaderToPage(
-                'X-API-Framework-Render-Time',
-                number_format($profile->elapsed, 4)
-            );
-
-            if(true == ($output instanceof HttpFoundation\Response)) {
-
-                // Transfer all the page headers over to the Response object
-                foreach(JsonFrontend::Page()->headers() as $h) {
-                    $output->headers->set(...explode(":", $h['header'], 2));
-                }
-                $output->send();
-                
-            } else {
-                // This will render new headers.
-                JsonFrontend::Page()->renderHeaders();
-                echo $output;
-            }
-
-        } else {
-            echo $output;
+            // The input is discarded, but we need to emulate the json
+            // ParameterBag object.
+            $request->json = new HttpFoundation\ParameterBag();
         }
 
+        $response = JsonFrontend::instance()->display($request);
+
+        /*
+         * This is just prior to the page headers being re-rendered
+         * @delegate JsonFrontendPreRenderHeaders
+         * @param string $context
+         * '/json_frontend/'
+         */
+        \Symphony::ExtensionManager()->notifyMembers(
+            'JsonFrontendPreRenderHeaders',
+            '/json_frontend/',
+            []
+        );
+
+        $profile = (object) array_combine(
+            ['message', 'elapsed', 'created', 'type', 'queries', 'memory'],
+            \Symphony::Profiler()->retrieveLast()
+        );
+
+        $response->headers->set('X-API-Framework-Render-Time', number_format($profile->elapsed, 4));
+
+        // Transfer all the page headers over, if any, to the Response object
+        foreach(JsonFrontend::Page()->headers() as $h) {
+            $response->headers->set(...explode(":", $h['header'], 2));
+        }
+
+        $response->send();
+                
         // Make sure nothing happens after calling this method. It shouldn't
         // but just in case.
         exit;

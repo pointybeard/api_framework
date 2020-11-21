@@ -6,6 +6,7 @@ namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use Symphony;
 use Symfony\Component\HttpFoundation;
+use pointybeard\Symphony\Extensions\Api_Framework\Router;
 
 /**
  * This extends the core Symphony class to give us a vector to
@@ -44,111 +45,111 @@ class JsonFrontend extends Symphony
 
     /**
      * Code duplication from core Frontend class, however it returns an
-     * instance of JsonFrontendPage rather than FrontendPage.
+     * instance of HttpFoundation\Response rather than FrontendPage.
      */
-    public function display(string $page)
+    public function display(HttpFoundation\Request $request)
     {
 
-        $resolvedPage = (new \FrontendPage())->resolvePage($page);
+        $routes = new Router;
+
+        // Load routes
+        $loader = include WORKSPACE . "/routes.php";
+        $loader($routes);
+
+        self::ExtensionManager()->notifyMembers(
+            'ModifyRoutes',
+            '/backend/',
+            ['routes' => &$routes]
+        );
+
+        // Check to see if we have default routes enabled
+        if(false == \Extension_API_Framework::isDefaultRoutesDisabled()) {
+            $routes->buildDefaultRoutes();
+        }
+
+        $route = $routes->find($request);
 
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =
         (
             true == \Extension_API_Framework::isCacheEnabled()
-            && 'GET' == $_SERVER['REQUEST_METHOD']
-            && true == is_array($resolvedPage)
-            && true == in_array(JsonFrontendPage::PAGE_TYPE_CACHEABLE, $resolvedPage['type'])
+            && HttpFoundation\Request::METHOD_GET == $request->getMethod()
+            && true == is_array($route->page()->type)
+            && true == in_array(JsonFrontendPage::PAGE_TYPE_CACHEABLE, $route->page()->type)
         );
 
-        self::$_page = $isCacheable
-            ? new CacheableJsonFrontendPage()
-            : new JsonFrontendPage()
-        ;
-
-        $this->Page()->addHeaderToPage(
-            'X-API-Framework-Page-Renderer',
-            array_pop(explode('\\', get_class(self::$_page)))
+        self::$_page = 
+        (
+            true == $isCacheable
+                ? new CacheableJsonFrontendPage()
+                : new JsonFrontendPage()
         );
-
-        \Symphony::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
-        
-        // Get the controller
-        try {
-            $controller = $this->Page()->getController();
-        } catch(Exceptions\ControllerNotFoundException $ex) {
-            // It's okay if controller ends up as nothing
-        }
-
-        $this->Page()->addHeaderToPage(
-            'X-API-Framework-Controller',
-            true == ($controller instanceof AbstractController)
-                ? get_class($controller)
-                : "none"
-        );
-
-        // Built a HTTP request object
-        try {
-            $request = JsonRequest::createFromGlobals();
-
-        // We want to allow non-JSON requests in certain situations.
-        } catch (Exceptions\RequestJsonInvalidException $ex) {
-            $request = HttpFoundation\Request::createFromGlobals();
-
-            // The input is discarded, but we need to emulate the json
-            // ParameterBag object.
-            $request->json = new HttpFoundation\ParameterBag();
-        }
-
-        // There are a couple of pathways here:
-        // 1. There is no controller so it should just
-        //      pass on the normal page rendering process
-        if(false == ($controller instanceof AbstractController)) {
-            return self::$_page->generate($page);
-
-        // 2a. There is a page controller
-        //      but it does not respond to GET requests AND it indicates a 403
-        //      should not be thrown, or 
-        } elseif (HttpFoundation\Request::METHOD_GET == $request->getMethod() 
-            && false == $controller->respondsToRequestMethod($request->getMethod()) 
-            && false == $controller->throwMethodNotAllowedExceptionOnGet()
-        ) {
-            return self::$_page->generate($page);
-        }
-
-        // 2b. There is a page controller for this page and it takes over 
-        //      generating the output, or 
-        if (false == $controller->respondsToRequestMethod($request->getMethod())) {
-            throw new Exceptions\MethodNotAllowedException($request->getMethod());
-        }
-
-        // Run any controller pre-flight code
-        $controller->execute($request);
 
         // Prepare the response.
         $response = new HttpFoundation\JsonResponse();
         $response->headers->set('Content-Type', 'application/json');
-        $response->setEncodingOptions(
-            JsonFrontend::instance()->getEncodingOptions()
-        );
+        $response->headers->set('X-API-Framework-Page-Renderer',  array_pop(explode('\\', get_class(self::$_page))));
+        $response->setEncodingOptions(JsonFrontend::instance()->getEncodingOptions());
 
-        // Find any request or response schemas to apply
-        if (true == $canValidate) {
-            $schemas = $controller->schemas($request->getMethod());
+        // Check if "Disable Cache Cleanup" has been set. If not, go ahead and
+        // delete all expired cache entries. This can be disabled in the
+        // preferences.
+        if (true == $isCacheable && \Extension_API_Framework::isCacheCleanupEnabled()) {
+            $response->headers->set('X-API-Framework-Expired-Cache-Entries', Models\PageCache::deleteExpired());
+        }
 
-            // Validate the request. We dont care about the returned data
-            $controller->validate(
-                $request->request->all(),
-                $schemas->request
+        $isCacheHit = (true == $isCacheable && true == (self::$_page->isCacheHit($request) instanceof Models\PageCache));
+
+        self::ExtensionManager()->notifyMembers('FrontendInitialised', '/frontend/');
+
+        // Get the controller
+        [$controllerClass, $controllerMethod] = $route->controller();
+
+        // There are a couple of pathways here:
+        // 1. There is no controller or there is a hit on the cache so it should
+        //      just pass on to the normal page rendering process
+        if(null == $route->controller() || true == $isCacheHit) {
+            $response = self::$_page->render($request, $response);
+
+        // 2a. There is a page controller specified
+        //      but it or the method does not exist
+        } elseif(false == class_exists($controllerClass) || false == method_exists($controllerClass, $controllerMethod)) {
+            throw new Exceptions\ControllerNotFoundException("{$controllerClass}::{$controllerMethod}");
+
+        // 2b. There is a page controller
+        //      but it does not implement Api_Framework\AbstractController
+        } elseif(false == (new \ReflectionClass($controllerClass))->implementsInterface(__NAMESPACE__ . '\\Interfaces\\ControllerInterface')) {
+            throw new Exceptions\ControllerNotValidException("Controller {$controllerClass} does not implement ControllerInterface");
+
+        // 2c. There is a page controller, all is valid, and it responds to this method. Yay!!
+        } else {
+
+            $controller = new $controllerClass;
+
+            // We only validate if the controller has the trait HasEndpointSchemaTrait
+            $canValidate = array_key_exists(__NAMESPACE__ . "\Traits\HasEndpointSchemaTrait", (new \ReflectionClass($controllerClass))->getTraits());
+
+            // Validate the request if able
+            if (true == $canValidate && null !== $controller->schemas($request->getMethod())->request) {
+                $controller->validate(
+                    $request->request->all(),
+                    $controller->schemas($request->getMethod())->request
+                );
+            }
+
+            $response = call_user_func_array(
+                [$controller, $controllerMethod], 
+                array_merge([$request, $response], $route->parse($request)->elements)
             );
         }
 
-        // Run the controller's method that corresponds to the request method
-        $response = call_user_func([$controller, strtolower($request->getMethod())], $request, $response);
-        //$response = $controller->$method($request, $response);
+        // Validate the response if able
+        if (true == $canValidate && null !== $controller->schemas($request->getMethod())->response) {
+            $controller->validate($response->getContent(), $controller->schemas($request->getMethod())->response);
+        }
 
-        // Validate the response. We dont care about the returned data
-        if (true == $canValidate) {
-            $controller->validate($response->getContent(), $schemas->response);
+        if(true == $isCacheable && false === $isCacheHit) {
+            self::$_page->saveToCache($request, $response);
         }
 
         return $response;

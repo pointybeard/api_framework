@@ -4,78 +4,79 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
+use Symfony\Component\HttpFoundation;
+
 /**
  * This extends the JsonFrontendPage class, adding caching features.
  */
 class CacheableJsonFrontendPage extends JsonFrontendPage
 {
-    public function generate($page = null): string
-    {
-        // Check if "Disable Cache Cleanup" has been set. If not, go ahead and
-        // delete all expired cache entries. This can be disabled in the
-        // preferences.
-        if (\Extension_API_Framework::isCacheCleanupEnabled()) {
-            JsonFrontend::Page()->addHeaderToPage(
-                'X-API-Framework-Expired-Cache-Entries',
-                (int) Models\PageCache::deleteExpired()
-            );
-        }
 
+    public function isCacheHit(HttpFoundation\Request $request)
+    {
+        return Models\PageCache::loadCurrentFromPageAndQueryString(
+            rtrim($request->getPathInfo(), "/"),
+            $this->normaliseQueryString($request)
+        );
+    }
+
+    public function normaliseQueryString(HttpFoundation\Request $request): string
+    {
         // Grab any query string values. We'll store this with the
         // cache to improve hit accuracy.
-        $query = [];
-        parse_str($_SERVER['QUERY_STRING'], $query);
+        $query = $request->query->all();
         asort($query, SORT_NATURAL | SORT_FLAG_CASE);
 
         // symphony-page is always set, otherwise we wouldn't be here. Get rid
         // of it to make cache entry slightly less verbose.
         unset($query['symphony-page']);
 
-        $orderedQueryString = '';
+        $normalised = '';
         foreach ($query as $key => $value) {
-            $orderedQueryString .= "&{$key}={$value}";
+            $normalised .= "&{$key}={$value}";
         }
-        $orderedQueryString = trim($orderedQueryString, '&');
+        $normalised = trim($normalised, '&');
 
+        return $normalised;
+    }
+
+    public function render(HttpFoundation\Request $request, HttpFoundation\Response $response): HttpFoundation\Response
+    {
         // Logic for checking if there is cached page data
-        $cache = Models\PageCache::loadCurrentFromPageAndQueryString($page, $orderedQueryString);
+        $cache = $this->isCacheHit($request);
 
-        if ($cache instanceof Models\PageCache) {
-            JsonFrontend::Page()->addHeaderToPage(
-                'X-API-Framework-Cache',
-                'hit'
-            );
-
-            return $cache->render();
+        if (false == ($cache instanceof Models\PageCache)) {
+            throw new \Exception("No cache record, so why you calling ->render(). This should NEVER happen!");
         }
 
-        $output = parent::generate($page);
+        $response->headers->set('X-API-Framework-Cache', "hit");
 
-        $headers = [];
-        foreach ($this->headers() as $h) {
-            list($name, $value) = explode(':', $h['header'], 2);
-            $headers[$name] = $value;
+        return $cache->render($response);
+    }
+
+    public function saveToCache(HttpFoundation\Request $request, HttpFoundation\Response $response): HttpFoundation\Response
+    {
+
+        foreach($response->headers->all() as $name => $value) {
+            $headers[$name] = $value[0];
         }
 
         // Update the cache
         (new Models\PageCache())
             ->headers(json_encode($headers, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES))
-            ->contents($output)
-            ->queryString($orderedQueryString)
+            ->contents($response->getContent())
+            ->queryString($this->normaliseQueryString($request))
             ->dateCreatedAt('now')
             ->dateExpiresAt(\DateTimeObj::format(
                 \Extension_API_Framework::calculateNextCacheExpiryTime(),
                 DATE_RFC2822
             ))
-            ->page($page)
+            ->page($request->getPathInfo())
             ->save()
         ;
+        
+        $response->headers->set('X-API-Framework-Cache', "miss");
 
-        JsonFrontend::Page()->addHeaderToPage(
-            'X-API-Framework-Cache',
-            'miss'
-        );
-
-        return $output;
+        return $response;
     }
 }

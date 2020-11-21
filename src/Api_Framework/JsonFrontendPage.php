@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
+use Symfony\Component\HttpFoundation;
+
 /**
  * This extends the core FrontendPage class of Symphony to give us a vector to
  * overload various functionality.
@@ -28,62 +30,16 @@ class JsonFrontendPage extends \FrontendPage
         $this->is_logged_in = JsonFrontend::instance()->isLoggedIn();
     }
 
-    public function getController(): AbstractController
-    {
-        // #5 - Use the full page path to generate the controller class name
-        // #7 - Use a PSR-4 folder structure and build the namespace accordingly
-        // #14 - Each page has a parent-path (somtimes this is / when at root).
-
-        // In order to find the correct controller path, we need to combine
-        // current-page with parent-path
-
-        // Determine the current page path
-        $page = (new PageResolver((string)getCurrentPage()))->resolve();
-
-        $controllerName = 'Controller'.ucfirst(trim($page->handle));
-
-        // Next, do some processing over the parent path (if there is one) to
-        // determine the folder path.
-        $parts = array_map('ucfirst', preg_split("@\/@", trim((string)$page->path, '/')));
-        $controllerPath = implode($parts, '\\').'\\';
-
-        $controllerPath = sprintf(
-            __NAMESPACE__ . "\\Controllers\\%s%s",
-            ltrim($controllerPath, '\\'),
-            $controllerName
-        );
-
-        // #6 - Check if the controller exists before trying to include it.
-        // Throw an exception if it cannot be located.
-        if (false == class_exists($controllerPath)) {
-            throw new Exceptions\ControllerNotFoundException($controllerPath);
-        }
-
-        $controller = new $controllerPath();
-
-        // Make sure the controller extends the AbstractController class
-        if (false == ($controller instanceof AbstractController)) {
-            throw new Exceptions\ControllerNotValidException("'{$controllerPath}' is not a valid controller.");
-        }
-
-        return $controller;
-    }
-
     // Accessor method for rendering the page headers.
     public function renderHeaders(): void
     {
         \Page::__renderHeaders();
     }
 
-    public function generateParent($page = null): string
-    {
-        return parent::generate($page);
-    }
-
-    public function generate($page = null): string
+    public function render(HttpFoundation\Request $request, HttpFoundation\Response $response): HttpFoundation\Response
     {
 
-        $output = $this->generateParent($page);
+        $output = parent::generate(rtrim($request->getPathInfo(), '/'));
 
         cleanup_session_cookies();
 
@@ -140,6 +96,9 @@ class JsonFrontendPage extends \FrontendPage
                 throw $e;
             }
         }
-        return $output;
+
+        $response->setContent($output);
+
+        return $response;
     }
 }
