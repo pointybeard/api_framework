@@ -27,11 +27,10 @@ if (!class_exists('\\Extension_API_Framework')) {
         const CACHE_DURATION_HOUR = 'hour';
         const CACHE_DURATION_WEEK = 'week';
 
-        const CACHE_ENABLED = 'yes';
-        const CACHE_DISABLED = 'no';
-
-        const EXCEPTION_DEBUG_ENABLED = 'yes';
-        const EXCEPTION_DEBUG_DISABLED = 'no';
+        // These are an attempt to standardise setting/testing values of
+        // checkbox preferences
+        const ENABLED = 'yes';
+        const DISABLED = 'no';
 
         public function getSubscribedDelegates(): array
         {
@@ -79,7 +78,7 @@ if (!class_exists('\\Extension_API_Framework')) {
 
             // Append enable cache
             $label = Widget::Label();
-            $input = Widget::Input('settings[api_framework][enable_caching]', self::CACHE_ENABLED, 'checkbox');
+            $input = Widget::Input('settings[api_framework][enable_caching]', self::ENABLED, 'checkbox');
 
             if (self::isCacheEnabled()) {
                 $input->setAttribute('checked', 'checked');
@@ -144,9 +143,9 @@ if (!class_exists('\\Extension_API_Framework')) {
             // Append help
             $group->appendChild(new XMLElement('p', __('By default, any expired cache entries are automatically checked for and removed each time a cacheable page is rendered. If there the site has a large volume of cached content, you may wish to disable this to reduce load.'), ['class' => 'help']));
 
-            // Append enable cache
+            // Append enable exception debug output
             $label = Widget::Label();
-            $input = Widget::Input('settings[api_framework][enable_exception_debug_output]', self::EXCEPTION_DEBUG_ENABLED, 'checkbox');
+            $input = Widget::Input('settings[api_framework][enable_exception_debug_output]', self::ENABLED, 'checkbox');
 
             if (self::isExceptionDebugOutputEnabled()) {
                 $input->setAttribute('checked', 'checked');
@@ -155,8 +154,20 @@ if (!class_exists('\\Extension_API_Framework')) {
             $label->setValue($input->generate().' '.__('Enable exception debug output'));
             $group->appendChild($label);
 
-            // Append exception debug
             $group->appendChild(new XMLElement('p', __('When there is an uncaught exception, enabling this will display more information including a debug trace and list of executed SQL extensions. Not recommened to enable this on production environments.'), ['class' => 'help']));
+
+            // Append enable default routes
+            $label = Widget::Label();
+            $input = Widget::Input('settings[api_framework][disable_default_routes]', self::ENABLED, 'checkbox');
+
+            if (self::isDefaultRoutesDisabled()) {
+                $input->setAttribute('checked', 'checked');
+            }
+
+            $label->setValue($input->generate().' '.__('Disable default routes for all pages'));
+            $group->appendChild($label);
+
+            $group->appendChild(new XMLElement('p', __('Checking this will disable the auto-generated routes for pages that do not have a custom route defined in workspace/routes.php. Any page without a route will throw a 404 Page Not Found error.'), ['class' => 'help']));
 
             // Append new preference group
             $context['wrapper']->appendChild($group);
@@ -174,17 +185,18 @@ if (!class_exists('\\Extension_API_Framework')) {
                 // Disable caching by default
                 $context['settings'] = [
                 'api_framework' => [
-                    'enable_caching' => self::CACHE_DISABLED,
+                    'enable_caching' => self::DISABLED,
                     'cache_lifetime' => 1,
                     'cache_duration' => self::CACHE_DURATION_HOUR,
-                    'cache_disable_cleanup' => 'no',
-                    'enable_exception_debug_output' => 'no',
+                    'cache_disable_cleanup' => self::DISABLED,
+                    'enable_exception_debug_output' => self::DISABLED,
+                    'disable_default_routes' => self::DISABLED
                 ],
             ];
             } else {
                 if (false == isset($context['settings']['api_framework']['enable_caching'])) {
                     // Disable caching if it has not been checked
-                    $context['settings']['api_framework']['enable_caching'] = self::CACHE_DISABLED;
+                    $context['settings']['api_framework']['enable_caching'] = self::DISABLED;
                 }
 
                 if (false == isset($context['settings']['api_framework']['cache_disable_cleanup'])) {
@@ -193,8 +205,11 @@ if (!class_exists('\\Extension_API_Framework')) {
                 }
 
                 if (false == isset($context['settings']['api_framework']['enable_exception_debug_output'])) {
-                    // Disable cache cheanup had been checked
-                    $context['settings']['api_framework']['enable_exception_debug_output'] = self::EXCEPTION_DEBUG_DISABLED;
+                    $context['settings']['api_framework']['enable_exception_debug_output'] = self::DISABLED;
+                }
+
+                if (false == isset($context['settings']['api_framework']['disable_default_routes'])) {
+                    $context['settings']['api_framework']['disable_default_routes'] = self::DISABLED;
                 }
 
                 $context['settings']['api_framework']['cache_lifetime'] = max(1, (int) $context['settings']['api_framework']['cache_lifetime']);
@@ -207,7 +222,7 @@ if (!class_exists('\\Extension_API_Framework')) {
         public static function isCacheEnabled(): bool
         {
             return
-                self::CACHE_ENABLED == Symphony::Configuration()->get('enable_caching', 'api_framework')
+                self::ENABLED == Symphony::Configuration()->get('enable_caching', 'api_framework')
                     ? true
                     : false
             ;
@@ -216,7 +231,16 @@ if (!class_exists('\\Extension_API_Framework')) {
         public static function isExceptionDebugOutputEnabled(): bool
         {
             return
-                self::CACHE_ENABLED == Symphony::Configuration()->get('enable_exception_debug_output', 'api_framework')
+                self::ENABLED == Symphony::Configuration()->get('enable_exception_debug_output', 'api_framework')
+                    ? true
+                    : false
+                ;
+        }
+
+        public static function isDefaultRoutesDisabled(): bool
+        {
+            return
+                self::ENABLED == Symphony::Configuration()->get('disable_default_routes', 'api_framework')
                     ? true
                     : false
                 ;
