@@ -87,7 +87,7 @@ class ExceptionHandler extends \GenericExceptionHandler
         ];
 
         // Check for a custom status code
-        if (true == ($ex instanceof AbstractApiException)) {
+        if (true == ($ex instanceof Exceptions\ApiFrameworkException)) {
             $output['status'] = $ex->getHttpStatusCode();
         }
 

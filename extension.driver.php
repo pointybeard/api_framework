@@ -13,6 +13,7 @@ if (!file_exists(__DIR__.'/vendor/autoload.php')) {
 require_once __DIR__.'/vendor/autoload.php';
 
 use pointybeard\Symphony\Extended;
+use pointybeard\Symphony\Extended\PageResolver;
 use pointybeard\Helpers\Functions\Arrays;
 use pointybeard\Symphony\Extensions\Api_Framework;
 
@@ -412,7 +413,7 @@ if (!class_exists('\\Extension_API_Framework')) {
 
             // We need to determine if this is a JSON page or not and set the
             // renderer accordingly
-            $page = (new API_Framework\PageResolver((string)getCurrentPage()))->resolve();
+            $page = (new PageResolver((string)getCurrentPage()))->resolve();
 
             if ($page instanceof \stdClass && true == in_array(Api_Framework\JsonFrontendPage::PAGE_TYPE_JSON, $page->type)) {
                 define('SYMPHONY_LAUNCHER', 'pointybeard\\Symphony\\Extensions\\Api_Framework\\renderer_json');

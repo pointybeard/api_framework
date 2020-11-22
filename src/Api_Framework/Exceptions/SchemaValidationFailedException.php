@@ -5,13 +5,12 @@ declare(strict_types=1);
 namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
 use pointybeard\Symphony\Extensions\Api_Framework\Interfaces;
-use Symfony\Component\HttpFoundation\Response;
-use pointybeard\Symphony\Extensions\Api_Framework;
+use Symfony\Component\HttpFoundation;
 
 /**
  * @thrownby pointybeard\Symphony\Extensions\Api_Framework\Traits\hasEndpointSchemaTrait
  */
-class SchemaValidationFailedException extends Api_Framework\AbstractApiException implements Interfaces\ModifiesExceptionOutputInterface
+class SchemaValidationFailedException extends ApiFrameworkException implements Interfaces\ModifiesExceptionOutputInterface
 {
     /**
      * Holds errors that are passed in through the constructor.
@@ -42,7 +41,7 @@ class SchemaValidationFailedException extends Api_Framework\AbstractApiException
         $this->dataProvided = $dataProvided;
 
         parent::__construct(
-            Response::HTTP_BAD_REQUEST,
+            HttpFoundation\Response::HTTP_BAD_REQUEST,
             'Validation failed. Errors where encountered while validating data against the supplied schema.',
             $code,
             $previous

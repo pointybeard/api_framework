@@ -30,10 +30,10 @@
         "php": ">=7.4",
         "pointybeard/helpers": "~1.2.0",
         "pointybeard/symphony-pdo": "~0.1.7.0",
-        "pointybeard/symphony-extended": ">=1.0.1.1",
         "pointybeard/symphony-classmapper": "~2.0",
         "symfony/http-foundation": "~4.2.0",
-        "justinrainbow/json-schema": "~5.2.0"
+        "opis/json-schema": "^1.0",
+        "pointybeard/symphony-extended": "dev-feature-router"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "3.*",

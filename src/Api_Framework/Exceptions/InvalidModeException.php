@@ -4,6 +4,6 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
-class InvalidModeException extends \Exception
+class InvalidModeException extends ApiFrameworkException
 {
 }

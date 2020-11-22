@@ -12,8 +12,8 @@ use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Foundation\BroadcastAndListen;
 use pointybeard\Symphony\Extensions\Console\Commands\Console\Symphony;
 
-use pointybeard\Symphony\Extensions\Api_Framework\Router;
-use pointybeard\Symphony\Extensions\Api_Framework\Route;
+use pointybeard\Symphony\Extended\Router;
+use pointybeard\Symphony\Extended\Route;
 use pointybeard\Symphony\Extensions\Api_Framework\Controllers;
 
 class Routes extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface, BroadcastAndListen\Interfaces\AcceptsListenersInterface

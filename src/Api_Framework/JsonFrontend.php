@@ -5,8 +5,9 @@ declare(strict_types=1);
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use Symphony;
+use pointybeard\Symphony\Extended;
+use pointybeard\Symphony\Extended\Router;
 use Symfony\Component\HttpFoundation;
-use pointybeard\Symphony\Extensions\Api_Framework\Router;
 
 /**
  * This extends the core Symphony class to give us a vector to
@@ -67,7 +68,15 @@ class JsonFrontend extends Symphony
             $routes->buildDefaultRoutes();
         }
 
-        $route = $routes->find($request);
+        try {
+            $route = $routes->find($request);
+
+        } catch(Extended\Exceptions\MethodNotAllowedException $ex) {
+            throw new Exceptions\ApiFrameworkException(HttpFoundation\Response::HTTP_METHOD_NOT_ALLOWED, $ex->getMessage(), 0, $ex);
+
+        } catch(Extended\Exceptions\MatchingRouteNotFound $ex) {
+            throw new Exceptions\ApiFrameworkException(HttpFoundation\Response::HTTP_NOT_FOUND, $ex->getMessage(), 0, $ex);
+        }
 
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =

@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework\Traits;
 
-use JsonSchema;
+use Opis\JsonSchema;
 use Symfony\Component\HttpFoundation\Request;
 use pointybeard\Symphony\Extensions\Api_Framework;
 
 /**
  * This trait will help resolve schema for a particular endpoint.
  */
-trait hasEndpointSchemaTrait
+trait HasEndpointSchemaTrait
 {
     /**
      * This will return any JSON schemas for the endpoint.
@@ -91,16 +91,13 @@ trait hasEndpointSchemaTrait
 
         // We only need to validate if a schema was supplied
         if (null != $schema) {
-            // Validate
-            $validator = new JsonSchema\Validator();
-            $validator->validate(
-                $data,
-                (object) ['$ref' => 'file://'.realpath($schema)]
-            );
+
+            $validator = new JsonSchema\Validator;
+            $result = $validator->dataValidation((object)["name" => "John Doe"], (object) ['$ref' => 'file://'.realpath($schema)]);
 
             // The result was not valid, but we need to dig a little deeper to
             // see what the problem might be.
-            if (true !== $validator->isValid()) {
+            if (true !== $result->isValid()) {
                 $errors = [];
 
                 foreach ($validator->getErrors() as $error) {
