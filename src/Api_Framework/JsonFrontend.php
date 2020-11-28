@@ -63,6 +63,19 @@ class JsonFrontend extends Symphony
             ['routes' => &$routes]
         );
 
+        // Check to see if we have global OPTIONS route enabled
+        if(true == \Extension_API_Framework::isGlobalOptionsRouteEnabled()) {
+            $routes
+                ->add(
+                    (new Extended\Route)
+                        ->url("/{anything}")
+                        ->controller([GlobalOptionsController::class, "options"])
+                        ->methods(Extended\Route::METHOD_OPTIONS)
+                        ->validate(['anything' => '.*'])
+                )
+            ;
+        }
+
         // Check to see if we have default routes enabled
         if(false == \Extension_API_Framework::isDefaultRoutesDisabled()) {
             $routes->buildDefaultRoutes();
@@ -135,15 +148,9 @@ class JsonFrontend extends Symphony
 
             $controller = new $controllerClass;
 
-            // We only validate if the controller has the trait HasEndpointSchemaTrait
-            $canValidate = array_key_exists(__NAMESPACE__ . "\Traits\HasEndpointSchemaTrait", (new \ReflectionClass($controllerClass))->getTraits());
-
-            // Validate the request if able
-            if (true == $canValidate && null !== $controller->schemas($request->getMethod())->request) {
-                $controller->validate(
-                    $request->request->all(),
-                    $controller->schemas($request->getMethod())->request
-                );
+            // Validate output if a request schema was provided
+            if(true == ($route instanceof JsonRoute) && $route->canValidateRequest()) {
+                $route->validateRequest($request);
             }
 
             $response = call_user_func_array(
@@ -152,11 +159,12 @@ class JsonFrontend extends Symphony
             );
         }
 
-        // Validate the response if able
-        if (true == $canValidate && null !== $controller->schemas($request->getMethod())->response) {
-            $controller->validate($response->getContent(), $controller->schemas($request->getMethod())->response);
+        // Validate output if a response schema was provided
+        if(true == ($route instanceof JsonRoute) && $route->canValidateResponse()) {
+            $route->validateResponse($response);
         }
 
+        // Save to cache if this is a cachable page type
         if(true == $isCacheable && false === $isCacheHit) {
             self::$_page->saveToCache($request, $response);
         }
