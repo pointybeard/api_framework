@@ -170,6 +170,19 @@ if (!class_exists('\\Extension_API_Framework')) {
 
             $group->appendChild(new XMLElement('p', __('Checking this will disable the auto-generated routes for pages that do not have a custom route defined in workspace/routes.php. Any page without a route will throw a 404 Page Not Found error.'), ['class' => 'help']));
 
+            // Append enable global options route
+            $label = Widget::Label();
+            $input = Widget::Input('settings[api_framework][enable_global_options_route]', self::ENABLED, 'checkbox');
+
+            if (true == self::isGlobalOptionsRouteEnabled()) {
+                $input->setAttribute('checked', 'checked');
+            }
+
+            $label->setValue($input->generate().' '.__('Enable global OPTIONS route'));
+            $group->appendChild($label);
+
+            $group->appendChild(new XMLElement('p', __('Checking this will add a global route to respond to any OPTIONS HTTP request.'), ['class' => 'help']));
+
             // Append new preference group
             $context['wrapper']->appendChild($group);
         }
@@ -183,17 +196,16 @@ if (!class_exists('\\Extension_API_Framework')) {
         public function savePreferences(array &$context): void
         {
             if (!is_array($context['settings'])) {
-                // Disable caching by default
-                $context['settings'] = [
-                'api_framework' => [
+                $context['settings'] = ['api_framework' => [
                     'enable_caching' => self::DISABLED,
                     'cache_lifetime' => 1,
                     'cache_duration' => self::CACHE_DURATION_HOUR,
                     'cache_disable_cleanup' => self::DISABLED,
                     'enable_exception_debug_output' => self::DISABLED,
-                    'disable_default_routes' => self::DISABLED
-                ],
-            ];
+                    'disable_default_routes' => self::DISABLED,
+                    'enable_global_options_route' => self::ENABLED
+                ]];
+
             } else {
                 if (false == isset($context['settings']['api_framework']['enable_caching'])) {
                     // Disable caching if it has not been checked
@@ -202,7 +214,7 @@ if (!class_exists('\\Extension_API_Framework')) {
 
                 if (false == isset($context['settings']['api_framework']['cache_disable_cleanup'])) {
                     // Disable cache cheanup had been checked
-                    $context['settings']['api_framework']['cache_disable_cleanup'] = 'no';
+                    $context['settings']['api_framework']['cache_disable_cleanup'] = self::DISABLED;
                 }
 
                 if (false == isset($context['settings']['api_framework']['enable_exception_debug_output'])) {
@@ -211,6 +223,10 @@ if (!class_exists('\\Extension_API_Framework')) {
 
                 if (false == isset($context['settings']['api_framework']['disable_default_routes'])) {
                     $context['settings']['api_framework']['disable_default_routes'] = self::DISABLED;
+                }
+
+                if (false == isset($context['settings']['api_framework']['enable_global_options_route'])) {
+                    $context['settings']['api_framework']['enable_global_options_route'] = self::DISABLED;
                 }
 
                 $context['settings']['api_framework']['cache_lifetime'] = max(1, (int) $context['settings']['api_framework']['cache_lifetime']);
@@ -246,14 +262,22 @@ if (!class_exists('\\Extension_API_Framework')) {
                     : false
                 ;
         }
-        
+
+        public static function isGlobalOptionsRouteEnabled(): bool
+        {
+            return
+                self::ENABLED == Symphony::Configuration()->get('enable_global_options_route', 'api_framework')
+                    ? true
+                    : false
+                ;
+        }
+
         /**
          * Check if cache cleanup is enabled.
          */
         public static function isCacheCleanupEnabled(): bool
         {
-            return
-            'yes' != Symphony::Configuration()->get('cache_disable_cleanup', 'api_framework')
+            return self::ENABLED != Symphony::Configuration()->get('cache_disable_cleanup', 'api_framework')
                 ? true
                 : false
         ;
