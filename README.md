@@ -51,7 +51,7 @@ $ bin/orchestra build \
     --database-skip-import-data \
     --database-skip-import-structure \
     --skip-create-author \
-    --skip-skip-seeders \
+    --skip-seeders \
     --skip-git-reset \
     --skip-composer \
     --skip-postbuild
