@@ -148,6 +148,9 @@ class JsonFrontend extends Symphony
 
             $controller = new $controllerClass;
 
+            // Initialise the controller
+            $controller->initialise($request);
+
             // Validate output if a request schema was provided
             if(true == ($route instanceof JsonRoute) && $route->canValidateRequest()) {
                 $route->validateRequest($request);
