@@ -19,17 +19,17 @@ class JsonRequest extends HttpFoundation\Request
         // populate with data.
         $request = parent::createFromGlobals();
 
-        // Grab whatever we were sent; hopefully it's valid Json.
-        $requestBody = trim((string)file_get_contents('php://input'));
+        // Grab whatever we were sent
+        $request->body = file_get_contents('php://input');
 
         // Initialise an array to hold our input data.
         $input = [];
 
         // If we got something, decode it (making the assumption it's actually
         // json.)
-        if (false == empty($requestBody)) {
+        if (strlen(trim((string)$request->body)) > 0) {
             try {
-                $input = json_decode($requestBody, true, 512, JSON_THROW_ON_ERROR | $options);
+                $input = json_decode((string)$request->body, true, 512, JSON_THROW_ON_ERROR | $options);
             } catch (\JsonException $ex) {
                 throw new Exceptions\RequestJsonInvalidException(0, $ex);
             }
