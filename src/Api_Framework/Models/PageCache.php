@@ -12,7 +12,7 @@ use pointybeard\Symphony\Extensions\Api_Framework;
 
 final class PageCache extends Classmapper\AbstractModel
 {
-    use Classmapper\Traits\hasModelTrait;
+    use Classmapper\Traits\HasModelTrait;
     use Classmapper\Traits\HasFilterableModelTrait;
 
     public function getSectionHandle(): string
