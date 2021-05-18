@@ -26,19 +26,25 @@
       "issues": "https://github.com/pointybeard/api_framework/issues",
       "wiki": "https://github.com/pointybeard/api_framework/wiki"
     },
+    "repositories": [
+        {
+            "type": "git",
+            "url": "https://github.com/pointybeard/symphony-extended.git"
+        }
+    ],
     "require": {
         "php": ">=7.4",
         "m1x0n/opis-json-schema-error-presenter": "^0.5.2",
         "opis/json-schema": "^1.0",
         "pointybeard/helpers": "~1.2.0",
         "pointybeard/symphony-classmapper": "~2.0",
-        "pointybeard/symphony-extended": "^1.0",
+        "pointybeard/symphony-extended": "dev-feature-middleware",
         "pointybeard/symphony-pdo": "~0.1.7.0",
         "symfony/http-foundation": "~4.2.0"
     },
     "require-dev": {
-        "squizlabs/php_codesniffer": "3.*",
-        "friendsofphp/php-cs-fixer": "^2.16",
+        "squizlabs/php_codesniffer": "~3.0",
+        "friendsofphp/php-cs-fixer": "~3.0",
         "php-mock/php-mock-prophecy": "^0.0.2",
         "damianopetrungaro/php-commitizen": "^0.1.2",
         "php-parallel-lint/php-parallel-lint": "^1.2"
@@ -54,7 +60,7 @@
     },
     "scripts": {
         "post-update-cmd": "mkdir -p commands",
-        "tidy": "php-cs-fixer fix --config=.php_cs.dist -v --using-cache=no",
+        "tidy": "php-cs-fixer fix -v --using-cache=no",
         "tidyDry": "@tidy --dry-run",
         "test": [
             "parallel-lint . --exclude vendor",
