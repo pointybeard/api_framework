@@ -4,10 +4,13 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
-use Symphony;
 use pointybeard\Symphony\Extended;
 use pointybeard\Symphony\Extended\Router;
 use Symfony\Component\HttpFoundation;
+
+use Extension_API_Framework;
+use Closure;
+use Symphony;
 
 /**
  * This extends the core Symphony class to give us a vector to
@@ -64,7 +67,7 @@ class JsonFrontend extends Symphony
         );
 
         // Check to see if we have global OPTIONS route enabled
-        if(true == \Extension_API_Framework::isGlobalOptionsRouteEnabled()) {
+        if(true == Extension_API_Framework::isGlobalOptionsRouteEnabled()) {
             $routes
                 ->add(
                     (new Extended\Route)
@@ -77,7 +80,7 @@ class JsonFrontend extends Symphony
         }
 
         // Check to see if we have default routes enabled
-        if(false == \Extension_API_Framework::isDefaultRoutesDisabled()) {
+        if(false == Extension_API_Framework::isDefaultRoutesDisabled()) {
             $routes->buildDefaultRoutes();
         }
 
@@ -94,7 +97,7 @@ class JsonFrontend extends Symphony
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =
         (
-            true == \Extension_API_Framework::isCacheEnabled()
+            true == Extension_API_Framework::isCacheEnabled()
             && HttpFoundation\Request::METHOD_GET == $request->getMethod()
             && true == is_array($route->page()->type)
             && true == in_array(JsonFrontendPage::PAGE_TYPE_CACHEABLE, $route->page()->type)
@@ -107,16 +110,27 @@ class JsonFrontend extends Symphony
                 : new JsonFrontendPage()
         );
 
+        Extended\ServiceContainer::getInstance()->register("request", $request);
+
         // Prepare the response.
         $response = new HttpFoundation\JsonResponse();
-        $response->headers->set('Content-Type', 'application/json');
+        $response->headers->set('Content-Type', 'application/json; charset=utf-8');
         $response->headers->set('X-API-Framework-Page-Renderer',  array_pop(explode('\\', get_class(self::$_page))));
         $response->setEncodingOptions(JsonFrontend::instance()->getEncodingOptions());
+
+        // Register the Response object in our container
+        Extended\ServiceContainer::getInstance()->register("response", $response);
+
+        // Run middleware now
+        $route->runMiddleware($request, $response);
+
+        // Middleware might have modified the response object
+        $response = Extended\ServiceContainer::getInstance()->get("response");
 
         // Check if "Disable Cache Cleanup" has been set. If not, go ahead and
         // delete all expired cache entries. This can be disabled in the
         // preferences.
-        if (true == $isCacheable && \Extension_API_Framework::isCacheCleanupEnabled()) {
+        if (true == $isCacheable && Extension_API_Framework::isCacheCleanupEnabled()) {
             $response->headers->set('X-API-Framework-Expired-Cache-Entries', Models\PageCache::deleteExpired());
         }
 
@@ -156,9 +170,9 @@ class JsonFrontend extends Symphony
                 $route->validateRequest($request);
             }
 
-            $response = call_user_func_array(
+            $response = call_user_func(
                 [$controller, $controllerMethod], 
-                array_merge([$request, $response], $route->parse($request)->elements)
+                ...array_merge([$request, $response], array_values($route->parse($request)->elements))
             );
         }
 
