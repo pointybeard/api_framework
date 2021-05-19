@@ -26,21 +26,15 @@
       "issues": "https://github.com/pointybeard/api_framework/issues",
       "wiki": "https://github.com/pointybeard/api_framework/wiki"
     },
-    "repositories": [
-        {
-            "type": "git",
-            "url": "https://github.com/pointybeard/symphony-extended.git"
-        }
-    ],
     "require": {
         "php": ">=7.4",
-        "m1x0n/opis-json-schema-error-presenter": "^0.5.2",
         "opis/json-schema": "^1.0",
         "pointybeard/helpers": "~1.2.0",
-        "pointybeard/symphony-classmapper": "~2.0",
-        "pointybeard/symphony-extended": "dev-feature-middleware",
+        "symfony/http-foundation": "~4.2.0",
         "pointybeard/symphony-pdo": "~0.1.7.0",
-        "symfony/http-foundation": "~4.2.0"
+        "pointybeard/symphony-extended": ">=1.0.1.11",
+        "pointybeard/symphony-classmapper": "~2.0",
+        "m1x0n/opis-json-schema-error-presenter": "^0.5.2"
     },
     "require-dev": {
         "squizlabs/php_codesniffer": "~3.0",
