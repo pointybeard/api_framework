@@ -46,7 +46,8 @@
     "autoload": {
         "psr-4": {
             "pointybeard\\Symphony\\Extensions\\": "src",
-            "pointybeard\\Symphony\\Extensions\\Api_Framework\\Controllers\\": "../../workspace/controllers"
+            "pointybeard\\Symphony\\Extensions\\Api_Framework\\Controllers\\": "../../workspace/controllers",
+            "pointybeard\\Symphony\\Extensions\\Api_Framework\\Middleware\\": "../../workspace/middleware"
         },
         "files": [
             "src/Includes/Renderer.php"
