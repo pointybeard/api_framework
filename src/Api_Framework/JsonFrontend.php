@@ -55,6 +55,7 @@ class JsonFrontend extends Symphony
     {
 
         $routes = new Router;
+        $container = Extended\ServiceContainer::getInstance();
 
         // Load routes
         $loader = include WORKSPACE . "/routes.php";
@@ -94,6 +95,9 @@ class JsonFrontend extends Symphony
             throw new Exceptions\ApiFrameworkException(HttpFoundation\Response::HTTP_NOT_FOUND, $ex->getMessage(), 0, $ex);
         }
 
+        // Register the route with service container
+        $container->register("route", $route);
+
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =
         (
@@ -110,22 +114,13 @@ class JsonFrontend extends Symphony
                 : new JsonFrontendPage()
         );
 
-        Extended\ServiceContainer::getInstance()->register("request", $request);
-
-        // Prepare the response.
-        $response = new HttpFoundation\JsonResponse();
-        $response->headers->set('Content-Type', 'application/json; charset=utf-8');
-        $response->headers->set('X-API-Framework-Page-Renderer',  array_pop(explode('\\', get_class(self::$_page))));
-        $response->setEncodingOptions(JsonFrontend::instance()->getEncodingOptions());
-
-        // Register the Response object in our container
-        Extended\ServiceContainer::getInstance()->register("response", $response);
+        $container->register("request", $request);
+        $container->register("response", new HttpFoundation\JsonResponse, true);
+        $container->register("page", self::$_page);
+        $container->register("frontend", JsonFrontend::instance());
 
         // Run middleware now
-        $route->runMiddleware($request, $response);
-
-        // Middleware might have modified the response object
-        $response = Extended\ServiceContainer::getInstance()->get("response");
+        $response = $route->runMiddleware();
 
         // Check if "Disable Cache Cleanup" has been set. If not, go ahead and
         // delete all expired cache entries. This can be disabled in the
@@ -147,46 +142,36 @@ class JsonFrontend extends Symphony
         if(null == $route->controller() || true == $isCacheHit) {
             $response = self::$_page->render($request, $response);
 
-        // 2a. There is a page controller specified
-        //      but it or the method does not exist
-        } elseif(false == class_exists($controllerClass) || false == method_exists($controllerClass, $controllerMethod)) {
-            throw new Exceptions\ControllerNotFoundException("{$controllerClass}::{$controllerMethod}");
-
-        // 2b. There is a page controller
-        //      but it does not implement Api_Framework\AbstractController
-        } elseif(false == (new \ReflectionClass($controllerClass))->implementsInterface(__NAMESPACE__ . '\\Interfaces\\ControllerInterface')) {
-            throw new Exceptions\ControllerNotValidException("Controller {$controllerClass} does not implement ControllerInterface");
-
         // 2c. There is a page controller, all is valid, and it responds to this method. Yay!!
         } else {
 
-            $controller = new $controllerClass;
+            // Register the controller so we can let the service container deal with dependencies
+            $container->register($controllerClass, "{$controllerClass}::{$controllerMethod}", false, $route->parse($request)->elements);
 
-            // Initialise the controller
-            $controller->initialise($request);
+            // Invoke the controller. Service Container will do the auto-wiring for us
+            $response = $container->get($controllerClass);
 
-            // Validate output if a request schema was provided
-            if(true == ($route instanceof JsonRoute) && $route->canValidateRequest()) {
-                $route->validateRequest($request);
-            }
-
-            $response = call_user_func(
-                [$controller, $controllerMethod], 
-                ...array_merge([$request, $response], array_values($route->parse($request)->elements))
-            );
         }
 
-        // Validate output if a response schema was provided
-        if(true == ($route instanceof JsonRoute) && $route->canValidateResponse()) {
-            $route->validateResponse($response);
+        // Response will have been modified so we need to register the updated version with the service container
+        // before we call the terminatation middleware
+        $container->register("response", $response);
+
+        // Run termination middleware
+        foreach($route->middleware() as $m) {
+            try {
+                $container->get("{$m}_terminate");
+            } catch (Extended\Exceptions\ServiceContainerEntryNotFoundException $ex) {
+                // No terminate method. Keep going.
+            }
         }
 
         // Save to cache if this is a cachable page type
         if(true == $isCacheable && false === $isCacheHit) {
-            self::$_page->saveToCache($request, $response);
+            self::$_page->saveToCache($request, $container->get("response"));
         }
 
-        return $response;
+        return $container->get("response");
 
     }
 
