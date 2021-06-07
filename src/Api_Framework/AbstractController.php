@@ -21,9 +21,4 @@ abstract class AbstractController implements Interfaces\ControllerInterface
     {
         return false;
     }
-
-    public function initialise(Request $request): void
-    {
-        return;
-    }
 }
