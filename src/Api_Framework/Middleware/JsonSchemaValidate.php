@@ -6,6 +6,7 @@ namespace pointybeard\Symphony\Extensions\Api_Framework\Middleware;
 
 use pointybeard\Symphony\Extensions\Api_Framework\JsonRoute;
 use pointybeard\Symphony\Extensions\Api_Framework\Models;
+use pointybeard\Symphony\Extensions\Api_Framework\Exceptions\SchemaValidationFailedException;
 
 use pointybeard\Symphony\Extended;
 use pointybeard\Symphony\Extended\Route;
@@ -105,7 +106,7 @@ final class JsonSchemaValidate
             }
 
             // Now throw up an exception along with the processed errors
-            throw new Exceptions\SchemaValidationFailedException(
+            throw new SchemaValidationFailedException(
                 $errors,
                 $schemaPathname,
                 $data
