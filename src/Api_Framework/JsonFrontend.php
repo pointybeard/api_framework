@@ -158,11 +158,13 @@ class JsonFrontend extends Symphony
         $container->register("response", $response);
 
         // Run termination middleware
-        foreach($route->middleware() as $m) {
-            try {
-                $container->get("{$m}_terminate");
-            } catch (Extended\Exceptions\ServiceContainerEntryNotFoundException $ex) {
-                // No terminate method. Keep going.
+        if(true == $route->hasMiddleware()) {
+            foreach($route->middleware() as $m) {
+                try {
+                    $container->get("{$m}_terminate");
+                } catch (Extended\Exceptions\ServiceContainerEntryNotFoundException $ex) {
+                    // No terminate method. Keep going.
+                }
             }
         }
 
