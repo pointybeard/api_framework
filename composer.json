@@ -29,10 +29,7 @@
     "require": {
         "php": ">=7.4",
         "opis/json-schema": "^1.0",
-        "pointybeard/helpers": "~1.2.0",
-        "symfony/http-foundation": "~4.2.0",
-        "pointybeard/symphony-pdo": "~0.1.7.0",
-        "pointybeard/symphony-extended": ">=1.0.1.11",
+        "pointybeard/symphony-extended": "^1.0",
         "pointybeard/symphony-classmapper": "~2.0",
         "m1x0n/opis-json-schema-error-presenter": "^0.5.2"
     },

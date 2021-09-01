@@ -4,14 +4,22 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
-class ExceptionHandler extends \GenericExceptionHandler
+use ErrorException;
+use Exception;
+use Symphony;
+use GenericErrorHandler;
+use GenericExceptionHandler;
+use SymphonyErrorPage;
+use pointybeard\Symphony\Extended;
+
+class ExceptionHandler extends GenericExceptionHandler
 {
     private static $debug;
 
     public static function initialise($Log = NULL)
     {
         self::$enabled = true;
-        self::$debug = true == \Symphony::isLoggedIn();
+        self::$debug = true == Symphony::isLoggedIn();
         restore_exception_handler();
         set_exception_handler(array(__CLASS__, 'handler'));
     }
@@ -37,7 +45,7 @@ class ExceptionHandler extends \GenericExceptionHandler
 
             echo call_user_func(array($class, 'render'), $ex);
             exit;
-        } catch (\Exception $ex) {
+        } catch (Exception $ex) {
             echo 'Looks like the Exception handler crapped out';
             print_r($ex);
             exit;
@@ -77,8 +85,6 @@ class ExceptionHandler extends \GenericExceptionHandler
 
     public static function render($ex): void
     {
-        header('Content-Type: application/json');
-
         // Build the JSON
         $output = [
             'status' => 500,
@@ -96,19 +102,17 @@ class ExceptionHandler extends \GenericExceptionHandler
             $output = $ex->modifyOutput($output);
         }
 
-        http_response_code($output['status']);
-
         if (self::$debug) {
-            if (is_object(\Symphony::Database())) {
-                $databaseDebug = \Symphony::Database()->debug();
+            if (is_object(Symphony::Database())) {
+                $databaseDebug = Symphony::Database()->debug();
             }
 
             $output['debug'] = [
                 'file' => $ex->getFile(),
                 'line' => $ex->getLine(),
                 'severity' => (
-                    $e instanceof \ErrorException
-                        ? \GenericErrorHandler::$errorTypeStrings[$ex->getSeverity()]
+                    $e instanceof ErrorException
+                        ? GenericErrorHandler::$errorTypeStrings[$ex->getSeverity()]
                         : 'Fatal Error'
                 ),
                 'code_trace' => (
@@ -122,7 +126,7 @@ class ExceptionHandler extends \GenericExceptionHandler
             // See of this is an XSLT error. If so, include the XML output
             // since that is what is most likely failing.
             if (
-                $e instanceof \SymphonyErrorPage &&
+                $e instanceof SymphonyErrorPage &&
                 'xslt' == $ex->getTemplateName() &&
                 isset($ex->getAdditional()->proc)
             ) {
@@ -152,7 +156,18 @@ class ExceptionHandler extends \GenericExceptionHandler
             }
         }
 
+        // log the error
+        $request = Extended\ServiceContainer::getInstance()->get("request");
+        Symphony::Log()->pushExceptionToLog($ex, true, false, false, ["output" => $output, "request" => [
+            "headers" => $request->headers->all(),
+            "query" => $request->query->all(),
+            "request" => $request->request->all(),
+            "raw" => (string)$request,
+        ]]);
+
         // output and die
+        header('Content-Type: application/json');
+        http_response_code($output['status']);
         echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         exit(255);
     }
