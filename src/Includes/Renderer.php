@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use Symfony\Component\HttpFoundation;
@@ -23,7 +32,7 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
         // This ensures the composer autoloader for the framework is included
         \Extension_API_Framework::init();
 
-        if(true == \Extension_API_Framework::isExceptionDebugOutputEnabled()) {
+        if (true == \Extension_API_Framework::isExceptionDebugOutputEnabled()) {
             ExceptionHandler::enableDebugOutput();
         }
 
@@ -36,7 +45,7 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
         try {
             $request = JsonRequest::createFromGlobals();
 
-        // We want to allow non-JSON requests in certain situations.
+            // We want to allow non-JSON requests in certain situations.
         } catch (Exceptions\RequestJsonInvalidException $ex) {
             $request = HttpFoundation\Request::createFromGlobals();
 
@@ -67,12 +76,12 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
         $response->headers->set('X-API-Framework-Render-Time', number_format($profile->elapsed, 4));
 
         // Transfer all the page headers over, if any, to the Response object
-        foreach(JsonFrontend::Page()->headers() as $h) {
-            $response->headers->set(...explode(":", $h['header'], 2));
+        foreach (JsonFrontend::Page()->headers() as $h) {
+            $response->headers->set(...explode(':', $h['header'], 2));
         }
 
         $response->send();
-                
+
         // Make sure nothing happens after calling this method. It shouldn't
         // but just in case.
         exit;

@@ -2,33 +2,44 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use ErrorException;
 use Exception;
-use Symphony;
 use GenericErrorHandler;
 use GenericExceptionHandler;
-use SymphonyErrorPage;
 use pointybeard\Symphony\Extended;
+use Symphony;
+use SymphonyErrorPage;
 
 class ExceptionHandler extends GenericExceptionHandler
 {
     private static $debug;
 
-    public static function initialise($Log = NULL)
+    public static function initialise($Log = null)
     {
         self::$enabled = true;
         self::$debug = true == Symphony::isLoggedIn();
         restore_exception_handler();
-        set_exception_handler(array(__CLASS__, 'handler'));
+        set_exception_handler([__CLASS__, 'handler']);
     }
 
-    public static function enableDebugOutput() {
+    public static function enableDebugOutput()
+    {
         self::$debug = true;
     }
 
-    public static function disableDebugOutput() {
+    public static function disableDebugOutput()
+    {
         self::$debug = false;
     }
 
@@ -43,7 +54,7 @@ class ExceptionHandler extends GenericExceptionHandler
                 $class = $handler;
             }
 
-            echo call_user_func(array($class, 'render'), $ex);
+            echo call_user_func([$class, 'render'], $ex);
             exit;
         } catch (Exception $ex) {
             echo 'Looks like the Exception handler crapped out';
@@ -157,12 +168,12 @@ class ExceptionHandler extends GenericExceptionHandler
         }
 
         // log the error
-        $request = Extended\ServiceContainer::getInstance()->get("request");
-        Symphony::Log()->pushExceptionToLog($ex, true, false, false, ["output" => $output, "request" => [
-            "headers" => $request->headers->all(),
-            "query" => $request->query->all(),
-            "request" => $request->request->all(),
-            "raw" => (string)$request,
+        $request = Extended\ServiceContainer::getInstance()->get('request');
+        Symphony::Log()->pushExceptionToLog($ex, true, false, false, ['output' => $output, 'request' => [
+            'headers' => $request->headers->all(),
+            'query' => $request->query->all(),
+            'request' => $request->request->all(),
+            'raw' => (string) $request,
         ]]);
 
         // output and die

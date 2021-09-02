@@ -2,20 +2,30 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Console\Commands\Api_Framework;
 
-use pointybeard\Symphony\Extensions\Console as Console;
 use pointybeard\Helpers\Cli;
 use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Symphony\Extensions\Api_Framework\Models\PageCache;
+use pointybeard\Symphony\Extensions\Console as Console;
 
 class Cache extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface
 {
     use Console\Traits\hasCommandRequiresAuthenticateTrait;
 
-    const ACTION_CLEAN = 'clean';
-    const ACTION_PURGE = 'purge';
+    public const ACTION_CLEAN = 'clean';
+
+    public const ACTION_PURGE = 'purge';
 
     public function __construct()
     {
@@ -55,9 +65,7 @@ class Cache extends Console\AbstractCommand implements Console\Interfaces\Authen
                                     self::ACTION_PURGE,
                                 ]
                             )) {
-                                throw new Console\Exceptions\ConsoleException(
-                                    'action must be either purge or clean.'
-                                );
+                                throw new Console\Exceptions\ConsoleException('action must be either purge or clean.');
                             }
 
                             return $context->find('action');

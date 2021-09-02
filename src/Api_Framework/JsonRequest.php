@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use Symfony\Component\HttpFoundation;
@@ -27,9 +36,9 @@ class JsonRequest extends HttpFoundation\Request
 
         // If we got something, decode it (making the assumption it's actually
         // json.)
-        if (strlen(trim((string)$request->body)) > 0) {
+        if (strlen(trim((string) $request->body)) > 0) {
             try {
-                $input = json_decode((string)$request->body, true, 512, JSON_THROW_ON_ERROR | $options);
+                $input = json_decode((string) $request->body, true, 512, JSON_THROW_ON_ERROR | $options);
             } catch (\JsonException $ex) {
                 throw new Exceptions\RequestJsonInvalidException(0, $ex);
             }

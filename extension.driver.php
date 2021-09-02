@@ -2,19 +2,24 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 if (!file_exists(__DIR__.'/vendor/autoload.php')) {
-    throw new Exception(sprintf(
-        'Could not find composer autoload file %s. Did you run `composer update` in %s?',
-        __DIR__.'/vendor/autoload.php',
-        __DIR__
-    ));
+    throw new Exception(sprintf('Could not find composer autoload file %s. Did you run `composer update` in %s?', __DIR__.'/vendor/autoload.php', __DIR__));
 }
 
 require_once __DIR__.'/vendor/autoload.php';
 
+use pointybeard\Helpers\Functions\Arrays;
 use pointybeard\Symphony\Extended;
 use pointybeard\Symphony\Extended\PageResolver;
-use pointybeard\Helpers\Functions\Arrays;
 use pointybeard\Symphony\Extensions\Api_Framework;
 
 // This file is included automatically in the composer autoloader, however,
@@ -23,15 +28,19 @@ use pointybeard\Symphony\Extensions\Api_Framework;
 if (!class_exists('\\Extension_API_Framework')) {
     class Extension_API_Framework extends Extended\AbstractExtension
     {
-        const CACHE_DURATION_MINUTE = 'minute';
-        const CACHE_DURATION_DAY = 'day';
-        const CACHE_DURATION_HOUR = 'hour';
-        const CACHE_DURATION_WEEK = 'week';
+        public const CACHE_DURATION_MINUTE = 'minute';
+
+        public const CACHE_DURATION_DAY = 'day';
+
+        public const CACHE_DURATION_HOUR = 'hour';
+
+        public const CACHE_DURATION_WEEK = 'week';
 
         // These are an attempt to standardise setting/testing values of
         // checkbox preferences
-        const ENABLED = 'yes';
-        const DISABLED = 'no';
+        public const ENABLED = 'yes';
+
+        public const DISABLED = 'no';
 
         public function getSubscribedDelegates(): array
         {
@@ -203,9 +212,8 @@ if (!class_exists('\\Extension_API_Framework')) {
                     'cache_disable_cleanup' => self::DISABLED,
                     'enable_exception_debug_output' => self::DISABLED,
                     'disable_default_routes' => self::DISABLED,
-                    'enable_global_options_route' => self::ENABLED
+                    'enable_global_options_route' => self::ENABLED,
                 ]];
-
             } else {
                 if (false == isset($context['settings']['api_framework']['enable_caching'])) {
                     // Disable caching if it has not been checked
@@ -437,7 +445,7 @@ if (!class_exists('\\Extension_API_Framework')) {
 
             // We need to determine if this is a JSON page or not and set the
             // renderer accordingly
-            $page = (new PageResolver((string)getCurrentPage()))->resolve();
+            $page = (new PageResolver((string) getCurrentPage()))->resolve();
 
             if ($page instanceof \stdClass && true == in_array(Api_Framework\JsonFrontendPage::PAGE_TYPE_JSON, $page->type)) {
                 define('SYMPHONY_LAUNCHER', 'pointybeard\\Symphony\\Extensions\\Api_Framework\\renderer_json');

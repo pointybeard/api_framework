@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use Symfony\Component\HttpFoundation;
@@ -11,11 +20,10 @@ use Symfony\Component\HttpFoundation;
  */
 class CacheableJsonFrontendPage extends JsonFrontendPage
 {
-
     public function isCacheHit(HttpFoundation\Request $request)
     {
         return Models\PageCache::loadCurrentFromPageAndQueryString(
-            rtrim($request->getPathInfo(), "/"),
+            rtrim($request->getPathInfo(), '/'),
             $this->normaliseQueryString($request)
         );
     }
@@ -46,18 +54,17 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
         $cache = $this->isCacheHit($request);
 
         if (false == ($cache instanceof Models\PageCache)) {
-            throw new \Exception("No cache record, so why you calling ->render(). This should NEVER happen!");
+            throw new \Exception('No cache record, so why you calling ->render(). This should NEVER happen!');
         }
 
-        $response->headers->set('X-API-Framework-Cache', "hit");
+        $response->headers->set('X-API-Framework-Cache', 'hit');
 
         return $cache->render($response);
     }
 
     public function saveToCache(HttpFoundation\Request $request, HttpFoundation\Response $response): HttpFoundation\Response
     {
-
-        foreach($response->headers->all() as $name => $value) {
+        foreach ($response->headers->all() as $name => $value) {
             $headers[$name] = $value[0];
         }
 
@@ -74,8 +81,8 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
             ->page($request->getPathInfo())
             ->save()
         ;
-        
-        $response->headers->set('X-API-Framework-Cache', "miss");
+
+        $response->headers->set('X-API-Framework-Cache', 'miss');
 
         return $response;
     }

@@ -2,14 +2,22 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
+use Extension_API_Framework;
 use pointybeard\Symphony\Extended;
 use pointybeard\Symphony\Extended\Router;
-use Symfony\Component\HttpFoundation;
 
-use Extension_API_Framework;
-use Closure;
+use Symfony\Component\HttpFoundation;
 use Symphony;
 
 /**
@@ -21,7 +29,7 @@ use Symphony;
 class JsonFrontend extends Symphony
 {
     // JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
-    const DEFAULT_ENCODING_OPTIONS = 207;
+    public const DEFAULT_ENCODING_OPTIONS = 207;
 
     protected $encodingOptions = self::DEFAULT_ENCODING_OPTIONS;
 
@@ -53,12 +61,11 @@ class JsonFrontend extends Symphony
      */
     public function display(HttpFoundation\Request $request)
     {
-
-        $routes = new Router;
+        $routes = new Router();
         $container = Extended\ServiceContainer::getInstance();
 
         // Load routes
-        $loader = include WORKSPACE . "/routes.php";
+        $loader = include WORKSPACE.'/routes.php';
         $loader($routes);
 
         self::ExtensionManager()->notifyMembers(
@@ -68,12 +75,12 @@ class JsonFrontend extends Symphony
         );
 
         // Check to see if we have global OPTIONS route enabled
-        if(true == Extension_API_Framework::isGlobalOptionsRouteEnabled()) {
+        if (true == Extension_API_Framework::isGlobalOptionsRouteEnabled()) {
             $routes
                 ->add(
-                    (new Extended\Route)
-                        ->url("/{anything}")
-                        ->controller([GlobalOptionsController::class, "options"])
+                    (new Extended\Route())
+                        ->url('/{anything}')
+                        ->controller([GlobalOptionsController::class, 'options'])
                         ->methods(Extended\Route::METHOD_OPTIONS)
                         ->validate(['anything' => '.*'])
                 )
@@ -81,22 +88,20 @@ class JsonFrontend extends Symphony
         }
 
         // Check to see if we have default routes enabled
-        if(false == Extension_API_Framework::isDefaultRoutesDisabled()) {
+        if (false == Extension_API_Framework::isDefaultRoutesDisabled()) {
             $routes->buildDefaultRoutes();
         }
 
         try {
             $route = $routes->find($request);
-
-        } catch(Extended\Exceptions\MethodNotAllowedException $ex) {
+        } catch (Extended\Exceptions\MethodNotAllowedException $ex) {
             throw new Exceptions\ApiFrameworkException(HttpFoundation\Response::HTTP_METHOD_NOT_ALLOWED, $ex->getMessage(), 0, $ex);
-
-        } catch(Extended\Exceptions\MatchingRouteNotFound $ex) {
+        } catch (Extended\Exceptions\MatchingRouteNotFound $ex) {
             throw new Exceptions\ApiFrameworkException(HttpFoundation\Response::HTTP_NOT_FOUND, $ex->getMessage(), 0, $ex);
         }
 
         // Register the route with service container
-        $container->register("route", $route);
+        $container->register('route', $route);
 
         // GET Requests on pages that are of type 'cacheable' can be cached.
         $isCacheable =
@@ -107,17 +112,17 @@ class JsonFrontend extends Symphony
             && true == in_array(JsonFrontendPage::PAGE_TYPE_CACHEABLE, $route->page()->type)
         );
 
-        self::$_page = 
+        self::$_page =
         (
             true == $isCacheable
                 ? new CacheableJsonFrontendPage()
                 : new JsonFrontendPage()
         );
 
-        $container->register("request", $request);
-        $container->register("response", new HttpFoundation\JsonResponse, true);
-        $container->register("page", self::$_page);
-        $container->register("frontend", JsonFrontend::instance());
+        $container->register('request', $request);
+        $container->register('response', new HttpFoundation\JsonResponse(), true);
+        $container->register('page', self::$_page);
+        $container->register('frontend', JsonFrontend::instance());
 
         // Run middleware now
         $response = $route->runMiddleware();
@@ -139,7 +144,7 @@ class JsonFrontend extends Symphony
         // There are a couple of pathways here:
         // 1. There is no controller or there is a hit on the cache so it should
         //      just pass on to the normal page rendering process
-        if(null == $route->controller() || true == $isCacheHit) {
+        if (null == $route->controller() || true == $isCacheHit) {
             $response = self::$_page->render($request, $response);
 
         // 2c. There is a page controller, all is valid, and it responds to this method. Yay!!
@@ -150,16 +155,15 @@ class JsonFrontend extends Symphony
 
             // Invoke the controller. Service Container will do the auto-wiring for us
             $response = $container->get($controllerClass);
-
         }
 
         // Response will have been modified so we need to register the updated version with the service container
         // before we call the terminatation middleware
-        $container->register("response", $response);
+        $container->register('response', $response);
 
         // Run termination middleware
-        if(true == $route->hasMiddleware()) {
-            foreach($route->middleware() as $m) {
+        if (true == $route->hasMiddleware()) {
+            foreach ($route->middleware() as $m) {
                 try {
                     $container->get("{$m}_terminate");
                 } catch (Extended\Exceptions\ServiceContainerEntryNotFoundException $ex) {
@@ -169,12 +173,11 @@ class JsonFrontend extends Symphony
         }
 
         // Save to cache if this is a cachable page type
-        if(true == $isCacheable && false === $isCacheHit) {
-            self::$_page->saveToCache($request, $container->get("response"));
+        if (true == $isCacheable && false === $isCacheHit) {
+            self::$_page->saveToCache($request, $container->get('response'));
         }
 
-        return $container->get("response");
-
+        return $container->get('response');
     }
 
     /**

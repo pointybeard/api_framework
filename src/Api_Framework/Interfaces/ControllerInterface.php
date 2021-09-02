@@ -2,13 +2,20 @@
 
 declare(strict_types=1);
 
-namespace pointybeard\Symphony\Extensions\Api_Framework\Interfaces;
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
 
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
+namespace pointybeard\Symphony\Extensions\Api_Framework\Interfaces;
 
 interface ControllerInterface
 {
     public function throwMethodNotAllowedExceptionOnGet(): bool;
+
     public function respondsToRequestMethod(string $method): bool;
 }

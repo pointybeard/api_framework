@@ -2,19 +2,26 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Console\Commands\Api_Framework;
 
-use pointybeard\Symphony\Extensions\Console as Console;
 use pointybeard\Helpers\Cli;
-use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Colour\Colour;
+use pointybeard\Helpers\Cli\Input;
 use pointybeard\Helpers\Cli\Input\AbstractInputType as Type;
 use pointybeard\Helpers\Foundation\BroadcastAndListen;
-use pointybeard\Symphony\Extensions\Console\Commands\Console\Symphony;
-
 use pointybeard\Symphony\Extended\Router;
-use pointybeard\Symphony\Extended\Route;
-use pointybeard\Symphony\Extensions\Api_Framework\Controllers;
+use pointybeard\Symphony\Extensions\Console as Console;
+
+use pointybeard\Symphony\Extensions\Console\Commands\Console\Symphony;
 
 class Routes extends Console\AbstractCommand implements Console\Interfaces\AuthenticatedCommandInterface, BroadcastAndListen\Interfaces\AcceptsListenersInterface
 {
@@ -22,7 +29,7 @@ class Routes extends Console\AbstractCommand implements Console\Interfaces\Authe
     use BroadcastAndListen\Traits\HasBroadcasterTrait;
     use Console\Traits\hasCommandRequiresAuthenticateTrait;
 
-    const ACTION_EXPORT = 'export';
+    public const ACTION_EXPORT = 'export';
 
     public function __construct()
     {
@@ -57,12 +64,10 @@ class Routes extends Console\AbstractCommand implements Console\Interfaces\Authe
                             if (!in_array(
                                 $context->find('action'),
                                 [
-                                    self::ACTION_EXPORT
+                                    self::ACTION_EXPORT,
                                 ]
                             )) {
-                                throw new Console\Exceptions\ConsoleException(
-                                    'action must be export'
-                                );
+                                throw new Console\Exceptions\ConsoleException('action must be export');
                             }
 
                             return $context->find('action');
@@ -82,11 +87,10 @@ class Routes extends Console\AbstractCommand implements Console\Interfaces\Authe
 
     public function execute(Input\Interfaces\InputHandlerInterface $input): bool
     {
-
-        $routes = new Router;
+        $routes = new Router();
 
         // Load routes
-        $loader = include WORKSPACE . "/routes.php";
+        $loader = include WORKSPACE.'/routes.php';
         $loader($routes);
 
         \Symphony::ExtensionManager()->notifyMembers(
@@ -96,15 +100,14 @@ class Routes extends Console\AbstractCommand implements Console\Interfaces\Authe
         );
 
         // Check to see if we have default routes enabled
-        if(false == \Extension_API_Framework::isDefaultRoutesDisabled()) {
+        if (false == \Extension_API_Framework::isDefaultRoutesDisabled()) {
             $routes->buildDefaultRoutes();
         }
 
         if (null === $input->find('output')) {
-            echo (string)$routes.PHP_EOL;
-
+            echo (string) $routes.PHP_EOL;
         } else {
-            file_put_contents($input->find('output'), (string)$routes);
+            file_put_contents($input->find('output'), (string) $routes);
             $this->broadcast(
                 Symphony::BROADCAST_MESSAGE,
                 E_NOTICE,

@@ -2,10 +2,19 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
-use GenericErrorHandler;
 use ErrorException;
+use GenericErrorHandler;
 
 class ErrorHandler extends GenericErrorHandler
 {
@@ -21,17 +30,15 @@ class ErrorHandler extends GenericErrorHandler
      * Initialise will set the error handler to be the `__CLASS__::handler`
      * function.
      */
-    public static function initialise($Log = NULL)
+    public static function initialise($Log = null)
     {
         restore_error_handler();
-        set_error_handler(array(__CLASS__, 'handler'), error_reporting());
+        set_error_handler([__CLASS__, 'handler'], error_reporting());
     }
 
     /**
      * Determines if the error handler is enabled by checking that error_reporting
      * is set in the php config and that $enabled is true.
-     *
-     * @return bool
      */
     public static function isEnabled(): bool
     {
@@ -75,7 +82,7 @@ class ErrorHandler extends GenericErrorHandler
      * @return string
      *                Usually a string of HTML that will displayed to a user
      */
-    public static function handler($code, $message, $file = NULL, $line = NULL)
+    public static function handler($code, $message, $file = null, $line = null)
     {
         if (self::isEnabled()) {
             throw new ErrorException($message, 0, $code, $file, $line);

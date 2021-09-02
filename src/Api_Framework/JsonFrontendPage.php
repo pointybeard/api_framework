@@ -2,6 +2,15 @@
 
 declare(strict_types=1);
 
+/*
+ * This file is part of the "RESTful API Framework Extension for Symphony CMS" repository.
+ *
+ * Copyright 2017-2021 Alannah Kearney <hi@alannahkearney.com>
+ *
+ * For the full copyright and license information, please view the LICENCE
+ * file that was distributed with this source code.
+ */
+
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
 use Symfony\Component\HttpFoundation;
@@ -12,8 +21,9 @@ use Symfony\Component\HttpFoundation;
  */
 class JsonFrontendPage extends \FrontendPage
 {
-    const PAGE_TYPE_JSON = 'JSON';
-    const PAGE_TYPE_CACHEABLE = 'cacheable';
+    public const PAGE_TYPE_JSON = 'JSON';
+
+    public const PAGE_TYPE_CACHEABLE = 'cacheable';
 
     /**
      * Constructor function sets the `$is_logged_in` variable, calls
@@ -38,7 +48,6 @@ class JsonFrontendPage extends \FrontendPage
 
     public function render(HttpFoundation\Request $request, HttpFoundation\Response $response): HttpFoundation\Response
     {
-
         $output = parent::generate(rtrim($request->getPathInfo(), '/'));
 
         cleanup_session_cookies();
@@ -74,7 +83,6 @@ class JsonFrontendPage extends \FrontendPage
             );
 
             \Profiler::instance()->sample('API JSON Rendering complete.');
-
         } catch (\Exception $e) {
             // This happened because the input was not valid XML. This could
             // occur for a few reasons, but there are two scenarios
