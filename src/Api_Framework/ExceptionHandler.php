@@ -20,6 +20,7 @@ use GenericExceptionHandler;
 use pointybeard\Symphony\Extended;
 use Symphony;
 use SymphonyErrorPage;
+use Symfony\Component\HttpFoundation;
 
 class ExceptionHandler extends GenericExceptionHandler
 {
@@ -167,14 +168,16 @@ class ExceptionHandler extends GenericExceptionHandler
             }
         }
 
-        // log the error
-        $request = Extended\ServiceContainer::getInstance()->get('request');
-        Symphony::Log()->pushExceptionToLog($ex, true, false, false, ['output' => $output, 'request' => [
-            'headers' => $request->headers->all(),
-            'query' => $request->query->all(),
-            'request' => $request->request->all(),
-            'raw' => (string) $request,
-        ]]);
+        // Send to logs only if it is not an ApiFrameworkException or the status code is a 5XX
+        if(false == ($ex instanceof Exceptions\ApiFrameworkException) || $ex->getHttpStatusCode() >= HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR) {
+            $request = Extended\ServiceContainer::getInstance()->get('request');
+            Symphony::Log()->pushExceptionToLog($ex, true, false, false, ['output' => $output, 'request' => [
+                'headers' => $request->headers->all(),
+                'query' => $request->query->all(),
+                'request' => $request->request->all(),
+                'raw' => (string) $request,
+            ]]);
+        }
 
         // output and die
         header('Content-Type: application/json');
