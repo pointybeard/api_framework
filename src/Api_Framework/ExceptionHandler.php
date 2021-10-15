@@ -13,14 +13,15 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
+use pointybeard\Symphony\Extended;
+use Symfony\Component\HttpFoundation;
+
 use ErrorException;
 use Exception;
 use GenericErrorHandler;
 use GenericExceptionHandler;
-use pointybeard\Symphony\Extended;
 use Symphony;
 use SymphonyErrorPage;
-use Symfony\Component\HttpFoundation;
 
 class ExceptionHandler extends GenericExceptionHandler
 {
@@ -99,15 +100,16 @@ class ExceptionHandler extends GenericExceptionHandler
     {
         // Build the JSON
         $output = [
-            'status' => 500,
-            'error' => $ex->getCode(),
-            'message' => $ex->getMessage(),
+            'error' => [
+                'timestamp' => date('c'),
+                'type' => "/errors/internal-server-error",
+                'title' => $ex->getMessage(),
+                'status' => HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR,
+                'detail' => "The server encountered an internal error or misconfiguration and was unable to the request.",
+                'instance' => $_SERVER['REQUEST_URI'],
+                'code' => $ex->getCode(),
+            ]
         ];
-
-        // Check for a custom status code
-        if (true == ($ex instanceof Exceptions\ApiFrameworkException)) {
-            $output['status'] = $ex->getHttpStatusCode();
-        }
 
         // Let the exception modify the output if it wants to.
         if (in_array("pointybeard\Symphony\Extensions\Api_Framework\Interfaces\ModifiesExceptionOutputInterface", class_implements($ex))) {
@@ -115,11 +117,13 @@ class ExceptionHandler extends GenericExceptionHandler
         }
 
         if (self::$debug) {
+
             if (is_object(Symphony::Database())) {
                 $databaseDebug = Symphony::Database()->debug();
             }
 
-            $output['debug'] = [
+            $output['error']['debug'] = [
+                'thrown' => get_class($ex),
                 'file' => $ex->getFile(),
                 'line' => $ex->getLine(),
                 'severity' => (
@@ -160,9 +164,9 @@ class ExceptionHandler extends GenericExceptionHandler
 
                     // Add each line of the XML to the output. Use a zero padded
                     // line number for readablity.
-                    $output['debug']['context'] = [];
+                    $output['error']['debug']['context'] = [];
                     foreach ($xmlLines as $n => $l) {
-                        $output['debug']['context'][sprintf('%04d', $n + 1)] = $l;
+                        $output['error']['debug']['context'][sprintf('%04d', $n + 1)] = $l;
                     }
                 }
             }
@@ -170,18 +174,18 @@ class ExceptionHandler extends GenericExceptionHandler
 
         // Send to logs only if it is not an ApiFrameworkException or the status code is a 5XX
         if(false == ($ex instanceof Exceptions\ApiFrameworkException) || $ex->getHttpStatusCode() >= HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR) {
-            $request = Extended\ServiceContainer::getInstance()->get('request');
+            $request = new HttpFoundation\JsonResponse();
             Symphony::Log()->pushExceptionToLog($ex, true, false, false, ['output' => $output, 'request' => [
                 'headers' => $request->headers->all(),
-                'query' => $request->query->all(),
-                'request' => $request->request->all(),
+                'query' => $request->query ? $request->query->all() : null,
+                'request' => $request->request ? $request->request->all() : null,
                 'raw' => (string) $request,
             ]]);
         }
 
         // output and die
-        header('Content-Type: application/json');
-        http_response_code($output['status']);
+        header('Content-Type: application/problem+json');
+        http_response_code($output['error']['status']);
         echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
         exit(255);
     }
