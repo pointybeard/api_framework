@@ -19,7 +19,7 @@ if (!function_exists(__NAMESPACE__.'\renderer_json')) {
     function renderer_json(?string $mode): void
     {
         if (null !== $mode && 0 == strcasecmp('administration', $mode)) {
-            throw new Exceptions\InvalidModeException('JSON Renderer launcher is only available on the frontend');
+            throw new Exceptions\InvalidModeException();
         }
 
         // Initialise the Frontend object
