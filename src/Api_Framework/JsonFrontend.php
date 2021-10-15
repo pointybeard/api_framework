@@ -19,6 +19,8 @@ use pointybeard\Symphony\Extended\Router;
 
 use Symfony\Component\HttpFoundation;
 use Symphony;
+use Exception;
+use TypeError;
 
 /**
  * This extends the core Symphony class to give us a vector to
@@ -95,9 +97,9 @@ class JsonFrontend extends Symphony
         try {
             $route = $routes->find($request);
         } catch (Extended\Exceptions\MethodNotAllowedException $ex) {
-            throw new Exceptions\ApiFrameworkException(HttpFoundation\Response::HTTP_METHOD_NOT_ALLOWED, $ex->getMessage(), 0, $ex);
+            throw new Exceptions\MethodNotAllowedException($ex->getMessage(), $ex);
         } catch (Extended\Exceptions\MatchingRouteNotFound $ex) {
-            throw new Exceptions\ApiFrameworkException(HttpFoundation\Response::HTTP_NOT_FOUND, $ex->getMessage(), 0, $ex);
+            throw new Exceptions\MatchingRouteNotFoundException($ex->getMessage(), $ex);
         }
 
         // Register the route with service container
@@ -155,6 +157,7 @@ class JsonFrontend extends Symphony
 
             // Invoke the controller. Service Container will do the auto-wiring for us
             $response = $container->get($controllerClass);
+
         }
 
         // Response will have been modified so we need to register the updated version with the service container
@@ -172,8 +175,8 @@ class JsonFrontend extends Symphony
             }
         }
 
-        // Save to cache if this is a cachable page type
-        if (true == $isCacheable && false === $isCacheHit) {
+        // Save to cache if this is a cachable page type and response code is 200 OK
+        if (true == $isCacheable && $container->get('response')->getStatusCode() == HttpFoundation\Response::HTTP_OK && false === $isCacheHit) {
             self::$_page->saveToCache($request, $container->get('response'));
         }
 
