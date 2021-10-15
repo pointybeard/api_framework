@@ -23,7 +23,7 @@ class RequestJsonInvalidException extends ApiFrameworkException
             '/errors/invalid-contents-json',
             "Invalid JSON Contents",
             "Request could not be handled as the JSON contents is invalid.",
-            HttpFoundation\Response::HTTP_BAD_REQUEST, 215, $previous
+            HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY, 215, $previous
         );
     }
 }

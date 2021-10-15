@@ -53,7 +53,7 @@ class SchemaValidationFailedException extends ApiFrameworkException implements I
             '/errors/schema-validation-failed',
             "Schema Validation Failed",
             "Errors were encountered while attempting to validate data against the supplied schema.",
-            HttpFoundation\Response::HTTP_BAD_REQUEST, 215, $previous
+            HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY, 215, $previous
         );
     }
 
@@ -67,15 +67,9 @@ class SchemaValidationFailedException extends ApiFrameworkException implements I
         $output = parent::modifyOutput($output);
 
         // We want to see the schema validation errors in the output
-        $output['error']['schema']['errors'] = $this->schemaErrors;
-        $output['error']['schema'] += [
-            'path' => str_replace(
-                realpath(WORKSPACE).DIRECTORY_SEPARATOR,
-                '',
-                $this->schemaPath
-            ),
-            'input' => $this->dataProvided,
-        ];
+        $output['error']['errors'] = $this->schemaErrors;
+        $output['error']['schema'] = str_replace(realpath(WORKSPACE).DIRECTORY_SEPARATOR, '', $this->schemaPath);
+        $output['data'] = $this->dataProvided;
 
         return $output;
     }
