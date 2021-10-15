@@ -15,4 +15,13 @@ namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
 class ControllerNotValidException extends ApiFrameworkException
 {
+    public function __construct(string $controller, \Exception $previous = null)
+    {
+        return parent::__construct(
+            '/errors/controller-not-valid',
+            "Controller Not Valid",
+            "Controller '{$controller}' is not a valid instance of pointybeard\\Symphony\\Extensions\\Api_Framework\\AbstractController.",
+            HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR, 215, $previous
+        );
+    }
 }

@@ -43,17 +43,17 @@ class SchemaValidationFailedException extends ApiFrameworkException implements I
      */
     private $dataProvided = null;
 
-    public function __construct(array $schemaErrors, string $schemaPath, $dataProvided, int $code = 0, \Exception $previous = null)
+    public function __construct(array $schemaErrors, string $schemaPath, $dataProvided, \Exception $previous = null)
     {
         $this->schemaErrors = $schemaErrors;
         $this->schemaPath = $schemaPath;
         $this->dataProvided = $dataProvided;
 
-        parent::__construct(
-            HttpFoundation\Response::HTTP_BAD_REQUEST,
-            'Validation failed. Errors where encountered while validating data against the supplied schema.',
-            $code,
-            $previous
+        return parent::__construct(
+            '/errors/schema-validation-failed',
+            "Schema Validation Failed",
+            "Errors were encountered while attempting to validate data against the supplied schema.",
+            HttpFoundation\Response::HTTP_BAD_REQUEST, 215, $previous
         );
     }
 
@@ -63,10 +63,13 @@ class SchemaValidationFailedException extends ApiFrameworkException implements I
      */
     public function modifyOutput(array $output): array
     {
+
+        $output = parent::modifyOutput($output);
+
         // We want to see the schema validation errors in the output
-        $output['error'] = $this->schemaErrors;
-        $output['validation'] = [
-            'schema' => str_replace(
+        $output['error']['schema']['errors'] = $this->schemaErrors;
+        $output['error']['schema'] += [
+            'path' => str_replace(
                 realpath(WORKSPACE).DIRECTORY_SEPARATOR,
                 '',
                 $this->schemaPath

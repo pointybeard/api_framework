@@ -17,8 +17,13 @@ use Symfony\Component\HttpFoundation;
 
 class RequestJsonInvalidException extends ApiFrameworkException
 {
-    public function __construct(int $code = 0, \Exception $previous = null)
+    public function __construct(\Exception $previous = null)
     {
-        parent::__construct(HttpFoundation\Response::HTTP_BAD_REQUEST, 'Request could not be handled. Check JSON is valid.', $code, $previous);
+        return parent::__construct(
+            '/errors/invalid-contents-json',
+            "Invalid JSON Contents",
+            "Request could not be handled as the JSON contents is invalid.",
+            HttpFoundation\Response::HTTP_BAD_REQUEST, 215, $previous
+        );
     }
 }

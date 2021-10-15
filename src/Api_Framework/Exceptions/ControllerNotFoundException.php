@@ -17,8 +17,13 @@ use Symfony\Component\HttpFoundation;
 
 class ControllerNotFoundException extends ApiFrameworkException
 {
-    public function __construct(string $controller, int $code = 0, \Exception $previous = null)
+    public function __construct(string $controller, \Exception $previous = null)
     {
-        parent::__construct(HttpFoundation\Response::HTTP_NOT_FOUND, "Controller '{$controller}' could not be located.", $code, $previous);
+        return parent::__construct(
+            '/errors/controller-not-found',
+            "Controller Not Found",
+            "Controller '{$controller}' could not be located.",
+            HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR, 215, $previous
+        );
     }
 }
