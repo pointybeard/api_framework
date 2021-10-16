@@ -14,29 +14,21 @@ declare(strict_types=1);
 namespace pointybeard\Symphony\Extensions\Api_Framework\Middleware;
 
 use Exception;
-use Opis\JsonSchema;
-
-use OpisErrorPresenter\Implementation\MessageFormatterFactory;
-
-use OpisErrorPresenter\Implementation\PresentedValidationErrorFactory;
-use OpisErrorPresenter\Implementation\Strategies;
-
-use OpisErrorPresenter\Implementation\ValidationErrorPresenter;
-use pointybeard\Helpers\Functions\Json;
-use pointybeard\Symphony\Extended\Route;
-use pointybeard\Symphony\Extensions\Api_Framework\Exceptions\SchemaValidationFailedException;
-use pointybeard\Symphony\Extensions\Api_Framework\JsonRoute;
-
 use stdClass;
-
+use Opis\JsonSchema\Validator;
+use Opis\JsonSchema\Helper;
+use Opis\JsonSchema\Errors\ErrorFormatter;
+use Opis\JsonSchema\Errors\ValidationError;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use pointybeard\Symphony\Extended\Route;
+use pointybeard\Symphony\Extensions\Api_Framework\JsonRoute;
+use pointybeard\Symphony\Extensions\Api_Framework\Exceptions\SchemaValidationFailedException;
 
 final class JsonSchemaValidate
 {
     public function handle(Request $request, JsonRoute $route)
     {
-
         // (guard) No request schema was supplied with this route
         if (null == $route->schemaRequest) {
             return;
@@ -47,7 +39,6 @@ final class JsonSchemaValidate
 
     public function terminate(Response $response, Route $route)
     {
-
         // (guard) No response schema was supplied with this route
         if (null == $route->schemaResponse) {
             return;
@@ -56,61 +47,52 @@ final class JsonSchemaValidate
         $this->validateWithSchema($response->getContent(), $route->schemaResponse);
     }
 
-    private function validateWithSchema($data, string $schemaPathname): stdClass
+    private function validateWithSchema($data, string $schema): void
     {
-        if (false == is_readable($schemaPathname)) {
-            throw new \Exception("Schema {$schemaPathname} does not exist or is not readable.");
-        } elseif (false == Json\json_validate_file($schemaPathname)) {
-            throw new \Exception("Schema {$schemaPathname} is not valid JSON.");
+        // (guard) the schema is not readable
+        if (false == is_readable($schema)) {
+            throw new Exception("Schema {$schema} does not exist or is not readable.");
         }
 
-        // We need to convert the entire data array into an object. Quick way
-        // is to convert to json and back again.
-        $data = json_decode(
-            true == is_array($data)
-                ? json_encode($data)    // $data is an array
-                : $data                 // We have a JSON string
-        );
+        // validate data against provided schema
+        $result = (new Validator())
+            ->setMaxErrors(5)
+            ->validate(
+                (
+                    false == empty($data)
+                        ? Helper::toJSON($data)
+                        : (object)[]
+                ), 
+                file_get_contents($schema)
+            )
+        ;
 
-        // Handle a situation with $data is empty. We still need an object.
-        if (true == empty($data)) {
-            $data = (object) $data;
-        }
-
-        $result = (new JsonSchema\Validator())->schemaValidation(
-            $data,
-            JsonSchema\Schema::fromJsonString(file_get_contents($schemaPathname)),
-            -1
-        );
-
-        // The result was not valid, but we need to dig a little deeper to
-        // see what the problem might be.
-        if (true == $result->hasErrors()) {
-            $presenter = new ValidationErrorPresenter(
-                new PresentedValidationErrorFactory(
-                    new MessageFormatterFactory(
-                        new Strategies\FirstError()
-                    )
-                )
+        // (guard) data failed validation
+        if (false == $result->isValid()) {
+            throw new SchemaValidationFailedException(
+                array_values((new ErrorFormatter())->format(
+                    $result->error(),
+                    false,
+                    function (ValidationError $error) use ($formatter) {
+                        $fullPath = $error->data()->fullPath();
+                        return [
+                            "path" => "/" . (false == empty($fullPath) ? implode('/', $error->data()->fullPath()) : ""),
+                            "info" => $formatter->formatErrorMessage($error),
+                            'more' => [
+                                'keyword' => $error->keyword(),
+                                'args' => $error->args(),
+                                'message' => $error->message(),
+                                'data' => [
+                                    'type' => $error->data()->type(),
+                                    'value' => $error->data()->value(),
+                                ]
+                            ]
+                        ];
+                    }
+                )),
+                $schema,
+                $data
             );
-
-            $presented = $presenter->present(...$result->getErrors());
-            $errors = [];
-
-            foreach ($presented as $error) {
-                [$keyword, $pointer, $message] = array_values($error->toArray());
-                $errors[] = sprintf(
-                    '[%s] %s%s',
-                    $keyword,
-                    (null != $pointer ? "{$pointer}: " : ''),
-                    $message
-                );
-            }
-
-            // Now throw up an exception along with the processed errors
-            throw new SchemaValidationFailedException($errors, $schemaPathname, $data);
         }
-
-        return $data;
     }
 }
