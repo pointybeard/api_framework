@@ -16,8 +16,12 @@ namespace pointybeard\Symphony\Extensions\Api_Framework\Interfaces;
 interface Rfc7807ExceptionInterface
 {
     public function getType(): string;
+
     public function getTitle(): string;
+
     public function getStatus(): ?int;
+
     public function getDetail(): string;
+
     public function getInstance(): string;
 }

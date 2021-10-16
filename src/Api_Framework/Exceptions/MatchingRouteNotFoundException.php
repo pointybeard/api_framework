@@ -20,8 +20,8 @@ class MatchingRouteNotFoundException extends ApiFrameworkException
     public function __construct(string $details, \Exception $previous = null)
     {
         return parent::__construct(
-            "/errors/matching-route-not-found",
-            "Matching Route Not Found",
+            '/errors/matching-route-not-found',
+            'Matching Route Not Found',
             $details,
             HttpFoundation\Response::HTTP_NOT_FOUND, 125, $previous
         );

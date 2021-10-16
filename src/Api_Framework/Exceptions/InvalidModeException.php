@@ -19,8 +19,8 @@ class InvalidModeException extends ApiFrameworkException
     {
         return parent::__construct(
             '/errors/invalid-renderer-mode',
-            "Invalid Renderer Mode",
-            "JSON Renderer launcher is only available on the frontend",
+            'Invalid Renderer Mode',
+            'JSON Renderer launcher is only available on the frontend',
             HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR, 215, $previous
         );
     }

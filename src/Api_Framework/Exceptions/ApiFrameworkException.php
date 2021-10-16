@@ -13,19 +13,22 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework\Exceptions;
 
-use pointybeard\Symphony\Extensions\Api_Framework\Interfaces\Rfc7807ExceptionInterface;
-use pointybeard\Symphony\Extensions\Api_Framework\Interfaces\ModifiesExceptionOutputInterface;
-use pointybeard\Helpers\Exceptions\ReadableTrace\ReadableTraceException;
-use Symfony\Component\HttpFoundation\Response;
-use pointybeard\Symphony\Extended;
 use Exception;
+use pointybeard\Helpers\Exceptions\ReadableTrace\ReadableTraceException;
+use pointybeard\Symphony\Extensions\Api_Framework\Interfaces\ModifiesExceptionOutputInterface;
+use pointybeard\Symphony\Extensions\Api_Framework\Interfaces\Rfc7807ExceptionInterface;
+use Symfony\Component\HttpFoundation\Response;
 
 class ApiFrameworkException extends ReadableTraceException implements Rfc7807ExceptionInterface, ModifiesExceptionOutputInterface
 {
     private $type;
+
     private $title;
+
     private $status;
+
     private $detail;
+
     private $instance;
 
     public function getHttpStatusCode(): int
@@ -51,6 +54,7 @@ class ApiFrameworkException extends ReadableTraceException implements Rfc7807Exc
         $output['error']['status'] = $this->getHttpStatusCode();
         $output['error']['detail'] = $this->getDetail();
         $output['error']['instance'] = $this->getInstance();
+
         return $output;
     }
 
@@ -58,18 +62,22 @@ class ApiFrameworkException extends ReadableTraceException implements Rfc7807Exc
     {
         return $this->type;
     }
+
     public function getTitle(): string
     {
         return $this->title;
     }
+
     public function getStatus(): ?int
     {
         return $this->status;
     }
+
     public function getDetail(): string
     {
         return $this->detail;
     }
+
     public function getInstance(): string
     {
         return $this->instance;

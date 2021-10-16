@@ -21,8 +21,8 @@ class RequestJsonInvalidException extends ApiFrameworkException
     {
         return parent::__construct(
             '/errors/invalid-contents-json',
-            "Invalid JSON Contents",
-            "Request could not be handled as the JSON contents is invalid.",
+            'Invalid JSON Contents',
+            'Request could not be handled as the JSON contents is invalid.',
             HttpFoundation\Response::HTTP_UNPROCESSABLE_ENTITY, 215, $previous
         );
     }

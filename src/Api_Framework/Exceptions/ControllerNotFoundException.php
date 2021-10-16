@@ -21,7 +21,7 @@ class ControllerNotFoundException extends ApiFrameworkException
     {
         return parent::__construct(
             '/errors/controller-not-found',
-            "Controller Not Found",
+            'Controller Not Found',
             "Controller '{$controller}' could not be located.",
             HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR, 215, $previous
         );

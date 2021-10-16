@@ -19,7 +19,7 @@ class ControllerNotValidException extends ApiFrameworkException
     {
         return parent::__construct(
             '/errors/controller-not-valid',
-            "Controller Not Valid",
+            'Controller Not Valid',
             "Controller '{$controller}' is not a valid instance of pointybeard\\Symphony\\Extensions\\Api_Framework\\AbstractController.",
             HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR, 215, $previous
         );

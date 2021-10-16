@@ -13,13 +13,12 @@ declare(strict_types=1);
 
 namespace pointybeard\Symphony\Extensions\Api_Framework;
 
-use pointybeard\Symphony\Extended;
-use Symfony\Component\HttpFoundation;
-
 use ErrorException;
+
 use Exception;
 use GenericErrorHandler;
 use GenericExceptionHandler;
+use Symfony\Component\HttpFoundation;
 use Symphony;
 use SymphonyErrorPage;
 
@@ -102,13 +101,13 @@ class ExceptionHandler extends GenericExceptionHandler
         $output = [
             'error' => [
                 'timestamp' => date('c'),
-                'type' => "/errors/internal-server-error",
+                'type' => '/errors/internal-server-error',
                 'title' => $ex->getMessage(),
                 'status' => HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR,
-                'detail' => "The server encountered an internal error or misconfiguration and was unable to the request.",
+                'detail' => 'The server encountered an internal error or misconfiguration and was unable to the request.',
                 'instance' => $_SERVER['REQUEST_URI'],
                 'code' => $ex->getCode(),
-            ]
+            ],
         ];
 
         // Let the exception modify the output if it wants to.
@@ -117,7 +116,6 @@ class ExceptionHandler extends GenericExceptionHandler
         }
 
         if (self::$debug) {
-
             if (is_object(Symphony::Database())) {
                 $databaseDebug = Symphony::Database()->debug();
             }
@@ -173,7 +171,7 @@ class ExceptionHandler extends GenericExceptionHandler
         }
 
         // Send to logs only if it is not an ApiFrameworkException or the status code is a 5XX
-        if(false == ($ex instanceof Exceptions\ApiFrameworkException) || $ex->getHttpStatusCode() >= HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR) {
+        if (false == ($ex instanceof Exceptions\ApiFrameworkException) || $ex->getHttpStatusCode() >= HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR) {
             $request = new HttpFoundation\JsonResponse();
             Symphony::Log()->pushExceptionToLog($ex, true, false, false, ['output' => $output, 'request' => [
                 'headers' => $request->headers->all(),

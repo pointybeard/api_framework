@@ -14,16 +14,15 @@ declare(strict_types=1);
 namespace pointybeard\Symphony\Extensions\Api_Framework\Middleware;
 
 use Exception;
-use stdClass;
-use Opis\JsonSchema\Validator;
-use Opis\JsonSchema\Helper;
 use Opis\JsonSchema\Errors\ErrorFormatter;
 use Opis\JsonSchema\Errors\ValidationError;
+use Opis\JsonSchema\Helper;
+use Opis\JsonSchema\Validator;
+use pointybeard\Symphony\Extended\Route;
+use pointybeard\Symphony\Extensions\Api_Framework\Exceptions\SchemaValidationFailedException;
+use pointybeard\Symphony\Extensions\Api_Framework\JsonRoute;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use pointybeard\Symphony\Extended\Route;
-use pointybeard\Symphony\Extensions\Api_Framework\JsonRoute;
-use pointybeard\Symphony\Extensions\Api_Framework\Exceptions\SchemaValidationFailedException;
 
 final class JsonSchemaValidate
 {
@@ -61,38 +60,17 @@ final class JsonSchemaValidate
                 (
                     false == empty($data)
                         ? Helper::toJSON($data)
-                        : (object)[]
-                ), 
+                        : (object) []
+                ),
                 file_get_contents($schema)
             )
         ;
 
         // (guard) data failed validation
         if (false == $result->isValid()) {
-            throw new SchemaValidationFailedException(
-                array_values((new ErrorFormatter())->format(
-                    $result->error(),
-                    false,
-                    function (ValidationError $error) use ($formatter) {
-                        $fullPath = $error->data()->fullPath();
-                        return [
-                            "path" => "/" . (false == empty($fullPath) ? implode('/', $error->data()->fullPath()) : ""),
-                            "info" => $formatter->formatErrorMessage($error),
-                            'more' => [
-                                'keyword' => $error->keyword(),
-                                'args' => $error->args(),
-                                'message' => $error->message(),
-                                'data' => [
-                                    'type' => $error->data()->type(),
-                                    'value' => $error->data()->value(),
-                                ]
-                            ]
-                        ];
-                    }
-                )),
-                $schema,
-                $data
-            );
+            throw new SchemaValidationFailedException(array_values((new ErrorFormatter())->format($result->error(), false, function (ValidationError $error) use ($formatter) { $fullPath = $error->data()->fullPath();
+
+return ['path' => '/'.(false == empty($fullPath) ? implode('/', $error->data()->fullPath()) : ''), 'info' => $formatter->formatErrorMessage($error), 'more' => ['keyword' => $error->keyword(), 'args' => $error->args(), 'message' => $error->message(), 'data' => ['type' => $error->data()->type(), 'value' => $error->data()->value()]]]; })), $schema, $data);
         }
     }
 }
