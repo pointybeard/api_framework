@@ -78,7 +78,7 @@ class CacheableJsonFrontendPage extends JsonFrontendPage
                 \Extension_API_Framework::calculateNextCacheExpiryTime(),
                 DATE_RFC2822
             ))
-            ->page($request->getPathInfo())
+            ->page(rtrim($request->getPathInfo(), '/'))
             ->save()
         ;
 
