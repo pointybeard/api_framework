@@ -21,6 +21,7 @@ use GenericExceptionHandler;
 use Symfony\Component\HttpFoundation;
 use Symphony;
 use SymphonyErrorPage;
+use pointybeard\Symphony\Extended;
 
 class ExceptionHandler extends GenericExceptionHandler
 {
@@ -170,6 +171,38 @@ class ExceptionHandler extends GenericExceptionHandler
             }
         }
 
+        $response = new HttpFoundation\JsonResponse;
+        $response->headers->set('Content-Type', 'problem+json; charset=utf-8');
+        $response->headers->set('X-API-Framework-Page-Renderer', array_pop(explode('\\', __CLASS__)));
+        $response->setEncodingOptions(JsonFrontend::DEFAULT_ENCODING_OPTIONS);
+        $response->setStatusCode($ex->getHttpStatusCode());
+        $response->setData($output);
+
+        // Run termination middlware if the exception is an ApiFrameworkException. We cannot handle other types of exceptions since
+        // we might be in a very unstable state. An ApiFrameworkException isn't thrown until we know the basics have all been
+        // established (like the service container object)
+        if(true == $ex instanceof Exceptions\ApiFrameworkException) {
+            try {
+                $container = Extended\ServiceContainer::getInstance();
+                $route = $container->get("route");
+                $container->register('response', $response);
+
+                if (true == $route->hasMiddleware()) {
+                    foreach ($route->middleware() as $m) {
+                        try {
+                            $container->get("{$m}_terminate");
+                        } catch (Extended\Exceptions\ServiceContainerEntryNotFoundException $ex) {
+                            // No terminate method. Keep going.
+                        }
+                    }
+                }
+                // Fetch the response object since it might have been changed by the middleware
+                $response = $container->get('response');
+            } catch(\Exception $ex) {
+                // Don't worry about it. Let the logs pick it up instead.
+            }
+        }
+
         // Send to logs only if it is not an ApiFrameworkException or the status code is a 5XX
         if (false == ($ex instanceof Exceptions\ApiFrameworkException) || $ex->getHttpStatusCode() >= HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR) {
             $request = new HttpFoundation\JsonResponse();
@@ -181,10 +214,7 @@ class ExceptionHandler extends GenericExceptionHandler
             ]]);
         }
 
-        // output and die
-        header('Content-Type: application/problem+json');
-        http_response_code($output['error']['status']);
-        echo json_encode($output, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+        $response->send();
         exit(255);
     }
 }
