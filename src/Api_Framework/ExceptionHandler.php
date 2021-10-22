@@ -175,13 +175,16 @@ class ExceptionHandler extends GenericExceptionHandler
         $response->headers->set('Content-Type', 'problem+json; charset=utf-8');
         $response->headers->set('X-API-Framework-Page-Renderer', array_pop(explode('\\', __CLASS__)));
         $response->setEncodingOptions(JsonFrontend::DEFAULT_ENCODING_OPTIONS);
-        $response->setStatusCode($ex->getHttpStatusCode());
+        $response->setStatusCode(HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR);
         $response->setData($output);
 
         // Run termination middlware if the exception is an ApiFrameworkException. We cannot handle other types of exceptions since
         // we might be in a very unstable state. An ApiFrameworkException isn't thrown until we know the basics have all been
         // established (like the service container object)
         if(true == $ex instanceof Exceptions\ApiFrameworkException) {
+
+            $response->setStatusCode($ex->getHttpStatusCode());
+
             try {
                 $container = Extended\ServiceContainer::getInstance();
                 $route = $container->get("route");
