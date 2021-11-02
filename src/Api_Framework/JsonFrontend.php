@@ -74,8 +74,8 @@ class JsonFrontend extends Symphony
             ['routes' => &$routes]
         );
 
-        // Check to see if we have global OPTIONS route enabled
-        if (true == Extension_API_Framework::isGlobalOptionsRouteEnabled()) {
+        // If this is an OPTIONS request, then check to see if we have global OPTIONS route enabled
+        if (Extended\Route::METHOD_OPTIONS == $request->getMethod() && true == Extension_API_Framework::isGlobalOptionsRouteEnabled()) {
             $routes
                 ->add(
                     (new Extended\Route())
