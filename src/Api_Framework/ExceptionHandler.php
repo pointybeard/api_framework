@@ -209,7 +209,7 @@ class ExceptionHandler extends GenericExceptionHandler
         // Send to logs only if it is not an ApiFrameworkException or the status code is a 5XX
         if (false == ($ex instanceof Exceptions\ApiFrameworkException) || $ex->getHttpStatusCode() >= HttpFoundation\Response::HTTP_INTERNAL_SERVER_ERROR) {
             $request = new HttpFoundation\JsonResponse();
-            Symphony::Log()->pushExceptionToLog($ex, true, false, false, ['output' => $output, 'request' => [
+            Symphony::Log()->pushExceptionToLog($ex, true, true, false, ['output' => $output, 'request' => [
                 'headers' => $request->headers->all(),
                 'query' => $request->query ? $request->query->all() : null,
                 'request' => $request->request ? $request->request->all() : null,
