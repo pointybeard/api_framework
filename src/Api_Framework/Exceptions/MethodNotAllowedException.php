@@ -20,7 +20,7 @@ class MethodNotAllowedException extends ApiFrameworkException
     public function __construct(string $details, \Exception $previous = null)
     {
         return parent::__construct(
-            '/errors/method-no-allowed',
+            '/errors/method-not-allowed',
             'Method Not Allowed',
             $details,
             HttpFoundation\Response::HTTP_METHOD_NOT_ALLOWED, 125, $previous
